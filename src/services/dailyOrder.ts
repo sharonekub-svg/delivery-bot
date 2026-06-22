@@ -60,6 +60,7 @@ async function sendAskPrompt(user: User, picked: ScoredDish[]): Promise<void> {
       userId: user.id,
       dishId: picked[i].dish.id,
       dishName: picked[i].dish.name,
+      categoryId: picked[i].dish.categoryId,
       restaurantId: picked[i].dish.restaurantId,
       restaurantName: picked[i].dish.restaurantName,
       priceNis: picked[i].dish.priceNis,

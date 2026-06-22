@@ -42,6 +42,7 @@ export async function executeOrder(user: User, prefs: Preferences, order: OrderR
   const result = await tenbis.placeOrder(session, {
     dishId: order.dishId,
     restaurantId: order.restaurantId,
+    categoryId: order.categoryId,
     addressId: prefs.primaryAddressId,
     includeBeverage: prefs.includeBeverage,
     maxTotalNis: prefs.dailyBudgetNis,

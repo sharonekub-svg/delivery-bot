@@ -1,4 +1,5 @@
 import type {
+  LoginChallenge,
   PlaceOrderInput,
   TenbisAddress,
   TenbisBudget,
@@ -13,17 +14,26 @@ import type {
  * The single seam between this app and 10Bis.
  *
  * Two implementations exist:
- *  - MockTenbisClient (src/tenbis/mock.ts)  — deterministic fake data, used until
- *    the real API is wired and for tests.
- *  - LocalTenbisClient (src/tenbis/local.ts) — wraps the user's *local* 10Bis API.
+ *  - MockTenbisClient (src/tenbis/mock.ts)  — deterministic fake data, used for
+ *    tests and until live verification.
+ *  - LocalTenbisClient (src/tenbis/local.ts) — wraps the real 10Bis API.
  *
  * Picked at runtime via TENBIS_CLIENT env var (see src/tenbis/index.ts).
+ *
+ * Auth is SMS one-time-code, so login is two steps + a refresh that avoids
+ * re-prompting for a code on every session expiry.
  */
 export interface TenbisClient {
-  /** Authenticate. Throws on bad credentials. */
-  login(credentials: { username: string; password: string }): Promise<TenbisSession>;
+  /** Step 1: trigger an SMS code to the account phone for the given email. */
+  requestLoginCode(email: string): Promise<LoginChallenge>;
 
-  /** Cheap call to verify a token is still valid. */
+  /** Step 2: verify the SMS code; returns an authenticated session. */
+  verifyLoginCode(email: string, code: string, challenge: LoginChallenge): Promise<TenbisSession>;
+
+  /** Refresh an expiring session without a new SMS code. Throws if it can't. */
+  refreshSession(session: TenbisSession): Promise<TenbisSession>;
+
+  /** Cheap call to verify a session is still valid. */
   isSessionValid(session: TenbisSession): Promise<boolean>;
 
   getAddresses(session: TenbisSession): Promise<TenbisAddress[]>;

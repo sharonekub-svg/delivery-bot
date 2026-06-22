@@ -20,9 +20,17 @@ const DISHES: TenbisDish[] = [
   { id: 'd5', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Falafel Pita', description: 'Falafel, salad, tahini.', priceNis: 38, tags: ['vegan'], proteinG: 16, caloriesKcal: 650, deepLink: 'https://example/d5' },
 ];
 
-/** Deterministic fake 10Bis used until the real local API is wired. */
+/** Deterministic fake 10Bis used for tests and until live verification. */
 export class MockTenbisClient implements TenbisClient {
-  async login(): Promise<TenbisSession> {
+  async requestLoginCode(): Promise<{ pending: string }> {
+    return { pending: JSON.stringify({ mock: true }) };
+  }
+
+  async verifyLoginCode(): Promise<TenbisSession> {
+    return { token: 'mock-token', expiresAt: Date.now() + 7 * DAY };
+  }
+
+  async refreshSession(): Promise<TenbisSession> {
     return { token: 'mock-token', expiresAt: Date.now() + 7 * DAY };
   }
 

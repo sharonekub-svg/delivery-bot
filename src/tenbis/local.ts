@@ -1,5 +1,6 @@
 import type { TenbisClient } from './client';
 import type {
+  LoginChallenge,
   PlaceOrderInput,
   TenbisAddress,
   TenbisBudget,
@@ -12,81 +13,319 @@ import type {
 
 /**
  * ============================================================================
- *  REAL 10Bis LOCAL API CLIENT  —  FILL THIS IN WITH THE PROVIDED API
+ *  REAL 10Bis CLIENT — implemented from a captured browser session.
+ *  See docs/tenbis-api.md. Points marked `VERIFY LIVE` need a real run to
+ *  confirm (the capture had cookies stripped, so the session/cookie mechanics
+ *  are best-effort until the first live login).
  * ============================================================================
- *
- * Everything else in the app already codes against the TenbisClient interface,
- * so wiring the real API is localised to this one file. For each method below:
- *   1. Build the request to your local API (base URL from TENBIS_API_BASE_URL).
- *   2. Map the response into the shared shapes from ./types.
- *
- * What I need from you to complete each method is noted inline as `// NEED:`.
- *
- * Token handling: login() must return an opaque `token` (cookie string, bearer,
- * or JSON blob — anything) plus a best-effort `expiresAt`. The rest of the app
- * treats it as opaque and re-auths when isSessionValid() returns false.
  */
 
-const BASE = process.env.TENBIS_API_BASE_URL ?? '';
+const API = 'https://api.10bis.co.il/api/v1'; // catalog (GET)
+const NEXT = 'https://www.10bis.co.il/NextApi'; // account/cart (POST)
+const CULTURE = { culture: 'he-IL', uiCulture: 'he' };
 
-async function call<T>(path: string, init?: RequestInit & { token?: string }): Promise<T> {
-  const headers: Record<string, string> = { 'content-type': 'application/json', ...(init?.headers as Record<string, string>) };
-  if (init?.token) headers['authorization'] = init.token; // NEED: confirm auth header/cookie scheme
-  const res = await fetch(`${BASE}${path}`, { ...init, headers });
-  if (res.status === 401 || res.status === 419) {
-    const e = new Error('session_expired');
-    (e as any).code = 'session_expired';
-    throw e;
+/** Everything we persist (encrypted) to act as the user between requests. */
+interface SessionState {
+  email: string;
+  cookies: Record<string, string>;
+  userToken?: string;
+  userId?: number;
+  shoppingCartGuid?: string;
+}
+
+function parse(session: TenbisSession): SessionState {
+  return JSON.parse(session.token) as SessionState;
+}
+
+function pack(state: SessionState, ttlMs = 6 * 60 * 60 * 1000): TenbisSession {
+  return { token: JSON.stringify(state), expiresAt: Date.now() + ttlMs };
+}
+
+function cookieHeader(cookies: Record<string, string>): string {
+  return Object.entries(cookies)
+    .map(([k, v]) => `${k}=${v}`)
+    .join('; ');
+}
+
+/** Merge Set-Cookie headers from a response into the jar. */
+function absorbCookies(res: Response, jar: Record<string, string>): void {
+  // Node fetch exposes combined set-cookie via getSetCookie() when available.
+  const raw: string[] = (res.headers as any).getSetCookie?.() ?? [];
+  for (const line of raw) {
+    const [pair] = line.split(';');
+    const idx = pair.indexOf('=');
+    if (idx > 0) jar[pair.slice(0, idx).trim()] = pair.slice(idx + 1).trim();
   }
+}
+
+class SessionExpired extends Error {
+  constructor() {
+    super('session_expired');
+  }
+}
+
+/** POST to NextApi with cookies; absorbs Set-Cookie back into the jar. */
+async function postNext<T = any>(path: string, jar: Record<string, string>, body: object): Promise<T> {
+  const res = await fetch(`${NEXT}/${path}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-app-type': 'mobileWeb',
+      cookie: cookieHeader(jar),
+    },
+    body: JSON.stringify({ ...CULTURE, ...body }),
+  });
+  absorbCookies(res, jar);
+  if (res.status === 401) throw new SessionExpired();
+  if (!res.ok) throw new Error(`10Bis ${path} -> ${res.status}`);
+  const json = (await res.json()) as { Success?: boolean; Errors?: unknown[]; Data?: T; ShoppingCartGuid?: string };
+  if (json && json.Success === false) {
+    throw new Error(`10Bis ${path} failed: ${JSON.stringify(json.Errors ?? [])}`);
+  }
+  return json as unknown as T;
+}
+
+async function getApi<T = any>(path: string, jar: Record<string, string>): Promise<T> {
+  const res = await fetch(`${API}/${path}`, {
+    headers: { 'x-app-type': 'mobileWeb', language: 'he', cookie: cookieHeader(jar) },
+  });
+  if (res.status === 401) throw new SessionExpired();
   if (!res.ok) throw new Error(`10Bis ${path} -> ${res.status}`);
   return (await res.json()) as T;
 }
 
 export class LocalTenbisClient implements TenbisClient {
-  async login(_credentials: { username: string; password: string }): Promise<TenbisSession> {
-    // NEED: login endpoint + payload shape + where the token/cookie comes back.
-    throw new Error('LocalTenbisClient.login not implemented — provide the 10Bis local API.');
+  // ---- Auth (SMS OTP, two steps) ----
+
+  async requestLoginCode(email: string): Promise<LoginChallenge> {
+    const jar: Record<string, string> = {};
+    const r: any = await postNext('GetUserAuthenticationDataAndSendAuthenticationCodeToUser_V2', jar, { email });
+    // authenticationToken lives under Data (shape varies); grab it defensively.
+    const data = r.Data ?? {};
+    const authenticationToken =
+      data.authenticationToken ?? data.codeAuthenticationData?.authenticationToken ?? data?.authenticationData?.authenticationToken;
+    const shoppingCartGuid = r.ShoppingCartGuid ?? data.shoppingCartGuid;
+    return { pending: JSON.stringify({ email, authenticationToken, shoppingCartGuid, cookies: jar }) };
   }
 
-  async isSessionValid(_session: TenbisSession): Promise<boolean> {
-    // NEED: a cheap authenticated endpoint (e.g. profile) to ping.
-    throw new Error('LocalTenbisClient.isSessionValid not implemented.');
+  async verifyLoginCode(email: string, code: string, challenge: LoginChallenge): Promise<TenbisSession> {
+    const ctx = JSON.parse(challenge.pending) as { authenticationToken: string; shoppingCartGuid: string; cookies: Record<string, string> };
+    const jar = { ...ctx.cookies };
+    const r: any = await postNext('GetUserV2', jar, {
+      shoppingCartGuid: ctx.shoppingCartGuid,
+      email,
+      authenticationCode: code,
+      authenticationToken: ctx.authenticationToken,
+    });
+    const d = r.Data ?? {};
+    return pack({
+      email,
+      cookies: jar,
+      userToken: d.userToken ?? d.sessionToken,
+      userId: d.userId,
+      shoppingCartGuid: r.ShoppingCartGuid ?? ctx.shoppingCartGuid,
+    });
   }
 
-  async getAddresses(_session: TenbisSession): Promise<TenbisAddress[]> {
-    // NEED: addresses endpoint + response shape.
-    throw new Error('LocalTenbisClient.getAddresses not implemented.');
+  async refreshSession(session: TenbisSession): Promise<TenbisSession> {
+    const state = parse(session);
+    const res = await fetch(`${API}/Authentication/RefreshToken`, {
+      method: 'POST',
+      headers: { 'x-app-type': 'mobileWeb', cookie: cookieHeader(state.cookies) },
+    });
+    if (!res.ok) throw new SessionExpired();
+    absorbCookies(res, state.cookies);
+    return pack(state);
   }
 
-  async getHistory(_session: TenbisSession, _sinceDays: number): Promise<TenbisHistoryItem[]> {
-    // NEED: order-history endpoint + response shape.
-    throw new Error('LocalTenbisClient.getHistory not implemented.');
+  async isSessionValid(session: TenbisSession): Promise<boolean> {
+    if (session.expiresAt > Date.now()) return true;
+    try {
+      await this.refreshSession(session);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  async getRestaurants(_session: TenbisSession, _addressId: string): Promise<TenbisRestaurant[]> {
-    // NEED: restaurants-for-address endpoint + how "open now" is represented.
-    throw new Error('LocalTenbisClient.getRestaurants not implemented.');
+  // ---- Reads ----
+
+  async getAddresses(session: TenbisSession): Promise<TenbisAddress[]> {
+    const state = parse(session);
+    const r: any = await postNext('GetUserAddresses', state.cookies, {});
+    const list: any[] = r.Data ?? [];
+    return list.map((a) => ({
+      id: String(a.addressId),
+      label: `${a.streetName ?? ''} ${a.houseNumber ?? ''}, ${a.cityName ?? ''}`.trim(),
+      raw: `${a.streetName} ${a.houseNumber}, ${a.cityName}`,
+      cityId: a.cityId,
+      cityName: a.cityName,
+      streetId: a.streetId,
+      streetName: a.streetName,
+      houseNumber: String(a.houseNumber ?? ''),
+      latitude: a.latitude,
+      longitude: a.longitude,
+      locationType: a.locationType,
+    }));
   }
 
-  async getAvailableDishes(_session: TenbisSession, _addressId: string, _restaurantId?: string): Promise<TenbisDish[]> {
-    // NEED: menu endpoint + price/nutrition fields if available.
-    throw new Error('LocalTenbisClient.getAvailableDishes not implemented.');
+  async getHistory(session: TenbisSession, _sinceDays: number): Promise<TenbisHistoryItem[]> {
+    // VERIFY LIVE: confirm the user-transactions endpoint/shape; the capture
+    // showed GetLastTransactionWithoutReview but not full history. Empty history
+    // is safe (engine just loses the fatigue/frequency signal).
+    try {
+      const state = parse(session);
+      const r: any = await postNext('GetUserTransactionsReport', state.cookies, {});
+      const list: any[] = r.Data?.transactions ?? r.Data ?? [];
+      return list
+        .filter((t) => t.dishName || t.restaurantName)
+        .map((t) => ({
+          dishId: String(t.dishId ?? ''),
+          dishName: t.dishName ?? '',
+          restaurantId: String(t.restaurantId ?? ''),
+          restaurantName: t.restaurantName ?? '',
+          priceNis: Number(t.sum ?? t.price ?? 0),
+          orderedAt: t.orderDate ?? t.date ?? new Date().toISOString(),
+        }));
+    } catch {
+      return [];
+    }
   }
 
-  async getBudget(_session: TenbisSession): Promise<TenbisBudget> {
-    // NEED: whether the API exposes monthly/daily budget. If not, we compute it
-    // from preferences (monthly / working days).
-    throw new Error('LocalTenbisClient.getBudget not implemented.');
+  async getRestaurants(session: TenbisSession, addressId: string): Promise<TenbisRestaurant[]> {
+    // The address coords drive availability; resolve the address first.
+    const addr = (await this.getAddresses(session)).find((a) => a.id === addressId);
+    const state = parse(session);
+    const qs = addr ? `?addressId=${addressId}&longitude=${addr.longitude}&latitude=${addr.latitude}` : `?addressId=${addressId}`;
+    const r: any = await getApi(`Restaurants/SearchByAddressId${qs}`, state.cookies).catch(() => ({ Data: [] }));
+    const list: any[] = r.Data?.restaurantsList ?? r.Data ?? [];
+    return list.map((x) => ({
+      id: String(x.restaurantId ?? x.id),
+      name: x.restaurantName ?? x.name,
+      isOpenNow: x.isOpenNow ?? x.isActive ?? true,
+      minOrderNis: x.minimumOrder,
+      deliveryEtaMinutes: x.deliveryTimeInMinutes,
+    }));
   }
 
-  async placeOrder(_session: TenbisSession, _input: PlaceOrderInput): Promise<TenbisOrderResult> {
-    // NEED: the order-submission endpoint + payload (cart build, address, submit).
-    // Map known failures to errorCode: restaurant_closed | out_of_stock |
-    // budget_exceeded | session_expired.
-    throw new Error('LocalTenbisClient.placeOrder not implemented.');
+  async getAvailableDishes(session: TenbisSession, addressId: string, restaurantId?: string): Promise<TenbisDish[]> {
+    if (!restaurantId) {
+      // Aggregate across open restaurants would be many calls; callers pass a
+      // restaurantId in practice. Keep it simple and return empty otherwise.
+      return [];
+    }
+    const state = parse(session);
+    const dateTime = new Date().toISOString().slice(0, 16);
+    const r: any = await getApi(`Restaurants/${restaurantId}/Menu?addressId=${addressId}&dateTime=${dateTime}`, state.cookies);
+    const data = r.Data ?? r;
+    const categories: any[] = data.categories ?? [];
+    const out: TenbisDish[] = [];
+    for (const cat of categories) {
+      for (const dish of cat.dishes ?? []) {
+        out.push({
+          id: String(dish.id),
+          restaurantId: String(restaurantId),
+          restaurantName: data.restaurantName ?? '',
+          categoryId: String(cat.id),
+          name: dish.name,
+          description: dish.description,
+          priceNis: Number(dish.price),
+          tags: dish.hasGreenSymbol ? ['healthy'] : [],
+          deepLink: `https://www.10bis.co.il/next/restaurants/menu/delivery/${restaurantId}`,
+        });
+      }
+    }
+    return out;
   }
 
-  // Keep a reference so `call`/`BASE` aren't flagged unused before wiring.
-  protected readonly _call = call;
-  protected readonly _base = BASE;
+  async getBudget(session: TenbisSession): Promise<TenbisBudget> {
+    // VERIFY LIVE: the daily allowance lives on the user's Moneycard; the exact
+    // field isn't certain from the capture. Returning {} lets preferences drive
+    // the daily budget instead.
+    void session;
+    return {};
+  }
+
+  // ---- Order ----
+
+  async placeOrder(session: TenbisSession, input: PlaceOrderInput): Promise<TenbisOrderResult> {
+    const state = parse(session);
+    const jar = state.cookies;
+    const guid = state.shoppingCartGuid;
+    if (!guid) return { ok: false, errorCode: 'unknown', errorMessage: 'no shopping cart' };
+
+    try {
+      const addr = (await this.getAddresses(session)).find((a) => a.id === input.addressId);
+      if (!addr) return { ok: false, errorCode: 'unknown', errorMessage: 'address not found' };
+
+      await postNext('SetAddressInOrder', jar, {
+        shoppingCartGuid: guid,
+        locationType: addr.locationType ?? 'residential',
+        addressKey: `${addr.cityId}-${addr.streetId}-${addr.houseNumber}`,
+        cityName: addr.cityName,
+        streetName: addr.streetName,
+        houseNumber: addr.houseNumber,
+        latitude: addr.latitude,
+        longitude: addr.longitude,
+        cityId: addr.cityId,
+        streetId: addr.streetId,
+        isBigCity: true,
+      });
+      await postNext('SetDeliveryMethodInOrder', jar, { shoppingCartGuid: guid, deliveryMethod: 'delivery' });
+      await postNext('SetRestaurantInOrder', jar, {
+        shoppingCartGuid: guid,
+        isMobileDevice: false,
+        restaurantId: Number(input.restaurantId),
+        deliveryRuleType: 'Asap',
+      });
+      await postNext('SetDishListInShoppingCart', jar, {
+        shoppingCartGuid: guid,
+        dishList: [
+          {
+            dishId: Number(input.dishId),
+            shoppingCartDishId: 1,
+            quantity: 1,
+            assignedUserId: state.userId,
+            choices: [],
+            dishNotes: null,
+            categoryId: input.categoryId ? Number(input.categoryId) : undefined,
+          },
+        ],
+      });
+      await postNext('ChooseAndSetBestDiscountCouponValueInOrder', jar, { shoppingCartGuid: guid, includeUserCoupons: false });
+
+      // Payment: the 10Bis Moneycard (company allowance). VERIFY LIVE: source of
+      // cardId — likely from GetPayments after the restaurant is set.
+      const payR: any = await postNext('GetPayments', jar, { shoppingCartGuid: guid }).catch(() => ({ Data: [] }));
+      const card = (payR.Data ?? []).find((p: any) => p.paymentMethod === 'Moneycard') ?? (payR.Data ?? [])[0];
+      if (card) {
+        const sum = card.sum ?? undefined;
+        if (input.maxTotalNis != null && typeof sum === 'number' && sum > input.maxTotalNis) {
+          return { ok: false, errorCode: 'budget_exceeded', errorMessage: `Total ${sum} over budget ${input.maxTotalNis}` };
+        }
+        await postNext('SetPaymentsInOrder', jar, {
+          shoppingCartGuid: guid,
+          payments: [{ ...card, assigned: true }],
+        });
+      }
+
+      const submit: any = await postNext('SubmitOrder', jar, {
+        shoppingCartGuid: guid,
+        isMobileDevice: false,
+        dontWantCutlery: false,
+        orderRemarks: '',
+      });
+      const od = submit.Data?.orderData ?? {};
+      // Persist any refreshed cookies/guid back is the caller's job (we mutated jar in place).
+      return {
+        ok: true,
+        orderId: String(od.orderId ?? submit.Data?.orderId ?? ''),
+        totalNis: od.shoppingCart?.totalAmount,
+        trackerDeepLink: 'https://www.10bis.co.il/next/user-transactions',
+      };
+    } catch (err) {
+      if (err instanceof SessionExpired) return { ok: false, errorCode: 'session_expired' };
+      return { ok: false, errorCode: 'unknown', errorMessage: (err as Error).message };
+    }
+  }
 }

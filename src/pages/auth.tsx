@@ -1,36 +1,61 @@
 import { useState } from 'react';
 
 /**
- * Secure re-authentication page. Posts the 10Bis credentials to
- * /api/auth/credentials, which validates and stores only the encrypted token.
- * The userId is passed as ?u=... from the WhatsApp link.
+ * Secure 10Bis connect page (SMS one-time-code). Step 1: enter the 10Bis email
+ * -> a code is texted to the account phone. Step 2: enter the code. Only the
+ * resulting encrypted session token is stored; no password is ever involved.
+ * userId comes from ?u=... in the WhatsApp link.
  */
 export default function Auth() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [phase, setPhase] = useState<'email' | 'code'>('email');
   const [status, setStatus] = useState<string | null>(null);
 
-  async function submit(e: React.FormEvent) {
+  function userId() {
+    return new URLSearchParams(window.location.search).get('u') ?? '';
+  }
+
+  async function requestCode(e: React.FormEvent) {
     e.preventDefault();
-    setStatus('Validating…');
-    const userId = new URLSearchParams(window.location.search).get('u') ?? '';
+    setStatus('Sending code…');
     const res = await fetch('/api/auth/credentials', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ userId, username, password }),
+      body: JSON.stringify({ userId: userId(), action: 'request', email }),
     });
-    setStatus(res.ok ? '✅ Connected! You can close this and head back to WhatsApp.' : '❌ Login failed — check your details.');
+    if (res.ok) {
+      setPhase('code');
+      setStatus('📲 We texted a code to the account phone. Enter it below.');
+    } else setStatus('❌ Could not send a code — check the email.');
+  }
+
+  async function verifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus('Verifying…');
+    const res = await fetch('/api/auth/credentials', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ userId: userId(), action: 'verify', code }),
+    });
+    setStatus(res.ok ? '✅ Connected! You can head back to WhatsApp.' : '❌ Wrong or expired code.');
   }
 
   return (
     <main style={{ maxWidth: 420, margin: '60px auto', fontFamily: 'system-ui', padding: '0 16px' }}>
       <h1>Connect 10Bis</h1>
-      <p>Your credentials are validated once and never stored — only an encrypted session token is kept.</p>
-      <form onSubmit={submit}>
-        <input placeholder="10Bis username / email" value={username} onChange={(e) => setUsername(e.target.value)} style={input} />
-        <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={input} />
-        <button type="submit" style={button}>Connect securely</button>
-      </form>
+      <p>We use a one-time SMS code — no password is stored, only an encrypted session token.</p>
+      {phase === 'email' ? (
+        <form onSubmit={requestCode}>
+          <input placeholder="10Bis email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={input} />
+          <button type="submit" style={button}>Send me a code</button>
+        </form>
+      ) : (
+        <form onSubmit={verifyCode}>
+          <input placeholder="SMS code" inputMode="numeric" value={code} onChange={(e) => setCode(e.target.value)} style={input} />
+          <button type="submit" style={button}>Connect</button>
+        </form>
+      )}
       {status && <p>{status}</p>}
     </main>
   );

@@ -4,6 +4,7 @@ import { parse } from '../whatsapp/parser';
 import * as tpl from '../whatsapp/templates';
 import { sendText } from '../whatsapp/twilio';
 import { executeOrder } from './execOrder';
+import { awaitingCode, completeLogin } from './auth';
 import { checkBudget } from '../domain/budget';
 
 /**
@@ -15,6 +16,18 @@ import { checkBudget } from '../domain/budget';
 export async function handleInbound(phone: string, text: string): Promise<void> {
   const user = await repo.getOrCreateUser(phone);
   const intent = parse(text);
+
+  // Mid-login: a 4–8 digit reply is the 10Bis SMS code.
+  if (/^\d{4,8}$/.test(text.trim()) && (await awaitingCode(user.id))) {
+    const ok = await completeLogin(user.id, text.trim());
+    await sendText(
+      phone,
+      ok
+        ? '✅ מחובר ל-10bis! מעכשיו אפשר להזמין. / Connected to 10Bis!'
+        : '❌ הקוד שגוי או שפג תוקפו. כתבי PREFS כדי לנסות שוב.',
+    );
+    return;
+  }
 
   // First contact / explicit start -> onboarding entry.
   if (!user.onboardingComplete && (intent.kind === 'start' || intent.kind === 'unknown')) {

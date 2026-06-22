@@ -53,6 +53,7 @@ export interface OrderRecord {
   userId: string;
   dishId: string;
   dishName: string;
+  categoryId?: string;
   restaurantId: string;
   restaurantName: string;
   priceNis: number;

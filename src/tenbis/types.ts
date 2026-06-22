@@ -9,17 +9,34 @@ export interface TenbisSession {
   expiresAt: number;
 }
 
+/** Opaque context returned by requestLoginCode, passed back to verifyLoginCode. */
+export interface LoginChallenge {
+  /** Serialized {authenticationToken, shoppingCartGuid, cookies}. */
+  pending: string;
+}
+
 export interface TenbisAddress {
   id: string;
   label: string; // e.g. "Office - Rothschild 1"
   raw: string;
   lastUsedAt?: string; // ISO
+  // Fields needed to rebuild SetAddressInOrder.
+  cityId?: number;
+  cityName?: string;
+  streetId?: number;
+  streetName?: string;
+  houseNumber?: string;
+  latitude?: number;
+  longitude?: number;
+  locationType?: string;
 }
 
 export interface TenbisDish {
   id: string;
   restaurantId: string;
   restaurantName: string;
+  /** Menu category id — needed when adding the dish to the cart. */
+  categoryId?: string;
   name: string;
   description?: string;
   priceNis: number;
@@ -70,6 +87,8 @@ export interface PlaceOrderInput {
   dishId: string;
   restaurantId: string;
   addressId: string;
+  /** Menu category the dish belongs to (required by SetDishListInShoppingCart). */
+  categoryId?: string;
   includeBeverage?: boolean;
   /** Hard ceiling; client must refuse if total exceeds this. */
   maxTotalNis?: number;

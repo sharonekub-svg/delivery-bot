@@ -21,6 +21,7 @@ export async function scheduleAutopilot(user: User, _prefs: Preferences, picked:
     userId: user.id,
     dishId: picked.dish.id,
     dishName: picked.dish.name,
+    categoryId: picked.dish.categoryId,
     restaurantId: picked.dish.restaurantId,
     restaurantName: picked.dish.restaurantName,
     priceNis: picked.dish.priceNis,

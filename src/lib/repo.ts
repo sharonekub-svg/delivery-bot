@@ -70,6 +70,36 @@ export async function loadSession(userId: string): Promise<TenbisSession | null>
   return JSON.parse(decrypt(data.encrypted_token)) as TenbisSession;
 }
 
+// ---- Auth state (10Bis login email + short-lived OTP challenge) ----
+
+export async function setTenbisEmail(userId: string, email: string): Promise<void> {
+  const { error } = await db()
+    .from('auth_state')
+    .upsert({ user_id: userId, tenbis_email: email, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+  if (error) throw error;
+}
+
+export async function getTenbisEmail(userId: string): Promise<string | null> {
+  const { data } = await db().from('auth_state').select('tenbis_email').eq('user_id', userId).maybeSingle();
+  return data?.tenbis_email ?? null;
+}
+
+export async function savePendingLogin(userId: string, pending: string): Promise<void> {
+  const { error } = await db()
+    .from('auth_state')
+    .upsert({ user_id: userId, pending_login: encrypt(pending), updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+  if (error) throw error;
+}
+
+export async function loadPendingLogin(userId: string): Promise<string | null> {
+  const { data } = await db().from('auth_state').select('pending_login').eq('user_id', userId).maybeSingle();
+  return data?.pending_login ? decrypt(data.pending_login) : null;
+}
+
+export async function clearPendingLogin(userId: string): Promise<void> {
+  await db().from('auth_state').update({ pending_login: null }).eq('user_id', userId);
+}
+
 // ---- Orders ----
 
 export async function createOrder(o: Omit<OrderRecord, 'id' | 'createdAt'>): Promise<OrderRecord> {
@@ -79,6 +109,7 @@ export async function createOrder(o: Omit<OrderRecord, 'id' | 'createdAt'>): Pro
       user_id: o.userId,
       dish_id: o.dishId,
       dish_name: o.dishName,
+      category_id: o.categoryId,
       restaurant_id: o.restaurantId,
       restaurant_name: o.restaurantName,
       price_nis: o.priceNis,
@@ -158,6 +189,7 @@ function rowToOrder(r: any): OrderRecord {
     userId: r.user_id,
     dishId: r.dish_id,
     dishName: r.dish_name,
+    categoryId: r.category_id ?? undefined,
     restaurantId: r.restaurant_id,
     restaurantName: r.restaurant_name,
     priceNis: r.price_nis,

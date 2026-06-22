@@ -64,12 +64,38 @@ In observed order:
 5. `ChooseAndSetBestDiscountCouponValueInOrder` — `{ shoppingCartGuid, ... }`
 6. `GetPayments` — `GET` → available payment methods (the 10Bis allowance)
 
-## GAP: final order submission
+## Session refresh (avoids re-OTP)
 
-The capture stopped at the checkout/payment screen. The **final
-"submit/confirm order"** call (e.g. `SubmitOrder`/similar) was NOT captured, so
-its endpoint and payload are unknown. Need one capture of a *completed* order to
-fill `placeOrder()`.
+When a `NextApi` call returns **401**, the web app calls
+`POST /api/v1/Authentication/RefreshToken` (empty body; relies on the
+refresh cookie) and retries. This means a stored session can be kept alive for
+a long time without a new SMS code — re-OTP only when refresh also fails.
+
+## Order build flow (POST /NextApi/...) — COMPLETE
+
+In observed order, all sharing one `shoppingCartGuid`:
+1. `SetAddressInOrder` — `{ shoppingCartGuid, culture, uiCulture, locationType,
+   addressKey ("cityId-streetId-houseNumber"), cityName, streetName,
+   houseNumber, latitude, longitude, cityId, streetId, isBigCity }`
+2. `SetDeliveryMethodInOrder` — `{ shoppingCartGuid, deliveryMethod: "delivery" }`
+3. `SetRestaurantInOrder` — `{ shoppingCartGuid, isMobileDevice, restaurantId,
+   deliveryRuleType: "Asap" }`
+4. `SetDishListInShoppingCart` — `{ shoppingCartGuid, dishList: [{ dishId,
+   shoppingCartDishId, quantity, assignedUserId, choices, dishNotes,
+   categoryId }] }`
+5. `ChooseAndSetBestDiscountCouponValueInOrder` — `{ shoppingCartGuid, includeUserCoupons:false }`
+6. `SetPaymentsInOrder` — `{ shoppingCartGuid, payments: [{ paymentMethod:
+   "Moneycard", cardId, userId, cardLastDigits, sum, assigned:true, ... }] }`
+   (cardId = the 10Bis Moneycard / company allowance; from the user's payments)
+7. `SubmitOrder` — `{ shoppingCartGuid, isMobileDevice, dontWantCutlery,
+   orderRemarks }` → `Data.orderData.orderId` (+ `threeDsChallengeUrl` if 3DS,
+   not used for Moneycard)
+
+Other seen: `GetUser` (inits cart / returns ShoppingCartGuid), `SetUserInOrder`,
+`SearchDishes`, `GetLastTransactionWithoutReview`, `GetPayments`.
+
+> No cancel endpoint was captured (the order was submitted but not cancelled in
+> the session). Cancellation, if needed, must be captured separately.
 
 ## Useful captured IDs (reference, not secret)
 
