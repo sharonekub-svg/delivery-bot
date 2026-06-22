@@ -6,7 +6,7 @@ import { getPreferences, loadSession, getUserByPhone } from '../lib/repo';
 import * as repo from '../lib/repo';
 import { getTenbisClient } from '../tenbis';
 import * as tpl from '../whatsapp/templates';
-import { sendProactive, sendText } from '../whatsapp/meta';
+import { sendProactive, sendText } from '../whatsapp/twilio';
 import { scheduleAutopilot } from './autopilot';
 import type { User } from '../domain/types';
 

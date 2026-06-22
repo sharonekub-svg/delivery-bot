@@ -3,7 +3,7 @@ import { getPreferences } from '../lib/repo';
 import * as repo from '../lib/repo';
 import { executeOrder } from './execOrder';
 import * as tpl from '../whatsapp/templates';
-import { sendProactive } from '../whatsapp/meta';
+import { sendProactive } from '../whatsapp/twilio';
 import type { ScoredDish } from '../domain/recommendation';
 import type { Preferences, User } from '../domain/types';
 

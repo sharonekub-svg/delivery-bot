@@ -24,7 +24,7 @@ WhatsApp ──webhook──► Vercel (Next.js API routes) ──► Supabase (
 | Hosting / API | Next.js (Pages Router) on Vercel; serverless API routes |
 | Scheduling | Vercel Cron (`vercel.json`) — daily prompt + autopilot sweep |
 | Database | Supabase Postgres (`supabase/migrations/0001_init.sql`) |
-| WhatsApp | Meta (Facebook) WhatsApp Cloud API — free tier |
+| WhatsApp | Twilio WhatsApp (sandbox to start) |
 | NL blurbs | Anthropic Claude (`ANTHROPIC_MODEL`) |
 | Secrets | Vercel env vars; credentials AES-256-GCM encrypted at rest |
 
@@ -35,7 +35,7 @@ src/
   tenbis/        the only seam to 10Bis: types, client interface, mock, local(REAL)
   domain/        types, preference defaults, recommendation engine + budget
   lib/           supabase, crypto (AES-256-GCM), config, claude, repo, cronAuth
-  whatsapp/      meta cloud-api send/webhook, message templates, reply parser
+  whatsapp/      twilio send, message templates, reply parser
   services/      dailyOrder, execOrder, autopilot, inbound (conversation router)
   pages/         onboarding + auth + terms webviews
   pages/api/     whatsapp/webhook, cron/daily, cron/autopilot, auth/credentials, onboarding
@@ -66,9 +66,9 @@ npm run typecheck && npm test     # tsc + vitest
 
 1. Set the env vars from `.env.example` in the Vercel project.
 2. Apply `supabase/migrations/0001_init.sql` to the Supabase project.
-3. In the Meta App dashboard → WhatsApp → Configuration, set the webhook
-   callback URL to `https://<your-app>.vercel.app/api/whatsapp/webhook`, use
-   `WHATSAPP_VERIFY_TOKEN` as the verify token, and subscribe to `messages`.
+3. In the Twilio console → Messaging → WhatsApp sandbox settings, set the
+   "When a message comes in" webhook to
+   `https://<your-app>.vercel.app/api/whatsapp/webhook` (POST).
 4. Cron is configured in `vercel.json` (daily Sun–Thu; autopilot every 5 min).
 
 ## What's left
@@ -76,10 +76,9 @@ npm run typecheck && npm test     # tsc + vitest
 1. **The 10Bis local API.** Implement `src/tenbis/local.ts` — every method has a
    `// NEED:` note for the exact endpoint/shape required. Then set
    `TENBIS_CLIENT=local` and `TENBIS_API_BASE_URL`. Nothing else needs to change.
-2. **Secrets**: Meta WhatsApp (`WHATSAPP_PHONE_NUMBER_ID`,
-   `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`),
-   `ANTHROPIC_API_KEY` (optional), `CREDENTIALS_ENC_KEY` (`openssl rand -hex 32`),
-   `CRON_SECRET`, Supabase URL + service-role key.
+2. **Secrets**: Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`,
+   `TWILIO_WHATSAPP_FROM`), `ANTHROPIC_API_KEY` (optional), `CREDENTIALS_ENC_KEY`
+   (`openssl rand -hex 32`), `CRON_SECRET`, Supabase URL + service-role key.
 3. **Supabase project** (account is at the 2-free-project limit — pause/upgrade
    or reuse an existing one).
 
@@ -89,7 +88,7 @@ npm run typecheck && npm test     # tsc + vitest
   token is stored (`food_app_tokens.encrypted_token`, AES-256-GCM).
 - The encryption key lives only in env vars, never in git or the DB.
 - Cron endpoints require `Authorization: Bearer $CRON_SECRET`; the WhatsApp
-  webhook verifies Meta's `X-Hub-Signature-256` in production.
+  webhook verifies the Twilio request signature in production.
 - `npm audit` flags Next.js App-Router/image-optimizer DoS advisories (we use the
   Pages Router + API routes only) and dev-only vitest/vite issues. None affect the
   production runtime; revisit with a Next 15 / React 19 upgrade later if desired.

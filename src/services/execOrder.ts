@@ -3,7 +3,7 @@ import { loadSession } from '../lib/repo';
 import * as repo from '../lib/repo';
 import { getTenbisClient } from '../tenbis';
 import * as tpl from '../whatsapp/templates';
-import { sendText } from '../whatsapp/meta';
+import { sendText } from '../whatsapp/twilio';
 import type { OrderRecord, Preferences, User } from '../domain/types';
 
 const FAIL_REASONS: Record<string, string> = {
