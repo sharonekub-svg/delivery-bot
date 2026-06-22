@@ -6,7 +6,7 @@ import { getPreferences, loadSession, getUserByPhone } from '../lib/repo';
 import * as repo from '../lib/repo';
 import { getTenbisClient } from '../tenbis';
 import * as tpl from '../whatsapp/templates';
-import { sendText } from '../whatsapp/twilio';
+import { sendProactive, sendText } from '../whatsapp/meta';
 import { scheduleAutopilot } from './autopilot';
 import type { User } from '../domain/types';
 
@@ -66,7 +66,7 @@ async function sendAskPrompt(user: User, picked: ScoredDish[]): Promise<void> {
       status: 'suggested',
     });
   }
-  await sendText(user.whatsappPhone, tpl.dailyPrompt(blurbs, picked));
+  await sendProactive(user.whatsappPhone, tpl.dailyPrompt(blurbs, picked));
 }
 
 export async function runDailyForPhone(phone: string): Promise<void> {

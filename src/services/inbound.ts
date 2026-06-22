@@ -2,7 +2,7 @@ import { config } from '../lib/config';
 import * as repo from '../lib/repo';
 import { parse } from '../whatsapp/parser';
 import * as tpl from '../whatsapp/templates';
-import { sendText } from '../whatsapp/twilio';
+import { sendText } from '../whatsapp/meta';
 import { executeOrder } from './execOrder';
 import { checkBudget } from '../domain/budget';
 

@@ -3,7 +3,7 @@ import { getPreferences } from '../lib/repo';
 import * as repo from '../lib/repo';
 import { executeOrder } from './execOrder';
 import * as tpl from '../whatsapp/templates';
-import { sendText } from '../whatsapp/twilio';
+import { sendProactive } from '../whatsapp/meta';
 import type { ScoredDish } from '../domain/recommendation';
 import type { Preferences, User } from '../domain/types';
 
@@ -28,7 +28,7 @@ export async function scheduleAutopilot(user: User, _prefs: Preferences, picked:
     executeAt: executeAt.toISOString(),
   });
   const localTime = executeAt.toLocaleTimeString('en-GB', { timeZone: config.timezone, hour: '2-digit', minute: '2-digit' });
-  await sendText(user.whatsappPhone, tpl.autopilotIntent(picked, localTime));
+  await sendProactive(user.whatsappPhone, tpl.autopilotIntent(picked, localTime));
 }
 
 /** Called every few minutes by cron: execute autopilot orders whose window passed. */

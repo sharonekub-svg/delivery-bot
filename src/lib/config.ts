@@ -16,10 +16,17 @@ export const config = {
     serviceRoleKey: () => required('SUPABASE_SERVICE_ROLE_KEY'),
   },
 
-  twilio: {
-    accountSid: () => required('TWILIO_ACCOUNT_SID'),
-    authToken: () => required('TWILIO_AUTH_TOKEN'),
-    from: () => required('TWILIO_WHATSAPP_FROM'),
+  // WhatsApp via Meta (Facebook) Cloud API — free tier.
+  whatsapp: {
+    phoneNumberId: () => required('WHATSAPP_PHONE_NUMBER_ID'),
+    accessToken: () => required('WHATSAPP_ACCESS_TOKEN'),
+    verifyToken: () => required('WHATSAPP_VERIFY_TOKEN'),
+    appSecret: () => process.env.WHATSAPP_APP_SECRET ?? '',
+    graphVersion: process.env.WHATSAPP_GRAPH_VERSION ?? 'v21.0',
+    // Approved template used for the proactive daily nudge (cold-start outside
+    // the 24h customer-service window). One body parameter carries the text.
+    dailyTemplate: process.env.WHATSAPP_DAILY_TEMPLATE ?? '',
+    templateLang: process.env.WHATSAPP_TEMPLATE_LANG ?? 'he',
   },
 
   anthropic: {
