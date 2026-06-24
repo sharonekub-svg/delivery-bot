@@ -51,8 +51,8 @@ export default function Connect() {
   }
 
   function skip() {
-    // אם כבר מחוברים — קפצו ישר לצהריים; אחרת המשיכו למילוי הפרופיל.
-    if (store.getSession()) router.push(store.getProfile() ? '/lunch' : '/profile');
+    // אם כבר מחוברים — קפצו ישר לבוט; אחרת המשיכו למילוי הפרופיל.
+    if (store.getSession()) router.push(store.getProfile() ? '/bot' : '/profile');
     else router.push('/profile');
   }
 

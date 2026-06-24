@@ -32,6 +32,8 @@ export interface StoredProfile {
   triggerTime: string;
   /** 'autopilot' = order on its own; 'ask' = ask for approval first. */
   mode: 'ask' | 'autopilot';
+  /** How many times per week the user wants to order (informational). */
+  ordersPerWeek?: number;
 }
 
 export const store = {

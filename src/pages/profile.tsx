@@ -60,7 +60,7 @@ export default function Profile() {
       mode,
     };
     store.setProfile(profile);
-    router.push('/lunch');
+    router.push('/bot');
   }
 
   return (
@@ -102,7 +102,7 @@ export default function Profile() {
         <label style={{ ...lbl, display: 'flex', alignItems: 'center', gap: 8, fontWeight: 400 }}>
           <input type="checkbox" checked={beverage} onChange={(e) => setBeverage(e.target.checked)} /> להוסיף משקה בהזמנה
         </label>
-        <button type="submit" style={button}>שמרו וראו את הצהריים שלי ←</button>
+        <button type="submit" style={button}>שמרו ודברו עם הבוט ←</button>
       </form>
     </main>
   );

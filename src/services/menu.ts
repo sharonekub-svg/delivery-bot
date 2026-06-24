@@ -42,8 +42,27 @@ export interface DishOption {
   deepLink?: string;
 }
 
-export async function recommendForUser(session: TenbisSession, addressId: string, prefs: Preferences): Promise<DishOption[]> {
-  const dishes = await gatherDishes(session, addressId, prefs);
+/** Craving keyword → words we look for in a dish name / description / restaurant. */
+const CRAVINGS: Record<string, string[]> = {
+  sushi: ['סושי', 'sushi', 'poke', 'פוקה', 'אסיאת', 'asian', 'maki', 'ניגירי', 'sashimi'],
+  burger: ['המבורגר', 'בורגר', 'burger', 'צ׳יזבורגר'],
+  pizza: ['פיצה', 'pizza', 'קלצונה', 'focaccia', 'פוקצ'],
+  salad: ['סלט', 'salad', 'bowl', 'קערה', 'greens', 'ירק'],
+  meat: ['בשר', 'סטייק', 'steak', 'grill', 'גריל', 'שיפוד', 'אנטריקוט', 'meat'],
+};
+
+function matchesCraving(dish: TenbisDish, words: string[]): boolean {
+  const hay = `${dish.name} ${dish.description ?? ''} ${dish.restaurantName} ${(dish.tags ?? []).join(' ')}`.toLowerCase();
+  return words.some((w) => hay.includes(w.toLowerCase()));
+}
+
+export async function recommendForUser(session: TenbisSession, addressId: string, prefs: Preferences, craving?: string): Promise<DishOption[]> {
+  let dishes = await gatherDishes(session, addressId, prefs);
+  const words = craving ? CRAVINGS[craving] : undefined;
+  if (words) {
+    const filtered = dishes.filter((d) => matchesCraving(d, words));
+    if (filtered.length > 0) dishes = filtered; // fall back to everything if no match
+  }
   const history = await getTenbisClient().getHistory(session, 30).catch(() => []);
   return recommend(dishes, prefs, history).map((s) => ({
     dishId: s.dish.id,

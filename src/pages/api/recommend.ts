@@ -19,9 +19,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const prefs: Preferences = { ...defaultPreferences(), ...(body.preferences ?? {}) };
   const addressId = String(body.addressId ?? '');
   if (!addressId) return res.status(400).json({ ok: false, error: 'no_address' });
+  // Let the chat ask for more options to cycle through.
+  const count = Number(body.count);
+  if (Number.isFinite(count) && count > 0) prefs.optionCount = Math.min(count, 8);
+  const craving = body.craving ? String(body.craving) : undefined;
 
   try {
-    const options = await recommendForUser(session, addressId, prefs);
+    const options = await recommendForUser(session, addressId, prefs, craving);
     return res.status(200).json({ ok: true, options });
   } catch (err) {
     console.error('recommend error', err);
