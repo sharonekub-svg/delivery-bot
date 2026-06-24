@@ -28,6 +28,10 @@ export interface StoredProfile {
   weeklyProteinTargetG?: number;
   dailyBudgetNis: number;
   includeBeverage: boolean;
+  /** Preferred ordering time, local HH:mm. */
+  triggerTime: string;
+  /** 'autopilot' = order on its own; 'ask' = ask for approval first. */
+  mode: 'ask' | 'autopilot';
 }
 
 export const store = {

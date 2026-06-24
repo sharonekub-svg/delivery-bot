@@ -34,6 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ ok: result.ok, result });
   } catch (err) {
     console.error('order error', err);
-    return res.status(500).json({ ok: false, error: 'The order failed. Please try again.' });
+    return res.status(500).json({ ok: false, error: 'ההזמנה נכשלה. נסו שוב.' });
   }
 }

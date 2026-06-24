@@ -1,19 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { store } from '../lib/store';
 
 /**
- * Step 1: connect 10Bis. Walk the user through grabbing their session from
- * DevTools, validate it server-side, then remember it in this browser and move
- * on to the profile.
+ * שלב 1: חיבור ל-10bis. מדריכים את המשתמש להעתיק את הסשן מכלי הפיתוח, מאמתים
+ * בצד השרת, וזוכרים בדפדפן. כפתור "דלג" למטה מימין מאפשר לדלג אם כבר מחוברים.
  */
 const STEPS: [string, string][] = [
-  ['Open 10Bis and log in', 'Go to https://www.10bis.co.il in this browser and sign in as usual.'],
-  ['Open DevTools', 'Press F12 (or ⌥⌘I on a Mac) and click the Network tab.'],
-  ['Make 10Bis do something', 'Reload the page or click into a restaurant so requests show up in the list.'],
-  ['Copy a request', 'Find any request to 10bis.co.il (the “NextApi” ones work great). Right-click it → Copy → Copy as cURL.'],
-  ['Paste it below', 'Paste the whole thing and hit Connect. We only keep the cookie + token, on your device.'],
+  ['פתחו את 10bis והתחברו', 'היכנסו ל-https://www.10bis.co.il בדפדפן הזה והתחברו כרגיל.'],
+  ['פתחו את כלי הפיתוח', 'לחצו F12 (או ⌥⌘I במק) ועברו ללשונית Network.'],
+  ['גרמו ל-10bis לעשות משהו', 'רעננו את הדף או היכנסו למסעדה כדי שיופיעו בקשות ברשימה.'],
+  ['העתיקו בקשה', 'מצאו בקשה כלשהי ל-10bis.co.il (אלה של "NextApi" מצוינות). לחצו קליק ימני → Copy → Copy as cURL.'],
+  ['הדביקו כאן למטה', 'הדביקו את הכל ולחצו "התחברו". אנחנו שומרים רק את העוגייה והטוקן, במכשיר שלכם.'],
 ];
 
 export default function Connect() {
@@ -21,11 +20,14 @@ export default function Connect() {
   const [raw, setRaw] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
+
+  useEffect(() => { setHasSession(!!store.getSession()); }, []);
 
   async function connect(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    setStatus('Checking your credentials…');
+    setStatus('בודק את הפרטים…');
     try {
       const res = await fetch('/api/connect', {
         method: 'POST',
@@ -36,26 +38,36 @@ export default function Connect() {
       if (res.ok && data.ok) {
         store.setSession(data.session);
         if (data.addresses?.[0]?.id) store.setAddress(data.addresses[0].id);
-        setStatus('✅ Connected! Now tell us how you like to eat…');
+        setStatus('✅ התחברתם! עכשיו ספרו לנו איך אתם אוהבים לאכול…');
         router.push('/profile');
       } else {
-        setStatus(`❌ ${data.error ?? 'Could not connect.'}`);
+        setStatus(`❌ ${data.error ?? 'החיבור נכשל.'}`);
       }
     } catch {
-      setStatus('❌ Network error — please try again.');
+      setStatus('❌ תקלת רשת — נסו שוב.');
     } finally {
       setBusy(false);
     }
   }
 
+  function skip() {
+    // אם כבר מחוברים — קפצו ישר לצהריים; אחרת המשיכו למילוי הפרופיל.
+    if (store.getSession()) router.push(store.getProfile() ? '/lunch' : '/profile');
+    else router.push('/profile');
+  }
+
   return (
     <main style={wrap}>
-      <Link href="/" style={{ color: '#64748b', textDecoration: 'none', fontSize: 14 }}>← Back</Link>
-      <div style={{ color: '#94a3b8', fontSize: 13, marginTop: 12 }}>Step 1 of 2</div>
-      <h1 style={{ fontSize: 30, margin: '4px 0' }}>Connect your 10Bis</h1>
+      <Link href="/" style={{ color: '#64748b', textDecoration: 'none', fontSize: 14 }}>→ חזרה</Link>
+      <div style={{ color: '#94a3b8', fontSize: 13, marginTop: 12 }}>שלב 1 מתוך 2</div>
+      <h1 style={{ fontSize: 30, margin: '4px 0' }}>חיבור ה-10bis שלכם</h1>
       <p style={{ color: '#475569', marginTop: 0 }}>
-        10Bis has no public API, so we use the session your browser already has. Takes ~30 seconds.
+        ל-10bis אין API ציבורי, אז אנחנו משתמשים בסשן שכבר יש לדפדפן שלכם. לוקח כ-30 שניות.
       </p>
+
+      {hasSession && (
+        <div style={connectedNote}>✅ אתם כבר מחוברים. אפשר לדלג למטה, או להדביק סשן חדש כדי להחליף.</div>
+      )}
 
       <ol style={{ listStyle: 'none', padding: 0, margin: '24px 0' }}>
         {STEPS.map(([title, body], i) => (
@@ -73,25 +85,34 @@ export default function Connect() {
         <textarea
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
-          placeholder="Paste the copied request here (curl '…' -H 'cookie: …' …)"
+          placeholder="הדביקו כאן את הבקשה שהעתקתם (curl '…' -H 'cookie: …' …)"
           style={textarea}
           spellCheck={false}
+          dir="ltr"
         />
         <button type="submit" disabled={busy || raw.trim().length < 10} style={{ ...button, opacity: busy || raw.trim().length < 10 ? 0.6 : 1 }}>
-          {busy ? 'Connecting…' : 'Connect'}
+          {busy ? 'מתחבר…' : 'התחברו'}
         </button>
       </form>
       {status && <p style={{ marginTop: 16 }}>{status}</p>}
 
       <p style={{ color: '#94a3b8', fontSize: 13, marginTop: 24 }}>
-        🔒 Sent once over HTTPS to validate, then stored only in this browser. Nothing is saved to a shared server.
+        🔒 נשלח פעם אחת ב-HTTPS לאימות, ואז נשמר רק בדפדפן הזה. שום דבר לא נשמר בשרת משותף.
       </p>
+
+      <button onClick={skip} style={skipBtn} aria-label="דלג">דלג ←</button>
     </main>
   );
 }
 
-const wrap: React.CSSProperties = { maxWidth: 640, margin: '0 auto', padding: '32px 20px 60px', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#0f172a' };
+const wrap: React.CSSProperties = { maxWidth: 640, margin: '0 auto', padding: '32px 20px 90px', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#0f172a' };
 const step: React.CSSProperties = { display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px solid #f1f5f9' };
 const num: React.CSSProperties = { flex: '0 0 auto', width: 28, height: 28, borderRadius: '50%', background: '#f97316', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 };
 const textarea: React.CSSProperties = { width: '100%', minHeight: 120, padding: 12, fontSize: 13, fontFamily: 'ui-monospace, monospace', border: '1px solid #cbd5e1', borderRadius: 10, boxSizing: 'border-box', resize: 'vertical' };
 const button: React.CSSProperties = { marginTop: 12, background: '#f97316', color: '#fff', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 16, fontWeight: 600, cursor: 'pointer' };
+const connectedNote: React.CSSProperties = { background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: 12, marginTop: 8, color: '#15803d', fontSize: 14 };
+const skipBtn: React.CSSProperties = {
+  position: 'fixed', bottom: 20, right: 20, background: '#0f172a', color: '#fff', border: 'none',
+  borderRadius: 24, padding: '12px 22px', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.2)', zIndex: 10,
+};

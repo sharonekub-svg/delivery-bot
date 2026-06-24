@@ -25,6 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ ok: true, options });
   } catch (err) {
     console.error('recommend error', err);
-    return res.status(500).json({ ok: false, error: 'Could not load the menu. Your 10Bis session may have expired — reconnect and try again.' });
+    return res.status(500).json({ ok: false, error: 'לא הצלחנו לטעון את התפריט. ייתכן שהסשן של 10bis פג — התחברו מחדש ונסו שוב.' });
   }
 }
