@@ -11,8 +11,8 @@ export default function Home() {
         <div style={{ fontSize: 56 }}>🍽️</div>
         <h1 style={{ fontSize: 40, margin: '12px 0 8px', letterSpacing: -1 }}>Lunch Helper</h1>
         <p style={{ fontSize: 20, color: '#475569', maxWidth: 560, margin: '0 auto' }}>
-          Connect your <strong>10Bis</strong> account, tell the bot how you like to eat, and it
-          recommends — and orders — the perfect lunch for you.
+          Connect your <strong>10Bis</strong> account, fill in your taste profile once, and it
+          remembers it — then picks and orders the perfect lunch for you.
         </p>
         <div style={{ marginTop: 28 }}>
           <Link href="/connect" style={cta}>Connect 10Bis →</Link>
@@ -22,7 +22,7 @@ export default function Home() {
       <section style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', margin: '24px 0' }}>
         {[
           ['🔌', 'Paste & go', 'No password. Copy one request from your browser’s DevTools and paste it in — that’s the whole setup.'],
-          ['💬', 'It interviews you', 'A friendly chatbot learns your goals, protein targets, favourite restaurants and allergies.'],
+          ['📝', 'Fill it in once', 'Your goals, protein target, favourite restaurants and allergies — saved and remembered, so you never re-enter them.'],
           ['🛵', 'It orders for real', 'Picks live menu options that fit your taste and budget, then places the order once you say go.'],
         ].map(([icon, title, body]) => (
           <div key={title} style={card}>

@@ -2,13 +2,11 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { z } from 'zod';
 import { parseCredentials } from '../../lib/curlParse';
 import { getTenbisClient } from '../../tenbis';
-import { writeSession } from '../../lib/webSession';
 
 /**
- * Web connect flow. The user pastes what they copied from DevTools (a "Copy as
- * cURL", a raw header block, or just the cookie string). We extract the cookie
- * + bearer, validate them against 10Bis, and stash the resulting session in an
- * encrypted httpOnly cookie. No password, no database.
+ * Validate the 10Bis credentials the user pasted from DevTools. We extract the
+ * cookie + bearer, confirm they work, and hand the resulting session back to
+ * the browser, which remembers it locally. No password, no key, no database.
  */
 const Body = z.object({ raw: z.string().min(10) });
 
@@ -25,10 +23,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const tenbis = getTenbisClient();
     const session = await tenbis.sessionFromManualInput(creds);
-    writeSession(res, session);
     const addresses = await tenbis.getAddresses(session).catch(() => []);
     return res.status(200).json({
       ok: true,
+      session,
       addresses: addresses.map((a) => ({ id: a.id, label: a.label })),
     });
   } catch (err) {

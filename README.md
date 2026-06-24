@@ -7,30 +7,32 @@ The flow is dead simple:
 
 1. **Connect** (`/connect`) — paste a single 10Bis request you copied from your
    browser's DevTools ("Copy as cURL"). No password. We extract the cookie +
-   bearer token, validate them, and stash the session in an encrypted httpOnly
-   cookie. No database involved.
-2. **Chat** (`/chat`) — a Claude-powered concierge interviews you (cravings,
-   goals, protein target, favourite restaurants, allergies, budget), pulls the
-   live 10Bis menu through the recommendation engine, and places the order once
-   you confirm.
+   bearer token and validate them.
+2. **Profile** (`/profile`) — fill in your taste profile *once*: what you like,
+   your goal, protein target, favourite restaurants, allergies, budget. It's
+   saved and remembered, so you never answer twice.
+3. **Lunch** (`/lunch`) — uses your remembered profile to pull and rank today's
+   live 10Bis menu through the recommendation engine, and orders the dish you
+   pick.
 
-> The web app is **stateless**: your 10Bis session lives only in your own
-> encrypted cookie, and the chat history + preferences round-trip from the
-> browser each turn. Set `TENBIS_CLIENT=mock` to demo the whole thing with no
-> real account; `TENBIS_CLIENT=local` to place real orders.
+> **No required env vars, no database, no AI key.** Your profile and validated
+> 10Bis session are remembered in your own browser (localStorage); the server
+> is a stateless passthrough that ranks the menu and places orders. Set
+> `TENBIS_CLIENT=mock` to demo with fake data; it defaults to `local` (real).
 
 ## Web app pieces
 
 ```
 pages/index.tsx     landing page
-pages/connect.tsx   F12 step-by-step + paste box
-pages/chat.tsx      the chatbot UI (bubbles, recommendation cards, order card)
-pages/api/connect   parse paste -> validate -> set encrypted session cookie
-pages/api/session   connection status / disconnect
-pages/api/chat      one agent turn (stateless)
+pages/connect.tsx   F12 step-by-step + paste box (Step 1)
+pages/profile.tsx   the remembered taste profile form (Step 2)
+pages/lunch.tsx     ranked live options + one-tap ordering
+pages/api/connect   parse paste -> validate -> return the session to the browser
+pages/api/recommend rank the live menu against the saved profile
+pages/api/order     place a real 10Bis order
 lib/curlParse.ts    extract cookie + bearer from a cURL / header / cookie paste
-lib/webSession.ts   chunked AES-256-GCM session cookie (no DB)
-lib/agent.ts        the chatbot brain: Claude + tools (prefs, menu, order)
+lib/store.ts        browser-side memory (profile + session in localStorage)
+services/menu.ts    gather live dishes + run the recommendation engine
 ```
 
 The recommendation engine (`domain/`), the 10Bis client seam (`tenbis/`), and
