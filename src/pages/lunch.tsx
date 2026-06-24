@@ -5,7 +5,8 @@ import { store } from '../lib/store';
 
 interface DishOption {
   dishId: string; restaurantId: string; categoryId?: string; dishName: string;
-  restaurantName: string; priceNis: number; proteinG?: number; description?: string; deepLink?: string;
+  restaurantName: string; priceNis: number; proteinG?: number; caloriesKcal?: number;
+  description?: string; deepLink?: string; etaMinutes?: number;
 }
 interface OrderState {
   dishId: string; ok?: boolean; pending?: boolean; overBudget?: boolean; message?: string; trackerDeepLink?: string;
@@ -81,8 +82,8 @@ export default function Lunch() {
       {profile && (
         <div style={modeNote}>
           {profile.mode === 'autopilot'
-            ? `⏰ ביקשתם הזמנה אוטומטית בסביבות ${profile.triggerTime}. הערה: כדי שזה יקרה לבד גם כשהאתר סגור צריך להוסיף רכיב שרת — פירוט בצ'אט.`
-            : `⏰ שעת הזמנה מועדפת: ${profile.triggerTime}. כרגע אתם מאשרים כל הזמנה ידנית כאן.`}
+            ? `ביקשתם הזמנה אוטומטית בטווח ${profile.timeFrom}–${profile.timeTo}. הערה: כדי שזה יקרה לבד גם כשהאתר סגור צריך להוסיף רכיב שרת.`
+            : `טווח שעות מועדף: ${profile.timeFrom}–${profile.timeTo}. כרגע אתם מאשרים כל הזמנה ידנית כאן.`}
         </div>
       )}
 
@@ -106,18 +107,20 @@ export default function Lunch() {
           <>
             {/* ההמלצה המובילה — כשאלה, עם כפתור ענק "כן, הזמינו!" */}
             <div style={heroCard}>
-              <div style={{ fontSize: 15, color: '#9a3412', fontWeight: 600 }}>הבחירה המובילה בשבילך 👇</div>
-              <div style={{ fontSize: 24, fontWeight: 800, margin: '6px 0 2px' }}>רוצה {top.dishName}? 😋</div>
+              <div style={{ fontSize: 15, color: '#9a3412', fontWeight: 600 }}>הבחירה המובילה בשבילך</div>
+              <div style={{ fontSize: 24, fontWeight: 800, margin: '6px 0 2px' }}>רוצה {top.dishName}?</div>
               <div style={{ color: '#7c2d12', fontSize: 15 }}>מ{top.restaurantName}</div>
               {top.description && <div style={{ color: '#9a3412', fontSize: 14, marginTop: 6 }}>{top.description}</div>}
               <div style={{ marginTop: 10 }}>
                 <span style={heroPill}>₪{top.priceNis}</span>
                 {top.proteinG != null && <span style={heroPill}>{top.proteinG}ג חלבון</span>}
+                {top.caloriesKcal != null && <span style={heroPill}>{top.caloriesKcal} קלוריות</span>}
+                {top.etaMinutes != null && <span style={heroPill}>משלוח כ-{top.etaMinutes} דק׳</span>}
               </div>
               <OrderStatus o={o} onForce={() => place(top, true)} />
               {!o?.ok && (
                 <button onClick={() => place(top)} disabled={o?.pending} style={{ ...heroBtn, opacity: o?.pending ? 0.6 : 1 }}>
-                  {o?.pending ? 'מזמין…' : 'כן, הזמינו! 🛵'}
+                  {o?.pending ? 'מזמין…' : 'כן, הזמינו!'}
                 </button>
               )}
             </div>
@@ -137,7 +140,9 @@ export default function Lunch() {
                           <div style={{ marginTop: 8 }}>
                             <span style={pill}>₪{opt.priceNis}</span>
                             {opt.proteinG != null && <span style={pill}>{opt.proteinG}ג חלבון</span>}
-                            {opt.deepLink && <a href={opt.deepLink} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: '#f97316', marginInlineStart: 6 }}>צפייה ←</a>}
+                            {opt.caloriesKcal != null && <span style={pill}>{opt.caloriesKcal} קלוריות</span>}
+                            {opt.etaMinutes != null && <span style={pill}>משלוח כ-{opt.etaMinutes} דק׳</span>}
+                            {opt.deepLink && <a href={opt.deepLink} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: '#f97316', marginInlineStart: 6 }}>צפייה</a>}
                           </div>
                           <OrderStatus o={ro} onForce={() => place(opt, true)} />
                         </div>

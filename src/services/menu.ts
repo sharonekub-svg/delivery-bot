@@ -8,21 +8,29 @@ import type { TenbisDish, TenbisSession } from '../tenbis/types';
  * recommendation engine against the user's saved profile. Favourite restaurants
  * are checked first; network fan-out is capped so a request stays snappy.
  */
-export async function gatherDishes(session: TenbisSession, addressId: string, prefs: Preferences): Promise<TenbisDish[]> {
+export interface GatheredMenu {
+  dishes: TenbisDish[];
+  /** restaurantId -> approximate delivery time in minutes. */
+  etaByRestaurant: Record<string, number | undefined>;
+}
+
+export async function gatherDishes(session: TenbisSession, addressId: string, prefs: Preferences): Promise<GatheredMenu> {
   const tenbis = getTenbisClient();
   const restaurants = (await tenbis.getRestaurants(session, addressId)).filter((r) => r.isOpenNow);
   const favs = (prefs.favoriteRestaurantNames ?? []).map((s) => s.toLowerCase());
   const ranked = [...restaurants].sort((a, b) => favRank(a.name, favs) - favRank(b.name, favs));
 
   const dishes: TenbisDish[] = [];
+  const etaByRestaurant: Record<string, number | undefined> = {};
   for (const r of ranked.slice(0, 6)) {
+    etaByRestaurant[r.id] = r.deliveryEtaMinutes;
     try {
       dishes.push(...(await tenbis.getAvailableDishes(session, addressId, r.id)));
     } catch {
       /* skip a restaurant whose menu fails to load */
     }
   }
-  return dishes;
+  return { dishes, etaByRestaurant };
 }
 
 function favRank(name: string, favs: string[]): number {
@@ -38,8 +46,11 @@ export interface DishOption {
   restaurantName: string;
   priceNis: number;
   proteinG?: number;
+  caloriesKcal?: number;
   description?: string;
   deepLink?: string;
+  /** Approximate delivery time in minutes for this dish's restaurant. */
+  etaMinutes?: number;
 }
 
 /** Craving keyword → words we look for in a dish name / description / restaurant. */
@@ -57,7 +68,8 @@ function matchesCraving(dish: TenbisDish, words: string[]): boolean {
 }
 
 export async function recommendForUser(session: TenbisSession, addressId: string, prefs: Preferences, craving?: string): Promise<DishOption[]> {
-  let dishes = await gatherDishes(session, addressId, prefs);
+  const { dishes: all, etaByRestaurant } = await gatherDishes(session, addressId, prefs);
+  let dishes = all;
   const words = craving ? CRAVINGS[craving] : undefined;
   if (words) {
     const filtered = dishes.filter((d) => matchesCraving(d, words));
@@ -72,7 +84,9 @@ export async function recommendForUser(session: TenbisSession, addressId: string
     restaurantName: s.dish.restaurantName,
     priceNis: s.dish.priceNis,
     proteinG: s.dish.proteinG,
+    caloriesKcal: s.dish.caloriesKcal,
     description: s.dish.description,
     deepLink: s.dish.deepLink,
+    etaMinutes: etaByRestaurant[s.dish.restaurantId],
   }));
 }

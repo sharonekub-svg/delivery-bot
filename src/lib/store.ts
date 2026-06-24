@@ -28,8 +28,9 @@ export interface StoredProfile {
   weeklyProteinTargetG?: number;
   dailyBudgetNis: number;
   includeBeverage: boolean;
-  /** Preferred ordering time, local HH:mm. */
-  triggerTime: string;
+  /** Preferred ordering window, local HH:mm. */
+  timeFrom: string;
+  timeTo: string;
   /** 'autopilot' = order on its own; 'ask' = ask for approval first. */
   mode: 'ask' | 'autopilot';
   /** How many times per week the user wants to order (informational). */

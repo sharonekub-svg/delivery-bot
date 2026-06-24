@@ -22,7 +22,8 @@ export default function Profile() {
   const [allergies, setAllergies] = useState('');
   const [budget, setBudget] = useState(40);
   const [beverage, setBeverage] = useState(false);
-  const [triggerTime, setTriggerTime] = useState('12:30');
+  const [timeFrom, setTimeFrom] = useState('12:30');
+  const [timeTo, setTimeTo] = useState('17:30');
   const [mode, setMode] = useState<'ask' | 'autopilot'>('ask');
 
   // ממלאים מראש אם כבר נשמר פרופיל (האתר זוכר).
@@ -36,7 +37,8 @@ export default function Profile() {
       setAllergies(p.exclusions.join(', '));
       setBudget(p.dailyBudgetNis);
       setBeverage(p.includeBeverage);
-      if (p.triggerTime) setTriggerTime(p.triggerTime);
+      if (p.timeFrom) setTimeFrom(p.timeFrom);
+      if (p.timeTo) setTimeTo(p.timeTo);
       if (p.mode) setMode(p.mode);
     }
   }, []);
@@ -56,7 +58,8 @@ export default function Profile() {
       weeklyProteinTargetG: dailyProtein > 0 ? dailyProtein * 7 : undefined,
       dailyBudgetNis: budget,
       includeBeverage: beverage,
-      triggerTime,
+      timeFrom,
+      timeTo,
       mode,
     };
     store.setProfile(profile);
@@ -90,9 +93,19 @@ export default function Profile() {
         <label style={lbl}>תקציב יומי (₪)
           <input type="number" value={budget} onChange={(e) => setBudget(Number(e.target.value))} style={ctl} />
         </label>
-        <label style={lbl}>באיזו שעה בערך להזמין?
-          <input type="time" value={triggerTime} onChange={(e) => setTriggerTime(e.target.value)} style={ctl} />
-        </label>
+        <div style={lbl}>באיזה טווח שעות להזמין?
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
+            <span style={{ fontWeight: 400, color: '#475569' }}>משעה</span>
+            <input type="time" value={timeFrom} onChange={(e) => setTimeFrom(e.target.value)} style={{ ...ctl, marginTop: 0 }} />
+            <span style={{ fontWeight: 400, color: '#475569' }}>עד</span>
+            <input type="time" value={timeTo} onChange={(e) => setTimeTo(e.target.value)} style={{ ...ctl, marginTop: 0 }} />
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8, fontWeight: 400 }}>
+            {[['12:30', '17:30'], ['18:00', '20:00'], ['11:30', '14:30']].map(([f, t]) => (
+              <button type="button" key={f} onClick={() => { setTimeFrom(f); setTimeTo(t); }} style={preset}>{f}–{t}</button>
+            ))}
+          </div>
+        </div>
         <label style={lbl}>איך להזמין?
           <select value={mode} onChange={(e) => setMode(e.target.value as 'ask' | 'autopilot')} style={ctl}>
             <option value="ask">לשאול אותי קודם ולחכות לאישור</option>
@@ -112,3 +125,4 @@ const wrap: React.CSSProperties = { maxWidth: 560, margin: '0 auto', padding: '3
 const lbl: React.CSSProperties = { display: 'block', margin: '18px 0', fontWeight: 600 };
 const ctl: React.CSSProperties = { display: 'block', width: '100%', padding: 10, marginTop: 6, fontSize: 16, boxSizing: 'border-box', border: '1px solid #cbd5e1', borderRadius: 8 };
 const button: React.CSSProperties = { marginTop: 8, width: '100%', background: '#f97316', color: '#fff', border: 'none', borderRadius: 10, padding: '14px 24px', fontSize: 16, fontWeight: 600, cursor: 'pointer' };
+const preset: React.CSSProperties = { background: '#fff7ed', border: '1px solid #fdba74', color: '#9a3412', borderRadius: 999, padding: '6px 12px', fontSize: 14, cursor: 'pointer' };
