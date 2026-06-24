@@ -16,6 +16,8 @@ export interface Preferences {
   // 4. Favourite dishes (derived from history, manually overridable)
   favoriteDishIds: string[];
   favoritesRefreshedAt?: string; // ISO; re-derive every ~3 months
+  /** Restaurant/dish names the user calls out in chat — biases recommendations. */
+  favoriteRestaurantNames?: string[];
   // 5. Daily budget (NIS)
   dailyBudgetNis: number;
   budgetIsManual: boolean;

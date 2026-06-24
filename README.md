@@ -1,9 +1,47 @@
-# 🍽️ Food Order Helper
+# 🍽️ Lunch Helper
 
-A WhatsApp conversational assistant that proactively orders a healthy lunch on
-**10Bis** so you never skip a meal. Built per the PRD (executive summary →
-onboarding → daily engagement → recommendation engine → autopilot → budget →
-security).
+A **website** where you connect your **10Bis** account, chat with a bot about how
+you like to eat, and it recommends — and orders — your lunch.
+
+The flow is dead simple:
+
+1. **Connect** (`/connect`) — paste a single 10Bis request you copied from your
+   browser's DevTools ("Copy as cURL"). No password. We extract the cookie +
+   bearer token, validate them, and stash the session in an encrypted httpOnly
+   cookie. No database involved.
+2. **Chat** (`/chat`) — a Claude-powered concierge interviews you (cravings,
+   goals, protein target, favourite restaurants, allergies, budget), pulls the
+   live 10Bis menu through the recommendation engine, and places the order once
+   you confirm.
+
+> The web app is **stateless**: your 10Bis session lives only in your own
+> encrypted cookie, and the chat history + preferences round-trip from the
+> browser each turn. Set `TENBIS_CLIENT=mock` to demo the whole thing with no
+> real account; `TENBIS_CLIENT=local` to place real orders.
+
+## Web app pieces
+
+```
+pages/index.tsx     landing page
+pages/connect.tsx   F12 step-by-step + paste box
+pages/chat.tsx      the chatbot UI (bubbles, recommendation cards, order card)
+pages/api/connect   parse paste -> validate -> set encrypted session cookie
+pages/api/session   connection status / disconnect
+pages/api/chat      one agent turn (stateless)
+lib/curlParse.ts    extract cookie + bearer from a cURL / header / cookie paste
+lib/webSession.ts   chunked AES-256-GCM session cookie (no DB)
+lib/agent.ts        the chatbot brain: Claude + tools (prefs, menu, order)
+```
+
+The recommendation engine (`domain/`), the 10Bis client seam (`tenbis/`), and
+crypto/config (`lib/`) are shared with — and reused from — the original bot.
+
+---
+
+## Legacy: WhatsApp bot
+
+The repo still contains the original WhatsApp assistant (Twilio + Supabase +
+Vercel Cron). It is no longer the focus but is kept intact and described below.
 
 > Status: **scaffold complete and building/green**. Runs end-to-end today against
 > a *mock* 10Bis. The one piece that needs your input is the real **10Bis local

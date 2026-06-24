@@ -1,6 +1,8 @@
 import type { TenbisClient } from './client';
+import { cookieStringToJar } from '../lib/curlParse';
 import type {
   LoginChallenge,
+  ManualCredentials,
   PlaceOrderInput,
   TenbisAddress,
   TenbisBudget,
@@ -28,6 +30,8 @@ const CULTURE = { culture: 'he-IL', uiCulture: 'he' };
 interface SessionState {
   email: string;
   cookies: Record<string, string>;
+  /** Bearer token for the catalog host (api.10bis.co.il), when supplied. */
+  bearer?: string;
   userToken?: string;
   userId?: number;
   shoppingCartGuid?: string;
@@ -85,10 +89,10 @@ async function postNext<T = any>(path: string, jar: Record<string, string>, body
   return json as unknown as T;
 }
 
-async function getApi<T = any>(path: string, jar: Record<string, string>): Promise<T> {
-  const res = await fetch(`${API}/${path}`, {
-    headers: { 'x-app-type': 'mobileWeb', language: 'he', cookie: cookieHeader(jar) },
-  });
+async function getApi<T = any>(path: string, jar: Record<string, string>, bearer?: string): Promise<T> {
+  const headers: Record<string, string> = { 'x-app-type': 'mobileWeb', language: 'he', cookie: cookieHeader(jar) };
+  if (bearer) headers.authorization = `Bearer ${bearer}`;
+  const res = await fetch(`${API}/${path}`, { headers });
   if (res.status === 401) throw new SessionExpired();
   if (!res.ok) throw new Error(`10Bis ${path} -> ${res.status}`);
   return (await res.json()) as T;
@@ -124,6 +128,25 @@ export class LocalTenbisClient implements TenbisClient {
       userToken: d.userToken ?? d.sessionToken,
       userId: d.userId,
       shoppingCartGuid: r.ShoppingCartGuid ?? ctx.shoppingCartGuid,
+    });
+  }
+
+  async sessionFromManualInput(input: ManualCredentials): Promise<TenbisSession> {
+    const jar = input.cookie ? cookieStringToJar(input.cookie) : {};
+    if (Object.keys(jar).length === 0 && !input.bearer) {
+      throw new Error('No cookie or bearer token found in the pasted data.');
+    }
+    // GetUser both validates the credentials and initialises a shopping cart
+    // (returns the user id + ShoppingCartGuid we need to build an order later).
+    const r: any = await postNext('GetUser', jar, {});
+    const d = r.Data ?? {};
+    return pack({
+      email: d.email ?? '',
+      cookies: jar,
+      bearer: input.bearer,
+      userToken: d.userToken ?? d.sessionToken,
+      userId: d.userId,
+      shoppingCartGuid: r.ShoppingCartGuid ?? d.shoppingCartGuid,
     });
   }
 
@@ -197,7 +220,7 @@ export class LocalTenbisClient implements TenbisClient {
     const addr = (await this.getAddresses(session)).find((a) => a.id === addressId);
     const state = parse(session);
     const qs = addr ? `?addressId=${addressId}&longitude=${addr.longitude}&latitude=${addr.latitude}` : `?addressId=${addressId}`;
-    const r: any = await getApi(`Restaurants/SearchByAddressId${qs}`, state.cookies).catch(() => ({ Data: [] }));
+    const r: any = await getApi(`Restaurants/SearchByAddressId${qs}`, state.cookies, state.bearer).catch(() => ({ Data: [] }));
     const list: any[] = r.Data?.restaurantsList ?? r.Data ?? [];
     return list.map((x) => ({
       id: String(x.restaurantId ?? x.id),
@@ -216,7 +239,7 @@ export class LocalTenbisClient implements TenbisClient {
     }
     const state = parse(session);
     const dateTime = new Date().toISOString().slice(0, 16);
-    const r: any = await getApi(`Restaurants/${restaurantId}/Menu?addressId=${addressId}&dateTime=${dateTime}`, state.cookies);
+    const r: any = await getApi(`Restaurants/${restaurantId}/Menu?addressId=${addressId}&dateTime=${dateTime}`, state.cookies, state.bearer);
     const data = r.Data ?? r;
     const categories: any[] = data.categories ?? [];
     const out: TenbisDish[] = [];

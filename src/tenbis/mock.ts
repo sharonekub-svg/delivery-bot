@@ -30,6 +30,12 @@ export class MockTenbisClient implements TenbisClient {
     return { token: 'mock-token', expiresAt: Date.now() + 7 * DAY };
   }
 
+  async sessionFromManualInput(): Promise<TenbisSession> {
+    // Any non-empty paste "connects" in mock mode so the web flow is testable
+    // without a real 10Bis account.
+    return { token: 'mock-token', expiresAt: Date.now() + 7 * DAY };
+  }
+
   async refreshSession(): Promise<TenbisSession> {
     return { token: 'mock-token', expiresAt: Date.now() + 7 * DAY };
   }

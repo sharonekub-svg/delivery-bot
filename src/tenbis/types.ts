@@ -15,6 +15,14 @@ export interface LoginChallenge {
   pending: string;
 }
 
+/** Credentials lifted from the browser (DevTools) for the web connect flow. */
+export interface ManualCredentials {
+  /** Raw `Cookie:` header value — drives the stateful NextApi calls. */
+  cookie?: string;
+  /** Bearer token from the `Authorization:` header — drives catalog reads. */
+  bearer?: string;
+}
+
 export interface TenbisAddress {
   id: string;
   label: string; // e.g. "Office - Rothschild 1"

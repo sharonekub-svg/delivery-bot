@@ -1,5 +1,6 @@
 import type {
   LoginChallenge,
+  ManualCredentials,
   PlaceOrderInput,
   TenbisAddress,
   TenbisBudget,
@@ -29,6 +30,13 @@ export interface TenbisClient {
 
   /** Step 2: verify the SMS code; returns an authenticated session. */
   verifyLoginCode(email: string, code: string, challenge: LoginChallenge): Promise<TenbisSession>;
+
+  /**
+   * Web flow: build a session directly from credentials the user copied out of
+   * their browser DevTools (the `cookie` header and/or `authorization` bearer
+   * token). Validates them against 10Bis and throws if they don't work.
+   */
+  sessionFromManualInput(input: ManualCredentials): Promise<TenbisSession>;
 
   /** Refresh an expiring session without a new SMS code. Throws if it can't. */
   refreshSession(session: TenbisSession): Promise<TenbisSession>;
