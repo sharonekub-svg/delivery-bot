@@ -59,10 +59,10 @@ export default function Connect() {
 
   return (
     <main style={wrap}>
-      <Link href="/" style={{ color: '#64748b', textDecoration: 'none', fontSize: 14 }}>→ חזרה</Link>
-      <div style={{ color: '#94a3b8', fontSize: 13, marginTop: 12 }}>שלב 1 מתוך 2</div>
+      <Link href="/" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: 14 }}>→ חזרה</Link>
+      <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginTop: 12 }}>שלב 1 מתוך 2</div>
       <h1 style={{ fontSize: 30, margin: '4px 0' }}>חיבור לחשבון תן ביס</h1>
-      <p style={{ color: '#475569', marginTop: 0 }}>
+      <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: 0 }}>
         לתן ביס אין חיבור רשמי לאפליקציות, אז אנחנו "משאילים" את ההתחברות שכבר קיימת
         בדפדפן שלכם. פשוט עקבו אחרי 6 השלבים — לוקח פחות מדקה.
       </p>
@@ -77,7 +77,7 @@ export default function Connect() {
             <div style={num}>{i + 1}</div>
             <div>
               <div style={{ fontWeight: 600 }}>{title}</div>
-              <div style={{ color: '#64748b', fontSize: 15 }}>{body}</div>
+              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15 }}>{body}</div>
             </div>
           </li>
         ))}
@@ -98,8 +98,8 @@ export default function Connect() {
       </form>
       {status && <p style={{ marginTop: 16 }}>{status}</p>}
 
-      <p style={{ color: '#94a3b8', fontSize: 13, marginTop: 24 }}>
-        🔒 נשלח פעם אחת ב-HTTPS לאימות, ואז נשמר רק בדפדפן הזה. שום דבר לא נשמר בשרת משותף.
+      <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginTop: 24 }}>
+        נשלח פעם אחת ב-HTTPS לאימות, ואז נשמר רק בדפדפן הזה. שום דבר לא נשמר בשרת משותף.
       </p>
 
       <button onClick={skip} style={skipBtn} aria-label="דלג">דלג ←</button>
@@ -107,14 +107,15 @@ export default function Connect() {
   );
 }
 
-const wrap: React.CSSProperties = { maxWidth: 640, margin: '0 auto', padding: '32px 20px 90px', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#0f172a' };
-const step: React.CSSProperties = { display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px solid #f1f5f9' };
+const wrap: React.CSSProperties = { maxWidth: 640, margin: '0 auto', padding: '32px 20px 90px', minHeight: '100vh' };
+const step: React.CSSProperties = { display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' };
 const num: React.CSSProperties = { flex: '0 0 auto', width: 28, height: 28, borderRadius: '50%', background: '#f97316', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 };
-const textarea: React.CSSProperties = { width: '100%', minHeight: 120, padding: 12, fontSize: 13, fontFamily: 'ui-monospace, monospace', border: '1px solid #cbd5e1', borderRadius: 10, boxSizing: 'border-box', resize: 'vertical' };
-const button: React.CSSProperties = { marginTop: 12, background: '#f97316', color: '#fff', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 16, fontWeight: 600, cursor: 'pointer' };
-const connectedNote: React.CSSProperties = { background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: 12, marginTop: 8, color: '#15803d', fontSize: 14 };
+const textarea: React.CSSProperties = { width: '100%', minHeight: 120, padding: 12, fontSize: 13, fontFamily: 'ui-monospace, monospace', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 12, boxSizing: 'border-box', resize: 'vertical' };
+const button: React.CSSProperties = { marginTop: 12, background: '#f97316', color: '#fff', border: 'none', borderRadius: 9999, padding: '12px 24px', fontSize: 16, fontWeight: 600, cursor: 'pointer' };
+const connectedNote: React.CSSProperties = { background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.4)', borderRadius: 12, padding: 12, marginTop: 8, color: '#86efac', fontSize: 14 };
 const skipBtn: React.CSSProperties = {
-  position: 'fixed', bottom: 20, right: 20, background: '#0f172a', color: '#fff', border: 'none',
-  borderRadius: 24, padding: '12px 22px', fontSize: 15, fontWeight: 600, cursor: 'pointer',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.2)', zIndex: 10,
+  position: 'fixed', bottom: 20, right: 20, background: 'rgba(255,255,255,0.1)', color: '#fff',
+  border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(10px)',
+  borderRadius: 9999, padding: '12px 22px', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.3)', zIndex: 10,
 };

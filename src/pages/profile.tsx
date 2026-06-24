@@ -68,9 +68,9 @@ export default function Profile() {
 
   return (
     <main style={wrap}>
-      <div style={{ color: '#94a3b8', fontSize: 13 }}>שלב 2 מתוך 2</div>
+      <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>שלב 2 מתוך 2</div>
       <h1 style={{ fontSize: 30, margin: '4px 0' }}>פרופיל הטעם שלכם</h1>
-      <p style={{ color: '#475569', marginTop: 0 }}>ממלאים פעם אחת. נזכור את זה ונשתמש בו כדי לבחור לכם צהריים בכל פעם.</p>
+      <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: 0 }}>ממלאים פעם אחת. נזכור את זה ונשתמש בו כדי לבחור לכם צהריים בכל פעם.</p>
 
       <form onSubmit={save}>
         <label style={lbl}>מה אתם בדרך כלל אוהבים לאכול?
@@ -95,9 +95,9 @@ export default function Profile() {
         </label>
         <div style={lbl}>באיזה טווח שעות להזמין?
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
-            <span style={{ fontWeight: 400, color: '#475569' }}>משעה</span>
+            <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.7)' }}>משעה</span>
             <input type="time" value={timeFrom} onChange={(e) => setTimeFrom(e.target.value)} style={{ ...ctl, marginTop: 0 }} />
-            <span style={{ fontWeight: 400, color: '#475569' }}>עד</span>
+            <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.7)' }}>עד</span>
             <input type="time" value={timeTo} onChange={(e) => setTimeTo(e.target.value)} style={{ ...ctl, marginTop: 0 }} />
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8, fontWeight: 400 }}>
@@ -121,8 +121,8 @@ export default function Profile() {
   );
 }
 
-const wrap: React.CSSProperties = { maxWidth: 560, margin: '0 auto', padding: '32px 20px 60px', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#0f172a' };
+const wrap: React.CSSProperties = { maxWidth: 560, margin: '0 auto', padding: '32px 20px 60px', minHeight: '100vh' };
 const lbl: React.CSSProperties = { display: 'block', margin: '18px 0', fontWeight: 600 };
-const ctl: React.CSSProperties = { display: 'block', width: '100%', padding: 10, marginTop: 6, fontSize: 16, boxSizing: 'border-box', border: '1px solid #cbd5e1', borderRadius: 8 };
-const button: React.CSSProperties = { marginTop: 8, width: '100%', background: '#f97316', color: '#fff', border: 'none', borderRadius: 10, padding: '14px 24px', fontSize: 16, fontWeight: 600, cursor: 'pointer' };
-const preset: React.CSSProperties = { background: '#fff7ed', border: '1px solid #fdba74', color: '#9a3412', borderRadius: 999, padding: '6px 12px', fontSize: 14, cursor: 'pointer' };
+const ctl: React.CSSProperties = { display: 'block', width: '100%', padding: 10, marginTop: 6, fontSize: 16, boxSizing: 'border-box', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 10 };
+const button: React.CSSProperties = { marginTop: 8, width: '100%', background: '#f97316', color: '#fff', border: 'none', borderRadius: 9999, padding: '14px 24px', fontSize: 16, fontWeight: 600, cursor: 'pointer' };
+const preset: React.CSSProperties = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: 9999, padding: '6px 12px', fontSize: 14, cursor: 'pointer' };

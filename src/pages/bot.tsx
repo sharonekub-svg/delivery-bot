@@ -142,13 +142,13 @@ export default function Bot() {
     setStage('craving');
   }
 
-  if (!ready) return <main style={wrap}><p style={{ color: '#64748b', padding: 16 }}>טוען…</p></main>;
+  if (!ready) return <main style={wrap}><p style={{ color: 'rgba(255,255,255,0.6)', padding: 16 }}>טוען…</p></main>;
 
   return (
     <main style={wrap}>
       <header style={head}>
         <div style={{ fontWeight: 700 }}>עוזר הצהריים</div>
-        <Link href="/lunch" style={{ fontSize: 13, color: '#64748b' }}>כל האפשרויות</Link>
+        <Link href="/lunch" style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>כל האפשרויות</Link>
       </header>
 
       <div style={feed}>
@@ -175,7 +175,7 @@ export default function Bot() {
           </>
         )}
         {stage === 'ordered' && <Chip label="להזמין עוד" primary onClick={restart} />}
-        {stage === 'loading' && <span style={{ color: '#94a3b8', fontSize: 14 }}>רגע…</span>}
+        {stage === 'loading' && <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14 }}>רגע…</span>}
       </div>
     </main>
   );
@@ -187,8 +187,8 @@ function Bubble({ role, text }: { role: 'bot' | 'user'; text: string }) {
     <div style={{ display: 'flex', justifyContent: mine ? 'flex-start' : 'flex-end', margin: '6px 0' }}>
       <div style={{
         maxWidth: '80%', whiteSpace: 'pre-wrap', lineHeight: 1.45, padding: '10px 14px', borderRadius: 16,
-        background: mine ? '#f97316' : '#fff', color: mine ? '#fff' : '#0f172a',
-        border: mine ? 'none' : '1px solid #e2e8f0',
+        background: mine ? '#f97316' : 'rgba(255,255,255,0.06)', color: '#fff',
+        border: mine ? 'none' : '1px solid rgba(255,255,255,0.12)',
       }}>{text}</div>
     </div>
   );
@@ -198,9 +198,9 @@ function DishCard({ dish }: { dish: DishOption }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '4px 0' }}>
       <div style={dishCard}>
-        <div style={{ fontWeight: 800, fontSize: 18 }}>{dish.dishName}</div>
-        <div style={{ color: '#475569', fontSize: 14, marginTop: 2 }}>מסעדה: {dish.restaurantName}</div>
-        {dish.description && <div style={{ color: '#64748b', fontSize: 14, marginTop: 8, lineHeight: 1.5 }}>{dish.description}</div>}
+        <div className="font-heading" style={{ fontWeight: 400, fontSize: 24 }}>{dish.dishName}</div>
+        <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 2 }}>מסעדה: {dish.restaurantName}</div>
+        {dish.description && <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, marginTop: 8, lineHeight: 1.5 }}>{dish.description}</div>}
         <div style={detailRows}>
           <Row label="מחיר" value={`₪${dish.priceNis}`} />
           {dish.etaMinutes != null && <Row label="זמן משלוח משוער" value={`כ-${dish.etaMinutes} דקות`} />}
@@ -214,8 +214,8 @@ function DishCard({ dish }: { dish: DishOption }) {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderTop: '1px solid #fde7cf' }}>
-      <span style={{ color: '#9a3412' }}>{label}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+      <span style={{ color: 'rgba(255,255,255,0.6)' }}>{label}</span>
       <span style={{ fontWeight: 700 }}>{value}</span>
     </div>
   );
@@ -224,16 +224,16 @@ function Row({ label, value }: { label: string; value: string }) {
 function Chip({ label, onClick, primary }: { label: string; onClick: () => void; primary?: boolean }) {
   return (
     <button onClick={onClick} style={{
-      border: primary ? 'none' : '1px solid #fdba74', background: primary ? '#f97316' : '#fff7ed',
-      color: primary ? '#fff' : '#9a3412', borderRadius: 999, padding: '10px 16px', fontSize: 15,
-      fontWeight: 600, cursor: 'pointer',
+      border: primary ? 'none' : '1px solid rgba(255,255,255,0.25)', background: primary ? '#f97316' : 'rgba(255,255,255,0.06)',
+      color: '#fff', borderRadius: 9999, padding: '10px 16px', fontSize: 15,
+      fontWeight: 600, cursor: 'pointer', backdropFilter: primary ? 'none' : 'blur(8px)',
     }}>{label}</button>
   );
 }
 
-const wrap: React.CSSProperties = { maxWidth: 680, margin: '0 auto', height: '100dvh', display: 'flex', flexDirection: 'column', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#0f172a', background: '#f8fafc' };
-const head: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #e2e8f0', background: '#fff' };
+const wrap: React.CSSProperties = { maxWidth: 680, margin: '0 auto', height: '100dvh', display: 'flex', flexDirection: 'column', background: '#000' };
+const head: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' };
 const feed: React.CSSProperties = { flex: 1, overflowY: 'auto', padding: 16 };
-const bar: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 8, padding: 12, borderTop: '1px solid #e2e8f0', background: '#fff' };
-const dishCard: React.CSSProperties = { maxWidth: '88%', background: '#fff', border: '2px solid #fdba74', borderRadius: 16, padding: 16 };
-const detailRows: React.CSSProperties = { marginTop: 12, fontSize: 14, color: '#0f172a' };
+const bar: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 8, padding: 12, borderTop: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' };
+const dishCard: React.CSSProperties = { maxWidth: '88%', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(253,186,116,0.5)', borderRadius: 16, padding: 16, backdropFilter: 'blur(8px)' };
+const detailRows: React.CSSProperties = { marginTop: 12, fontSize: 14, color: '#fff' };
