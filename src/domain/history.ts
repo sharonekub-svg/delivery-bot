@@ -1,0 +1,105 @@
+import type { TenbisBudget, TenbisHistoryItem } from '../tenbis/types';
+import { deriveDailyBudget } from './preferences';
+
+/**
+ * Order-history insights for the profile page. Everything here is *derived from
+ * what 10Bis actually returns* — recent orders, what the user orders a lot, what
+ * they ordered once and never again, their employer's monthly allowance. We
+ * never invent dishes or numbers; if the history is empty the lists are empty.
+ */
+
+export interface DishStat {
+  dishId: string;
+  dishName: string;
+  restaurantName: string;
+  priceNis: number;
+  count: number;
+  lastOrderedAt: string; // ISO
+}
+
+export interface HistorySummary {
+  totalOrders: number;
+  /** Most recent orders first, capped. */
+  recent: TenbisHistoryItem[];
+  /** Ordered most often — "what they like". */
+  favorites: DishStat[];
+  /** Tried once and never repeated — "what they don't order much". */
+  rarely: DishStat[];
+  /** Restaurant names by frequency — used to pre-fill favourite restaurants. */
+  topRestaurants: string[];
+  /** Employer monthly allowance, if 10Bis exposes it. */
+  monthlyBudgetNis?: number;
+  /** Per-day budget: the API's daily figure, else monthly / working days. */
+  dailyBudgetNis?: number;
+}
+
+const CAPS = { recent: 8, favorites: 5, rarely: 5, restaurants: 4 } as const;
+
+function byDish(history: TenbisHistoryItem[]): DishStat[] {
+  const map = new Map<string, DishStat>();
+  for (const h of history) {
+    const existing = map.get(h.dishId);
+    if (existing) {
+      existing.count += 1;
+      if (h.orderedAt > existing.lastOrderedAt) {
+        existing.lastOrderedAt = h.orderedAt;
+        existing.priceNis = h.priceNis;
+      }
+    } else {
+      map.set(h.dishId, {
+        dishId: h.dishId,
+        dishName: h.dishName,
+        restaurantName: h.restaurantName,
+        priceNis: h.priceNis,
+        count: 1,
+        lastOrderedAt: h.orderedAt,
+      });
+    }
+  }
+  return [...map.values()];
+}
+
+export function summarizeHistory(
+  history: TenbisHistoryItem[],
+  budget?: TenbisBudget,
+): HistorySummary {
+  const recent = [...history]
+    .sort((a, b) => (a.orderedAt < b.orderedAt ? 1 : -1))
+    .slice(0, CAPS.recent);
+
+  const stats = byDish(history);
+  // Favourites: most-ordered first; break ties by recency.
+  const favorites = stats
+    .filter((s) => s.count >= 2)
+    .sort((a, b) => b.count - a.count || (a.lastOrderedAt < b.lastOrderedAt ? 1 : -1))
+    .slice(0, CAPS.favorites);
+  // Rarely: ordered exactly once; oldest first (longest since they bothered).
+  const rarely = stats
+    .filter((s) => s.count === 1)
+    .sort((a, b) => (a.lastOrderedAt < b.lastOrderedAt ? -1 : 1))
+    .slice(0, CAPS.rarely);
+
+  const restaurantCounts = new Map<string, number>();
+  for (const h of history) {
+    restaurantCounts.set(h.restaurantName, (restaurantCounts.get(h.restaurantName) ?? 0) + 1);
+  }
+  const topRestaurants = [...restaurantCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, CAPS.restaurants)
+    .map(([name]) => name);
+
+  const monthlyBudgetNis = budget?.monthlyNis;
+  const dailyBudgetNis =
+    budget?.dailyNis ??
+    (monthlyBudgetNis != null ? deriveDailyBudget(monthlyBudgetNis) : undefined);
+
+  return {
+    totalOrders: history.length,
+    recent,
+    favorites,
+    rarely,
+    topRestaurants,
+    monthlyBudgetNis,
+    dailyBudgetNis,
+  };
+}

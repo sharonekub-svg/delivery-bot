@@ -31,10 +31,16 @@ export interface StoredProfile {
   /** Preferred ordering window, local HH:mm. */
   timeFrom: string;
   timeTo: string;
+  /** Days the bot is allowed to order on (0=Sun..6=Sat). Default work days. */
+  activeDays: number[];
   /** 'autopilot' = order on its own; 'ask' = ask for approval first. */
   mode: 'ask' | 'autopilot';
   /** How many times per week the user wants to order (informational). */
   ordersPerWeek?: number;
+  /** When on, the bot times delivery around the connected calendar's meetings. */
+  scheduleAroundMeetings?: boolean;
+  /** ICS feed URL (e.g. Google Calendar secret iCal address) used for timing. */
+  calendarUrl?: string;
 }
 
 export const store = {
