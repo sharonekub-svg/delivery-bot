@@ -63,17 +63,19 @@ export default function Lunch() {
   async function place(opt: DishOption, approveOverBudget = false) {
     setOrder({ dishId: opt.dishId, pending: true });
     try {
+      const p = store.getProfile();
       const res = await fetch('/api/order', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          session: store.getSession(), preferences: store.getProfile(), addressId: store.getAddress(),
+          session: store.getSession(), preferences: p, addressId: store.getAddress(),
           dishId: opt.dishId, restaurantId: opt.restaurantId, categoryId: opt.categoryId, approveOverBudget,
+          pickup: p?.pickup, dontWantCutlery: p?.dontWantCutlery, useCoupons: p?.useCoupons, orderRemarks: p?.orderRemarks,
         }),
       });
       const data = await res.json();
       const r = data.result ?? {};
       if (data.ok) {
-        setOrder({ dishId: opt.dishId, ok: true, message: `הוזמן ${opt.dishName}!`, trackerDeepLink: r.trackerDeepLink });
+        setOrder({ dishId: opt.dishId, ok: true, message: `הוזמן ${opt.dishName}!${r.discountNis ? ` חסכת ₪${r.discountNis} עם קופון.` : ''}`, trackerDeepLink: r.trackerDeepLink });
       } else if (r.errorCode === 'budget_exceeded') {
         setOrder({ dishId: opt.dishId, overBudget: true, message: r.errorMessage ?? 'זה מעל התקציב היומי.' });
       } else {

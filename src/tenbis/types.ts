@@ -68,6 +68,34 @@ export interface TenbisRestaurant {
   isOpenNow: boolean;
   minOrderNis?: number;
   deliveryEtaMinutes?: number;
+  deliveryFeeNis?: number;
+  /** Self-pickup offered in addition to delivery. */
+  pickupAvailable?: boolean;
+  /** Shared/pooled office order offered. */
+  pooledOrderAvailable?: boolean;
+  /** Can be ordered now for a later scheduled delivery. */
+  scheduledDeliveryAvailable?: boolean;
+  isKosher?: boolean;
+  logoUrl?: string;
+}
+
+/** The signed-in user, as 10Bis knows them. */
+export interface TenbisUserProfile {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  companyName?: string;
+  companyId?: number;
+}
+
+/** A coupon/discount available on the account or order. */
+export interface TenbisCoupon {
+  code?: string;
+  description: string;
+  /** Fixed amount off, if known. */
+  amountNis?: number;
+  /** Percentage off, if that's the form. */
+  percent?: number;
 }
 
 export interface TenbisOrderResult {
@@ -78,6 +106,8 @@ export interface TenbisOrderResult {
   trackerDeepLink?: string;
   errorCode?: 'restaurant_closed' | 'out_of_stock' | 'budget_exceeded' | 'session_expired' | 'unknown';
   errorMessage?: string;
+  /** Discount applied by the chosen coupon, if any. */
+  discountNis?: number;
 }
 
 export interface TenbisHistoryItem {
@@ -107,4 +137,14 @@ export interface PlaceOrderInput {
   includeBeverage?: boolean;
   /** Hard ceiling; client must refuse if total exceeds this. */
   maxTotalNis?: number;
+  /** Self-pickup instead of delivery. */
+  pickup?: boolean;
+  /** ISO time for a scheduled/future delivery; omit for ASAP. */
+  deliverAt?: string;
+  /** Skip disposable cutlery. */
+  dontWantCutlery?: boolean;
+  /** Free-text note to the restaurant. */
+  orderRemarks?: string;
+  /** Apply the user's available coupons when picking the best discount. */
+  useCoupons?: boolean;
 }

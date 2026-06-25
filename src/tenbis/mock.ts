@@ -3,11 +3,13 @@ import type {
   PlaceOrderInput,
   TenbisAddress,
   TenbisBudget,
+  TenbisCoupon,
   TenbisDish,
   TenbisHistoryItem,
   TenbisOrderResult,
   TenbisRestaurant,
   TenbisSession,
+  TenbisUserProfile,
 } from './types';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -62,11 +64,22 @@ export class MockTenbisClient implements TenbisClient {
     return out;
   }
 
+  async getUserProfile(): Promise<TenbisUserProfile> {
+    return { firstName: 'Dana', lastName: 'Cohen', email: 'dana@example.com', companyName: 'Acme Ltd', companyId: 1234 };
+  }
+
+  async getCoupons(): Promise<TenbisCoupon[]> {
+    return [
+      { code: 'LUNCH10', description: '₪10 הנחה על הזמנה מעל ₪45', amountNis: 10 },
+      { code: 'NEWWEEK', description: '15% הנחה ביום ראשון', percent: 15 },
+    ];
+  }
+
   async getRestaurants(): Promise<TenbisRestaurant[]> {
     return [
-      { id: 'r1', name: 'Greens & Co', isOpenNow: true, deliveryEtaMinutes: 35 },
-      { id: 'r2', name: 'Pita Bar', isOpenNow: true, deliveryEtaMinutes: 25 },
-      { id: 'r3', name: 'Tokyo Express', isOpenNow: true, deliveryEtaMinutes: 40 },
+      { id: 'r1', name: 'Greens & Co', isOpenNow: true, deliveryEtaMinutes: 35, minOrderNis: 45, deliveryFeeNis: 0, pickupAvailable: true, pooledOrderAvailable: true, scheduledDeliveryAvailable: true, isKosher: true },
+      { id: 'r2', name: 'Pita Bar', isOpenNow: true, deliveryEtaMinutes: 25, minOrderNis: 40, deliveryFeeNis: 5, pickupAvailable: true, isKosher: true },
+      { id: 'r3', name: 'Tokyo Express', isOpenNow: true, deliveryEtaMinutes: 40, minOrderNis: 60, deliveryFeeNis: 12, scheduledDeliveryAvailable: true },
     ];
   }
 
@@ -81,14 +94,18 @@ export class MockTenbisClient implements TenbisClient {
   async placeOrder(_session: TenbisSession, input: PlaceOrderInput): Promise<TenbisOrderResult> {
     const dish = DISHES.find((d) => d.id === input.dishId);
     if (!dish) return { ok: false, errorCode: 'out_of_stock', errorMessage: 'Dish not found' };
-    if (input.maxTotalNis != null && dish.priceNis > input.maxTotalNis) {
-      return { ok: false, errorCode: 'budget_exceeded', errorMessage: `Over budget by ${dish.priceNis - input.maxTotalNis} NIS` };
+    // A coupon shaves ₪10 off when coupons are enabled and the order qualifies.
+    const discountNis = input.useCoupons && dish.priceNis >= 45 ? 10 : 0;
+    const totalNis = dish.priceNis - discountNis;
+    if (input.maxTotalNis != null && totalNis > input.maxTotalNis) {
+      return { ok: false, errorCode: 'budget_exceeded', errorMessage: `Over budget by ${totalNis - input.maxTotalNis} NIS` };
     }
     return {
       ok: true,
       orderId: `mock-${Date.now()}`,
-      totalNis: dish.priceNis,
-      etaMinutes: 35,
+      totalNis,
+      discountNis: discountNis || undefined,
+      etaMinutes: input.pickup ? 15 : 35,
       trackerDeepLink: 'https://example/track/mock',
     };
   }

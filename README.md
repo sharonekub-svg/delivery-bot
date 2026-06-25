@@ -14,7 +14,11 @@ The flow is dead simple:
    invented. You then tune: taste, goal, protein, favourites, allergies, budget,
    the **time window and days** to order on (work-days presets), and can connect
    a **calendar** (paste a Google Calendar iCal link) so delivery is timed into a
-   gap with no meeting. Saved and remembered, so you never answer twice.
+   gap with no meeting. We also greet you by name, surface your **available
+   coupons**, and expose every order option 10Bis supports — pickup vs delivery,
+   scheduled (future) delivery, skip-cutlery, auto-apply coupons, a standing
+   note to the restaurant, plus per-dish popular/healthy/health-warning badges.
+   Saved and remembered, so you never answer twice.
 3. **Lunch** (`/lunch`) — uses your remembered profile to pull and rank today's
    live 10Bis menu through the recommendation engine, and orders the dish you
    pick.
@@ -32,7 +36,7 @@ pages/connect.tsx   F12 step-by-step + paste box (Step 1)
 pages/profile.tsx   the remembered taste profile form (Step 2)
 pages/lunch.tsx     ranked live options + one-tap ordering
 pages/api/connect   parse paste -> validate -> return the session to the browser
-pages/api/insights  read 10Bis history + employer budget -> summary for /profile
+pages/api/insights  read 10Bis history + budget + name/company + coupons -> /profile
 pages/api/calendar  fetch an iCal feed -> meeting-free delivery slot for the window
 pages/api/recommend rank the live menu against the saved profile
 pages/api/order     place a real 10Bis order

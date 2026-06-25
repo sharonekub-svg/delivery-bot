@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { store, type StoredProfile } from '../lib/store';
 import type { HistorySummary } from '../domain/history';
 import type { SlotResult } from '../domain/calendar';
+import type { TenbisCoupon, TenbisUserProfile } from '../tenbis/types';
 
 /**
  * שלב 2: פרופיל הטעם — "המסמך שממלאים פעם אחת". האתר קורא קודם את ההיסטוריה
@@ -44,9 +45,17 @@ export default function Profile() {
   const [activeDays, setActiveDays] = useState<number[]>([0, 1, 2, 3, 4]);
   const [mode, setMode] = useState<'ask' | 'autopilot'>('ask');
 
-  // קריאת ההיסטוריה מ-10bis.
+  // קריאת ההיסטוריה והחשבון מ-10bis.
   const [insights, setInsights] = useState<HistorySummary | null>(null);
+  const [userProfile, setUserProfile] = useState<TenbisUserProfile | null>(null);
+  const [coupons, setCoupons] = useState<TenbisCoupon[]>([]);
   const [insightsState, setInsightsState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+
+  // אפשרויות הזמנה.
+  const [pickup, setPickup] = useState(false);
+  const [dontWantCutlery, setDontWantCutlery] = useState(false);
+  const [useCoupons, setUseCoupons] = useState(true);
+  const [orderRemarks, setOrderRemarks] = useState('');
 
   // חיבור ליומן.
   const [scheduleAroundMeetings, setScheduleAroundMeetings] = useState(false);
@@ -73,6 +82,10 @@ export default function Profile() {
       if (p.mode) setMode(p.mode);
       if (p.scheduleAroundMeetings) setScheduleAroundMeetings(true);
       if (p.calendarUrl) setCalendarUrl(p.calendarUrl);
+      if (p.pickup) setPickup(true);
+      if (p.dontWantCutlery) setDontWantCutlery(true);
+      if (p.useCoupons === false) setUseCoupons(false);
+      if (p.orderRemarks) setOrderRemarks(p.orderRemarks);
     }
 
     // קוראים את ההיסטוריה מ-10bis וממלאים מראש (רק בכניסה ראשונה, בלי לדרוס בחירות).
@@ -84,9 +97,11 @@ export default function Profile() {
       body: JSON.stringify({ session }),
     })
       .then((r) => r.json())
-      .then((data: { ok: boolean; insights?: HistorySummary }) => {
+      .then((data: { ok: boolean; insights?: HistorySummary; profile?: TenbisUserProfile; coupons?: TenbisCoupon[] }) => {
         if (!data.ok || !data.insights) { setInsightsState('error'); return; }
         setInsights(data.insights);
+        if (data.profile) setUserProfile(data.profile);
+        if (data.coupons) setCoupons(data.coupons);
         setInsightsState('done');
         if (!hadProfile) {
           const i = data.insights;
@@ -140,6 +155,10 @@ export default function Profile() {
       mode,
       scheduleAroundMeetings,
       calendarUrl: scheduleAroundMeetings ? calendarUrl.trim() || undefined : undefined,
+      pickup,
+      dontWantCutlery,
+      useCoupons,
+      orderRemarks: orderRemarks.trim() || undefined,
     };
     store.setProfile(profile);
     router.push('/bot');
@@ -148,10 +167,15 @@ export default function Profile() {
   return (
     <main style={wrap}>
       <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>שלב 2 מתוך 2</div>
-      <h1 style={{ fontSize: 30, margin: '4px 0' }}>פרופיל הטעם שלכם</h1>
+      <h1 style={{ fontSize: 30, margin: '4px 0' }}>
+        {userProfile?.firstName ? `היי ${userProfile.firstName} 👋` : 'פרופיל הטעם שלכם'}
+      </h1>
+      {userProfile?.companyName && (
+        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 2 }}>מחוברים דרך {userProfile.companyName}</div>
+      )}
       <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: 0 }}>ממלאים פעם אחת. נזכור את זה ונשתמש בו כדי לבחור לכם צהריים בכל פעם.</p>
 
-      <InsightsCard state={insightsState} insights={insights} />
+      <InsightsCard state={insightsState} insights={insights} coupons={coupons} />
 
       <form onSubmit={save}>
         <label style={lbl}>מה אתם בדרך כלל אוהבים לאכול?
@@ -231,9 +255,22 @@ export default function Profile() {
             <option value="autopilot">להזמין לבד אוטומטית בטווח הזה</option>
           </select>
         </label>
-        <label style={{ ...lbl, display: 'flex', alignItems: 'center', gap: 8, fontWeight: 400 }}>
-          <input type="checkbox" checked={beverage} onChange={(e) => setBeverage(e.target.checked)} /> להוסיף משקה בהזמנה
-        </label>
+
+        <div style={{ ...lbl, fontWeight: 600 }}>אפשרויות הזמנה
+          <label style={optRow}>
+            <input type="checkbox" checked={beverage} onChange={(e) => setBeverage(e.target.checked)} /> להוסיף משקה בהזמנה
+          </label>
+          <label style={optRow}>
+            <input type="checkbox" checked={useCoupons} onChange={(e) => setUseCoupons(e.target.checked)} /> להשתמש אוטומטית בקופונים והנחות
+          </label>
+          <label style={optRow}>
+            <input type="checkbox" checked={pickup} onChange={(e) => setPickup(e.target.checked)} /> איסוף עצמי במקום משלוח (כשאפשר)
+          </label>
+          <label style={optRow}>
+            <input type="checkbox" checked={dontWantCutlery} onChange={(e) => setDontWantCutlery(e.target.checked)} /> בלי סכו״ם חד-פעמי
+          </label>
+          <input value={orderRemarks} onChange={(e) => setOrderRemarks(e.target.value)} placeholder="הערה קבועה למסעדה (למשל: בלי בצל, להשאיר בקבלה)" style={{ ...ctl, marginTop: 10 }} />
+        </div>
         <button type="submit" style={button}>שמרו ודברו עם הבוט ←</button>
       </form>
     </main>
@@ -241,7 +278,7 @@ export default function Profile() {
 }
 
 /** כרטיס הסיכום של ההיסטוריה — נשען רק על מה ש-10bis החזיר, בלי להמציא. */
-function InsightsCard({ state, insights }: { state: string; insights: HistorySummary | null }) {
+function InsightsCard({ state, insights, coupons }: { state: string; insights: HistorySummary | null; coupons: TenbisCoupon[] }) {
   if (state === 'idle') return null;
   if (state === 'loading') return <div style={insightsBox}>קוראים את ההיסטוריה שלכם ב-10bis…</div>;
   if (state === 'error') return <div style={insightsBox}>לא הצלחנו לקרוא היסטוריה כרגע — אפשר למלא ידנית למטה.</div>;
@@ -269,6 +306,18 @@ function InsightsCard({ state, insights }: { state: string; insights: HistorySum
       )}
       {insights.rarely.length > 0 && (
         <Line label="כמעט לא הזמנתם">{insights.rarely.map((r) => r.dishName).join(' · ')}</Line>
+      )}
+      {coupons.length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>קופונים זמינים בחשבון:</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {coupons.map((c, i) => (
+              <span key={c.code ?? i} style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.5)', borderRadius: 9999, padding: '3px 12px', fontSize: 13, fontWeight: 600 }}>
+                🎟️ {c.description}{c.code ? ` (${c.code})` : ''}
+              </span>
+            ))}
+          </div>
+        </div>
       )}
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 8 }}>מילאנו את התקציב, המסעדות והטעמים מראש מהנתונים האלה — אפשר לשנות הכל למטה.</div>
     </div>
@@ -340,4 +389,5 @@ const presetOn: React.CSSProperties = { ...preset, background: '#f97316', border
 const dayOff: React.CSSProperties = { ...preset, padding: '6px 0', width: 40, textAlign: 'center' };
 const dayOn: React.CSSProperties = { ...dayOff, background: '#f97316', borderColor: '#f97316', fontWeight: 700 };
 const hint: React.CSSProperties = { fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 6 };
+const optRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, fontWeight: 400, margin: '10px 0' };
 const insightsBox: React.CSSProperties = { background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(253,186,116,0.4)', borderRadius: 14, padding: 16, margin: '16px 0', color: '#fff' };

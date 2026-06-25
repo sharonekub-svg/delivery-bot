@@ -114,17 +114,19 @@ export default function Bot() {
     if (!approveOverBudget) add({ role: 'user', kind: 'text', text: 'כן, הזמינו' });
     add({ role: 'bot', kind: 'text', text: 'מזמין…' });
     try {
+      const p = store.getProfile();
       const res = await fetch('/api/order', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          session: store.getSession(), preferences: store.getProfile(), addressId: store.getAddress(),
+          session: store.getSession(), preferences: p, addressId: store.getAddress(),
           dishId: dish.dishId, restaurantId: dish.restaurantId, categoryId: dish.categoryId, approveOverBudget,
+          pickup: p?.pickup, dontWantCutlery: p?.dontWantCutlery, useCoupons: p?.useCoupons, orderRemarks: p?.orderRemarks,
         }),
       });
       const data = await res.json();
       const r = data.result ?? {};
       if (data.ok) {
-        add({ role: 'bot', kind: 'text', text: `הוזמן: ${dish.dishName} מ${dish.restaurantName}. בתיאבון.${dish.etaMinutes != null ? `\nזמן משלוח משוער: כ-${dish.etaMinutes} דקות.` : ''}${r.trackerDeepLink ? `\nמעקב: ${r.trackerDeepLink}` : ''}` });
+        add({ role: 'bot', kind: 'text', text: `הוזמן: ${dish.dishName} מ${dish.restaurantName}. בתיאבון.${r.discountNis ? `\nחסכת ₪${r.discountNis} עם קופון.` : ''}${dish.etaMinutes != null ? `\nזמן משלוח משוער: כ-${dish.etaMinutes} דקות.` : ''}${r.trackerDeepLink ? `\nמעקב: ${r.trackerDeepLink}` : ''}` });
         setStage('ordered');
       } else if (r.errorCode === 'budget_exceeded') {
         add({ role: 'bot', kind: 'text', text: `${r.errorMessage ?? 'זה מעל התקציב היומי.'} להזמין בכל זאת?` });

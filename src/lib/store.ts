@@ -41,6 +41,14 @@ export interface StoredProfile {
   scheduleAroundMeetings?: boolean;
   /** ICS feed URL (e.g. Google Calendar secret iCal address) used for timing. */
   calendarUrl?: string;
+  /** Self-pickup instead of delivery. */
+  pickup?: boolean;
+  /** Skip disposable cutlery. */
+  dontWantCutlery?: boolean;
+  /** Apply available coupons/discounts automatically (default on). */
+  useCoupons?: boolean;
+  /** Standing note to the restaurant on every order. */
+  orderRemarks?: string;
 }
 
 export const store = {
