@@ -1,5 +1,6 @@
 import type { TenbisClient } from './client';
 import { cookieStringToJar } from '../lib/curlParse';
+import { normalizeHistory } from './normalize';
 import type {
   LoginChallenge,
   ManualCredentials,
@@ -239,27 +240,41 @@ export class LocalTenbisClient implements TenbisClient {
     }));
   }
 
-  async getHistory(session: TenbisSession, _sinceDays: number): Promise<TenbisHistoryItem[]> {
-    // VERIFY LIVE: confirm the user-transactions endpoint/shape; the capture
-    // showed GetLastTransactionWithoutReview but not full history. Empty history
-    // is safe (engine just loses the fatigue/frequency signal).
-    try {
-      const state = parse(session);
-      const r: any = await postNext('GetUserTransactionsReport', state.cookies, {});
-      const list: any[] = r.Data?.transactions ?? r.Data ?? [];
-      return list
-        .filter((t) => t.dishName || t.restaurantName)
-        .map((t) => ({
-          dishId: String(t.dishId ?? ''),
-          dishName: t.dishName ?? '',
-          restaurantId: String(t.restaurantId ?? ''),
-          restaurantName: t.restaurantName ?? '',
-          priceNis: Number(t.sum ?? t.price ?? 0),
-          orderedAt: t.orderDate ?? t.date ?? new Date().toISOString(),
-        }));
-    } catch {
-      return [];
+  async getHistory(session: TenbisSession, sinceDays: number): Promise<TenbisHistoryItem[]> {
+    // 10Bis exposes past orders through a "transactions report" endpoint, but the
+    // exact name + response shape vary. Rather than hard-code one guess, we try a
+    // few known endpoint names and run each response through the defensive
+    // normaliser (src/tenbis/normalize.ts), which copes with order-level vs
+    // dish-level data, Pascal/camel field names and `/Date(ms)/` dates. The first
+    // endpoint that yields any orders wins; empty history is always safe.
+    const state = parse(session);
+    const now = new Date();
+    const from = new Date(now.getTime() - sinceDays * 24 * 60 * 60 * 1000);
+    // Generous, redundant date fields so an endpoint that requires a range is happy.
+    const range = {
+      startDate: from.toISOString(),
+      endDate: now.toISOString(),
+      fromDate: from.toISOString(),
+      toDate: now.toISOString(),
+      dateBias: 0,
+    };
+    const endpoints = [
+      'GetUserTransactionsReport',
+      'UserTransactionsReport',
+      'GetUserOrdersHistory',
+      'GetOrdersHistory',
+      'GetUserReport',
+    ];
+    for (const ep of endpoints) {
+      try {
+        const r: any = await postNext(ep, state.cookies, range);
+        const items = normalizeHistory(r);
+        if (items.length > 0) return items;
+      } catch {
+        /* try the next candidate endpoint */
+      }
     }
+    return [];
   }
 
   async getRestaurants(session: TenbisSession, addressId: string): Promise<TenbisRestaurant[]> {
