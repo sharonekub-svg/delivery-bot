@@ -3,21 +3,23 @@ import type {
   PlaceOrderInput,
   TenbisAddress,
   TenbisBudget,
+  TenbisCoupon,
   TenbisDish,
   TenbisHistoryItem,
   TenbisOrderResult,
   TenbisRestaurant,
   TenbisSession,
+  TenbisUserProfile,
 } from './types';
 
 const DAY = 24 * 60 * 60 * 1000;
 
 const DISHES: TenbisDish[] = [
-  { id: 'd1', restaurantId: 'r1', restaurantName: 'Greens & Co', name: 'Grilled Chicken Quinoa Bowl', description: 'Grilled chicken breast, quinoa, roasted veg.', priceNis: 52, tags: ['high-protein'], proteinG: 41, caloriesKcal: 610, deepLink: 'https://example/d1' },
-  { id: 'd2', restaurantId: 'r1', restaurantName: 'Greens & Co', name: 'Mediterranean Salmon Salad', description: 'Salmon, mixed greens, tahini.', priceNis: 58, tags: ['high-protein', 'omega3'], proteinG: 34, caloriesKcal: 540, deepLink: 'https://example/d2' },
-  { id: 'd3', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Chicken Shawarma Plate', description: 'Shawarma, salad, hummus.', priceNis: 49, tags: ['high-protein'], proteinG: 38, caloriesKcal: 720, deepLink: 'https://example/d3' },
+  { id: 'd1', restaurantId: 'r1', restaurantName: 'Greens & Co', name: 'Grilled Chicken Quinoa Bowl', description: 'Grilled chicken breast, quinoa, roasted veg.', priceNis: 52, tags: ['high-protein', 'popular', 'healthy'], proteinG: 41, caloriesKcal: 610, popular: true, isGreen: true, deepLink: 'https://example/d1' },
+  { id: 'd2', restaurantId: 'r1', restaurantName: 'Greens & Co', name: 'Mediterranean Salmon Salad', description: 'Salmon, mixed greens, tahini.', priceNis: 58, tags: ['high-protein', 'omega3', 'healthy'], proteinG: 34, caloriesKcal: 540, isGreen: true, deepLink: 'https://example/d2' },
+  { id: 'd3', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Chicken Shawarma Plate', description: 'Shawarma, salad, hummus.', priceNis: 49, tags: ['high-protein', 'popular'], proteinG: 38, caloriesKcal: 720, popular: true, healthWarnings: ['sodium', 'fat'], deepLink: 'https://example/d3' },
   { id: 'd4', restaurantId: 'r3', restaurantName: 'Tokyo Express', name: 'Salmon Poke Bowl', description: 'Salmon, rice, edamame, avocado.', priceNis: 56, tags: ['high-protein'], proteinG: 30, caloriesKcal: 580, deepLink: 'https://example/d4' },
-  { id: 'd5', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Falafel Pita', description: 'Falafel, salad, tahini.', priceNis: 38, tags: ['vegan'], proteinG: 16, caloriesKcal: 650, deepLink: 'https://example/d5' },
+  { id: 'd5', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Falafel Pita', description: 'Falafel, salad, tahini.', priceNis: 38, tags: ['vegan'], proteinG: 16, caloriesKcal: 650, healthWarnings: ['sugar'], deepLink: 'https://example/d5' },
 ];
 
 /** Deterministic fake 10Bis used for tests and until live verification. */
@@ -62,11 +64,22 @@ export class MockTenbisClient implements TenbisClient {
     return out;
   }
 
+  async getUserProfile(): Promise<TenbisUserProfile> {
+    return { firstName: 'Dana', lastName: 'Cohen', email: 'dana@example.com', companyName: 'Acme Ltd', companyId: 1234 };
+  }
+
+  async getCoupons(): Promise<TenbisCoupon[]> {
+    return [
+      { code: 'LUNCH10', description: '₪10 הנחה על הזמנה מעל ₪45', amountNis: 10 },
+      { code: 'NEWWEEK', description: '15% הנחה ביום ראשון', percent: 15 },
+    ];
+  }
+
   async getRestaurants(): Promise<TenbisRestaurant[]> {
     return [
-      { id: 'r1', name: 'Greens & Co', isOpenNow: true, deliveryEtaMinutes: 35 },
-      { id: 'r2', name: 'Pita Bar', isOpenNow: true, deliveryEtaMinutes: 25 },
-      { id: 'r3', name: 'Tokyo Express', isOpenNow: true, deliveryEtaMinutes: 40 },
+      { id: 'r1', name: 'Greens & Co', isOpenNow: true, deliveryEtaMinutes: 35, minOrderNis: 45, deliveryFeeNis: 0, pickupAvailable: true, pooledOrderAvailable: true, scheduledDeliveryAvailable: true, isKosher: true },
+      { id: 'r2', name: 'Pita Bar', isOpenNow: true, deliveryEtaMinutes: 25, minOrderNis: 40, deliveryFeeNis: 5, pickupAvailable: true, isKosher: true },
+      { id: 'r3', name: 'Tokyo Express', isOpenNow: true, deliveryEtaMinutes: 40, minOrderNis: 60, deliveryFeeNis: 12, scheduledDeliveryAvailable: true },
     ];
   }
 
@@ -81,14 +94,18 @@ export class MockTenbisClient implements TenbisClient {
   async placeOrder(_session: TenbisSession, input: PlaceOrderInput): Promise<TenbisOrderResult> {
     const dish = DISHES.find((d) => d.id === input.dishId);
     if (!dish) return { ok: false, errorCode: 'out_of_stock', errorMessage: 'Dish not found' };
-    if (input.maxTotalNis != null && dish.priceNis > input.maxTotalNis) {
-      return { ok: false, errorCode: 'budget_exceeded', errorMessage: `Over budget by ${dish.priceNis - input.maxTotalNis} NIS` };
+    // A coupon shaves ₪10 off when coupons are enabled and the order qualifies.
+    const discountNis = input.useCoupons && dish.priceNis >= 45 ? 10 : 0;
+    const totalNis = dish.priceNis - discountNis;
+    if (input.maxTotalNis != null && totalNis > input.maxTotalNis) {
+      return { ok: false, errorCode: 'budget_exceeded', errorMessage: `Over budget by ${totalNis - input.maxTotalNis} NIS` };
     }
     return {
       ok: true,
       orderId: `mock-${Date.now()}`,
-      totalNis: dish.priceNis,
-      etaMinutes: 35,
+      totalNis,
+      discountNis: discountNis || undefined,
+      etaMinutes: input.pickup ? 15 : 35,
       trackerDeepLink: 'https://example/track/mock',
     };
   }

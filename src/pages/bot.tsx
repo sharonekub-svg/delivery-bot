@@ -7,7 +7,10 @@ interface DishOption {
   dishId: string; restaurantId: string; categoryId?: string; dishName: string;
   restaurantName: string; priceNis: number; proteinG?: number; caloriesKcal?: number;
   description?: string; deepLink?: string; etaMinutes?: number;
+  popular?: boolean; isGreen?: boolean; healthWarnings?: ('sugar' | 'sodium' | 'fat')[];
 }
+
+const WARN_LABEL: Record<string, string> = { sugar: 'סוכר גבוה', sodium: 'נתרן גבוה', fat: 'שומן רווי גבוה' };
 interface Msg { id: number; role: 'bot' | 'user'; kind: 'text' | 'dish'; text?: string; dish?: DishOption; }
 type Stage = 'freq' | 'craving' | 'loading' | 'dish' | 'overbudget' | 'ordered';
 
@@ -111,17 +114,19 @@ export default function Bot() {
     if (!approveOverBudget) add({ role: 'user', kind: 'text', text: 'כן, הזמינו' });
     add({ role: 'bot', kind: 'text', text: 'מזמין…' });
     try {
+      const p = store.getProfile();
       const res = await fetch('/api/order', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          session: store.getSession(), preferences: store.getProfile(), addressId: store.getAddress(),
+          session: store.getSession(), preferences: p, addressId: store.getAddress(),
           dishId: dish.dishId, restaurantId: dish.restaurantId, categoryId: dish.categoryId, approveOverBudget,
+          pickup: p?.pickup, dontWantCutlery: p?.dontWantCutlery, useCoupons: p?.useCoupons, orderRemarks: p?.orderRemarks,
         }),
       });
       const data = await res.json();
       const r = data.result ?? {};
       if (data.ok) {
-        add({ role: 'bot', kind: 'text', text: `הוזמן: ${dish.dishName} מ${dish.restaurantName}. בתיאבון.${dish.etaMinutes != null ? `\nזמן משלוח משוער: כ-${dish.etaMinutes} דקות.` : ''}${r.trackerDeepLink ? `\nמעקב: ${r.trackerDeepLink}` : ''}` });
+        add({ role: 'bot', kind: 'text', text: `הוזמן: ${dish.dishName} מ${dish.restaurantName}. בתיאבון.${r.discountNis ? `\nחסכת ₪${r.discountNis} עם קופון.` : ''}${dish.etaMinutes != null ? `\nזמן משלוח משוער: כ-${dish.etaMinutes} דקות.` : ''}${r.trackerDeepLink ? `\nמעקב: ${r.trackerDeepLink}` : ''}` });
         setStage('ordered');
       } else if (r.errorCode === 'budget_exceeded') {
         add({ role: 'bot', kind: 'text', text: `${r.errorMessage ?? 'זה מעל התקציב היומי.'} להזמין בכל זאת?` });
@@ -200,6 +205,13 @@ function DishCard({ dish }: { dish: DishOption }) {
       <div style={dishCard}>
         <div className="font-heading" style={{ fontWeight: 400, fontSize: 24 }}>{dish.dishName}</div>
         <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 2 }}>מסעדה: {dish.restaurantName}</div>
+        {(dish.popular || dish.isGreen || dish.healthWarnings?.length) && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+            {dish.popular && <span style={badge('#f59e0b')}>⭐ פופולרי</span>}
+            {dish.isGreen && <span style={badge('#16a34a')}>🟢 בריא</span>}
+            {dish.healthWarnings?.map((w) => <span key={w} style={badge('#b91c1c')}>{WARN_LABEL[w]}</span>)}
+          </div>
+        )}
         {dish.description && <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, marginTop: 8, lineHeight: 1.5 }}>{dish.description}</div>}
         <div style={detailRows}>
           <Row label="מחיר" value={`₪${dish.priceNis}`} />
@@ -236,4 +248,5 @@ const head: React.CSSProperties = { display: 'flex', alignItems: 'center', justi
 const feed: React.CSSProperties = { flex: 1, overflowY: 'auto', padding: 16 };
 const bar: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 8, padding: 12, borderTop: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' };
 const dishCard: React.CSSProperties = { maxWidth: '88%', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(253,186,116,0.5)', borderRadius: 16, padding: 16, backdropFilter: 'blur(8px)' };
+const badge = (color: string): React.CSSProperties => ({ display: 'inline-block', background: `${color}22`, border: `1px solid ${color}`, color: '#fff', borderRadius: 9999, padding: '2px 10px', fontSize: 12, fontWeight: 600 });
 const detailRows: React.CSSProperties = { marginTop: 12, fontSize: 14, color: '#fff' };

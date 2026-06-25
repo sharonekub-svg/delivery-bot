@@ -4,11 +4,13 @@ import type {
   PlaceOrderInput,
   TenbisAddress,
   TenbisBudget,
+  TenbisCoupon,
   TenbisDish,
   TenbisHistoryItem,
   TenbisOrderResult,
   TenbisRestaurant,
   TenbisSession,
+  TenbisUserProfile,
 } from './types';
 
 /**
@@ -43,6 +45,12 @@ export interface TenbisClient {
 
   /** Cheap call to verify a session is still valid. */
   isSessionValid(session: TenbisSession): Promise<boolean>;
+
+  /** The signed-in user's name / company, for greetings and context. */
+  getUserProfile(session: TenbisSession): Promise<TenbisUserProfile>;
+
+  /** Coupons/discounts available on the account. */
+  getCoupons(session: TenbisSession): Promise<TenbisCoupon[]>;
 
   getAddresses(session: TenbisSession): Promise<TenbisAddress[]>;
 

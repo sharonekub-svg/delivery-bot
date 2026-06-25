@@ -6,11 +6,13 @@ import type {
   PlaceOrderInput,
   TenbisAddress,
   TenbisBudget,
+  TenbisCoupon,
   TenbisDish,
   TenbisHistoryItem,
   TenbisOrderResult,
   TenbisRestaurant,
   TenbisSession,
+  TenbisUserProfile,
 } from './types';
 
 /**
@@ -43,6 +45,13 @@ function parse(session: TenbisSession): SessionState {
 
 function pack(state: SessionState, ttlMs = 6 * 60 * 60 * 1000): TenbisSession {
   return { token: JSON.stringify(state), expiresAt: Date.now() + ttlMs };
+}
+
+/** Coerce a possibly-missing API number; returns undefined for null/NaN. */
+function numOrUndef(v: unknown): number | undefined {
+  if (v == null) return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 function cookieHeader(cookies: Record<string, string>): string {
@@ -173,6 +182,44 @@ export class LocalTenbisClient implements TenbisClient {
 
   // ---- Reads ----
 
+  async getUserProfile(session: TenbisSession): Promise<TenbisUserProfile> {
+    // GetUser returns the signed-in user's details (and re-inits the cart).
+    try {
+      const state = parse(session);
+      const r: any = await postNext('GetUser', state.cookies, {});
+      const d = r.Data ?? {};
+      return {
+        firstName: d.firstName,
+        lastName: d.lastName,
+        email: d.email,
+        companyName: d.companyName ?? d.company?.companyName,
+        companyId: numOrUndef(d.companyId),
+      };
+    } catch {
+      return {};
+    }
+  }
+
+  async getCoupons(session: TenbisSession): Promise<TenbisCoupon[]> {
+    // VERIFY LIVE: coupon endpoint/shape isn't certain from the capture; we try
+    // GetUserCoupons and map defensively, returning [] if it isn't there.
+    try {
+      const state = parse(session);
+      const r: any = await postNext('GetUserCoupons', state.cookies, {});
+      const list: any[] = r.Data?.coupons ?? r.Data ?? [];
+      return list
+        .map((c) => ({
+          code: c.couponCode ?? c.code,
+          description: c.description ?? c.title ?? c.couponDescription ?? '',
+          amountNis: numOrUndef(c.amount ?? c.discountAmount),
+          percent: numOrUndef(c.percent ?? c.discountPercent),
+        }))
+        .filter((c) => c.description || c.code);
+    } catch {
+      return [];
+    }
+  }
+
   async getAddresses(session: TenbisSession): Promise<TenbisAddress[]> {
     const state = parse(session);
     const r: any = await postNext('GetUserAddresses', state.cookies, {});
@@ -226,8 +273,14 @@ export class LocalTenbisClient implements TenbisClient {
       id: String(x.restaurantId ?? x.id),
       name: x.restaurantName ?? x.name,
       isOpenNow: x.isOpenNow ?? x.isActive ?? true,
-      minOrderNis: x.minimumOrder,
-      deliveryEtaMinutes: x.deliveryTimeInMinutes,
+      minOrderNis: numOrUndef(x.minimumOrder ?? x.minimumPriceForOrder),
+      deliveryEtaMinutes: numOrUndef(x.deliveryTimeInMinutes ?? x.estimatedDeliveryTime),
+      deliveryFeeNis: numOrUndef(x.deliveryPrice ?? x.deliveryFee),
+      pickupAvailable: x.isPickupAvailable ?? x.pickupEnabled,
+      pooledOrderAvailable: x.isPooledOrderRestaurant ?? x.pooledOrder,
+      scheduledDeliveryAvailable: x.isFutureOrderAvailable ?? x.futureOrderAvailable,
+      isKosher: x.isKosher,
+      logoUrl: x.restaurantLogoUrl ?? x.logoUrl,
     }));
   }
 
@@ -245,6 +298,13 @@ export class LocalTenbisClient implements TenbisClient {
     const out: TenbisDish[] = [];
     for (const cat of categories) {
       for (const dish of cat.dishes ?? []) {
+        const warnings: ('sugar' | 'sodium' | 'fat')[] = [];
+        if (dish.hasHighSugar) warnings.push('sugar');
+        if (dish.hasHighSodium) warnings.push('sodium');
+        if (dish.hasHighSaturatedFat) warnings.push('fat');
+        const tags: string[] = [];
+        if (dish.hasGreenSymbol) tags.push('healthy');
+        if (dish.popular) tags.push('popular');
         out.push({
           id: String(dish.id),
           restaurantId: String(restaurantId),
@@ -253,7 +313,13 @@ export class LocalTenbisClient implements TenbisClient {
           name: dish.name,
           description: dish.description,
           priceNis: Number(dish.price),
-          tags: dish.hasGreenSymbol ? ['healthy'] : [],
+          tags,
+          proteinG: numOrUndef(dish.proteinG ?? dish.protein),
+          caloriesKcal: numOrUndef(dish.calories ?? dish.caloriesKcal),
+          popular: !!dish.popular,
+          isGreen: !!dish.hasGreenSymbol,
+          healthWarnings: warnings.length ? warnings : undefined,
+          imageUrl: dish.imageUrl,
           deepLink: `https://www.10bis.co.il/next/restaurants/menu/delivery/${restaurantId}`,
         });
       }
@@ -262,11 +328,26 @@ export class LocalTenbisClient implements TenbisClient {
   }
 
   async getBudget(session: TenbisSession): Promise<TenbisBudget> {
-    // VERIFY LIVE: the daily allowance lives on the user's Moneycard; the exact
-    // field isn't certain from the capture. Returning {} lets preferences drive
-    // the daily budget instead.
-    void session;
-    return {};
+    // The company allowance lives on the user's 10Bis Moneycard, surfaced by
+    // GetPayments once a cart exists. Field names vary across captures, so we
+    // read defensively and fall back to {} (preferences then drive the budget).
+    // VERIFY LIVE: confirm the exact monthly/daily/balance field names.
+    try {
+      const state = parse(session);
+      const r: any = await postNext('GetPayments', state.cookies, { shoppingCartGuid: state.shoppingCartGuid });
+      const payments: any[] = r.Data?.payments ?? r.Data ?? [];
+      const card =
+        payments.find((p) => p.paymentMethod === 'Moneycard') ??
+        payments.find((p) => p.isMoneycard || p.companyId) ??
+        payments[0];
+      if (!card) return {};
+      const monthlyNis = numOrUndef(card.monthlyMaxAmount ?? card.monthlyLimit ?? card.monthlyBudget);
+      const dailyNis = numOrUndef(card.dailyMaxAmount ?? card.dailyLimit ?? card.maxAmount ?? card.dailyBudget);
+      const remainingTodayNis = numOrUndef(card.balance ?? card.remainingAmount ?? card.sum ?? card.availableAmount);
+      return { monthlyNis, dailyNis, remainingTodayNis };
+    } catch {
+      return {};
+    }
   }
 
   // ---- Order ----
@@ -294,12 +375,17 @@ export class LocalTenbisClient implements TenbisClient {
         streetId: addr.streetId,
         isBigCity: true,
       });
-      await postNext('SetDeliveryMethodInOrder', jar, { shoppingCartGuid: guid, deliveryMethod: 'delivery' });
+      await postNext('SetDeliveryMethodInOrder', jar, {
+        shoppingCartGuid: guid,
+        deliveryMethod: input.pickup ? 'takeaway' : 'delivery',
+      });
       await postNext('SetRestaurantInOrder', jar, {
         shoppingCartGuid: guid,
         isMobileDevice: false,
         restaurantId: Number(input.restaurantId),
-        deliveryRuleType: 'Asap',
+        // A future delivery time schedules the order; otherwise it's ASAP.
+        deliveryRuleType: input.deliverAt ? 'Future' : 'Asap',
+        ...(input.deliverAt ? { orderDeliveryTime: input.deliverAt } : {}),
       });
       await postNext('SetDishListInShoppingCart', jar, {
         shoppingCartGuid: guid,
@@ -315,7 +401,11 @@ export class LocalTenbisClient implements TenbisClient {
           },
         ],
       });
-      await postNext('ChooseAndSetBestDiscountCouponValueInOrder', jar, { shoppingCartGuid: guid, includeUserCoupons: false });
+      const couponR: any = await postNext('ChooseAndSetBestDiscountCouponValueInOrder', jar, {
+        shoppingCartGuid: guid,
+        includeUserCoupons: input.useCoupons ?? false,
+      }).catch(() => ({}));
+      const discountNis = numOrUndef(couponR.Data?.discountAmount ?? couponR.Data?.couponValue);
 
       // Payment: the 10Bis Moneycard (company allowance). VERIFY LIVE: source of
       // cardId — likely from GetPayments after the restaurant is set.
@@ -335,8 +425,8 @@ export class LocalTenbisClient implements TenbisClient {
       const submit: any = await postNext('SubmitOrder', jar, {
         shoppingCartGuid: guid,
         isMobileDevice: false,
-        dontWantCutlery: false,
-        orderRemarks: '',
+        dontWantCutlery: input.dontWantCutlery ?? false,
+        orderRemarks: input.orderRemarks ?? '',
       });
       const od = submit.Data?.orderData ?? {};
       // Persist any refreshed cookies/guid back is the caller's job (we mutated jar in place).
@@ -344,6 +434,7 @@ export class LocalTenbisClient implements TenbisClient {
         ok: true,
         orderId: String(od.orderId ?? submit.Data?.orderId ?? ''),
         totalNis: od.shoppingCart?.totalAmount,
+        discountNis,
         trackerDeepLink: 'https://www.10bis.co.il/next/user-transactions',
       };
     } catch (err) {

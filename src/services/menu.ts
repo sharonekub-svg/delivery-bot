@@ -51,6 +51,11 @@ export interface DishOption {
   deepLink?: string;
   /** Approximate delivery time in minutes for this dish's restaurant. */
   etaMinutes?: number;
+  /** 10Bis signals surfaced to the UI so the user sees everything 10Bis knows. */
+  popular?: boolean;
+  isGreen?: boolean;
+  healthWarnings?: ('sugar' | 'sodium' | 'fat')[];
+  imageUrl?: string;
 }
 
 /** Craving keyword → words we look for in a dish name / description / restaurant. */
@@ -88,5 +93,9 @@ export async function recommendForUser(session: TenbisSession, addressId: string
     description: s.dish.description,
     deepLink: s.dish.deepLink,
     etaMinutes: etaByRestaurant[s.dish.restaurantId],
+    popular: s.dish.popular,
+    isGreen: s.dish.isGreen,
+    healthWarnings: s.dish.healthWarnings,
+    imageUrl: s.dish.imageUrl,
   }));
 }

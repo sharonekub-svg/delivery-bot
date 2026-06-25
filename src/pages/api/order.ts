@@ -30,6 +30,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       addressId,
       includeBeverage: prefs.includeBeverage,
       maxTotalNis: body.approveOverBudget ? undefined : prefs.dailyBudgetNis,
+      pickup: body.pickup === true,
+      deliverAt: body.deliverAt ? String(body.deliverAt) : undefined,
+      dontWantCutlery: body.dontWantCutlery === true,
+      orderRemarks: body.orderRemarks ? String(body.orderRemarks) : undefined,
+      useCoupons: body.useCoupons !== false, // default on — use available discounts
     });
     return res.status(200).json({ ok: result.ok, result });
   } catch (err) {

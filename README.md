@@ -8,9 +8,17 @@ The flow is dead simple:
 1. **Connect** (`/connect`) — paste a single 10Bis request you copied from your
    browser's DevTools ("Copy as cURL"). No password. We extract the cookie +
    bearer token and validate them.
-2. **Profile** (`/profile`) — fill in your taste profile *once*: what you like,
-   your goal, protein target, favourite restaurants, allergies, budget. It's
-   saved and remembered, so you never answer twice.
+2. **Profile** (`/profile`) — we first read your 10Bis **order history** (recent
+   orders, what your employer's monthly allowance is, what you order most, what
+   you've barely touched) and pre-fill the form from *your real data* — nothing
+   invented. You then tune: taste, goal, protein, favourites, allergies, budget,
+   the **time window and days** to order on (work-days presets), and can connect
+   a **calendar** (paste a Google Calendar iCal link) so delivery is timed into a
+   gap with no meeting. We also greet you by name, surface your **available
+   coupons**, and expose every order option 10Bis supports — pickup vs delivery,
+   scheduled (future) delivery, skip-cutlery, auto-apply coupons, a standing
+   note to the restaurant, plus per-dish popular/healthy/health-warning badges.
+   Saved and remembered, so you never answer twice.
 3. **Lunch** (`/lunch`) — uses your remembered profile to pull and rank today's
    live 10Bis menu through the recommendation engine, and orders the dish you
    pick.
@@ -28,10 +36,14 @@ pages/connect.tsx   F12 step-by-step + paste box (Step 1)
 pages/profile.tsx   the remembered taste profile form (Step 2)
 pages/lunch.tsx     ranked live options + one-tap ordering
 pages/api/connect   parse paste -> validate -> return the session to the browser
+pages/api/insights  read 10Bis history + budget + name/company + coupons -> /profile
+pages/api/calendar  fetch an iCal feed -> meeting-free delivery slot for the window
 pages/api/recommend rank the live menu against the saved profile
 pages/api/order     place a real 10Bis order
 lib/curlParse.ts    extract cookie + bearer from a cURL / header / cookie paste
 lib/store.ts        browser-side memory (profile + session in localStorage)
+domain/history.ts   derive recent/favourite/rarely + budget from order history
+domain/calendar.ts  parse iCal + pick a delivery time with no meeting clash
 services/menu.ts    gather live dishes + run the recommendation engine
 ```
 
