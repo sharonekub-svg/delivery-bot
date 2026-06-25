@@ -32,10 +32,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (err) {
     console.error('connect error', err);
     const detail = String((err as Error)?.message ?? '').slice(0, 300);
-    return res.status(401).json({
-      ok: false,
-      error: 'הפרטים לא עבדו — ייתכן שפג תוקפם. העתיקו מחדש (בקשת GetUser) ונסו שוב.',
-      detail: detail || undefined,
-    });
+    // 401 means 10Bis rejected the auth. Usually the copied request was missing
+    // its Authorization token (cookie alone isn't enough on most accounts).
+    const error = /session_expired|-> 401/.test(detail)
+      ? 'נראה שחסר טוקן בהדבקה — העוגייה לבדה לא מספיקה. ודאו שהעתקתם את בקשת GetUser כ-cURL *מלא* (היא כוללת גם Authorization), ושהיא טרייה (רעננו והעתיקו שוב).'
+      : 'הפרטים לא עבדו. העתיקו מחדש את בקשת GetUser ונסו שוב.';
+    return res.status(401).json({ ok: false, error, detail: detail || undefined });
   }
 }

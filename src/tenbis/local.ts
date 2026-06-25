@@ -78,15 +78,19 @@ class SessionExpired extends Error {
   }
 }
 
-/** POST to NextApi with cookies; absorbs Set-Cookie back into the jar. */
-async function postNext<T = any>(path: string, jar: Record<string, string>, body: object): Promise<T> {
+/** POST to NextApi with cookies (+ bearer when we have one); absorbs Set-Cookie. */
+async function postNext<T = any>(path: string, jar: Record<string, string>, body: object, bearer?: string): Promise<T> {
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    'x-app-type': 'mobileWeb',
+    cookie: cookieHeader(jar),
+  };
+  // 10Bis now authenticates NextApi with BOTH the cookie and an Authorization
+  // bearer — sending only the cookie yields 401 (session_expired).
+  if (bearer) headers.authorization = `Bearer ${bearer}`;
   const res = await fetch(`${NEXT}/${path}`, {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-app-type': 'mobileWeb',
-      cookie: cookieHeader(jar),
-    },
+    headers,
     body: JSON.stringify({ ...CULTURE, ...body }),
   });
   absorbCookies(res, jar);
@@ -155,7 +159,7 @@ export class LocalTenbisClient implements TenbisClient {
     let lastErr = '';
     for (const ep of ['GetUser', 'GetUserAddresses']) {
       try {
-        const r: any = await postNext(ep, jar, {});
+        const r: any = await postNext(ep, jar, {}, input.bearer);
         if (Array.isArray(r.Data)) {
           guid = r.ShoppingCartGuid ?? guid;
         } else {
@@ -231,7 +235,7 @@ export class LocalTenbisClient implements TenbisClient {
     // GetUser returns the signed-in user's details (and re-inits the cart).
     try {
       const state = parse(session);
-      const r: any = await postNext('GetUser', state.cookies, {});
+      const r: any = await postNext('GetUser', state.cookies, {}, state.bearer);
       const d = r.Data ?? {};
       return {
         firstName: d.firstName,
@@ -250,7 +254,7 @@ export class LocalTenbisClient implements TenbisClient {
     // GetUserCoupons and map defensively, returning [] if it isn't there.
     try {
       const state = parse(session);
-      const r: any = await postNext('GetUserCoupons', state.cookies, {});
+      const r: any = await postNext('GetUserCoupons', state.cookies, {}, state.bearer);
       const list: any[] = r.Data?.coupons ?? r.Data ?? [];
       return list
         .map((c) => ({
@@ -267,7 +271,7 @@ export class LocalTenbisClient implements TenbisClient {
 
   async getAddresses(session: TenbisSession): Promise<TenbisAddress[]> {
     const state = parse(session);
-    const r: any = await postNext('GetUserAddresses', state.cookies, {});
+    const r: any = await postNext('GetUserAddresses', state.cookies, {}, state.bearer);
     const list: any[] = r.Data ?? [];
     return list.map((a) => ({
       id: String(a.addressId),
@@ -311,7 +315,7 @@ export class LocalTenbisClient implements TenbisClient {
     ];
     for (const ep of endpoints) {
       try {
-        const r: any = await postNext(ep, state.cookies, range);
+        const r: any = await postNext(ep, state.cookies, range, state.bearer);
         const items = normalizeHistory(r);
         if (items.length > 0) return items;
       } catch {
@@ -395,7 +399,7 @@ export class LocalTenbisClient implements TenbisClient {
 
     // Daily allowance / remaining-today from the Moneycard.
     try {
-      const r: any = await postNext('GetPayments', state.cookies, { shoppingCartGuid: state.shoppingCartGuid });
+      const r: any = await postNext('GetPayments', state.cookies, { shoppingCartGuid: state.shoppingCartGuid }, state.bearer);
       const payments: any[] = r.Data?.payments ?? r.Data ?? [];
       const card =
         payments.find((p) => p.paymentMethod === 'Moneycard') ??
@@ -414,7 +418,7 @@ export class LocalTenbisClient implements TenbisClient {
     // (GetUser) — the user "set" it when they joined the company on 10Bis.
     if (out.monthlyNis == null) {
       try {
-        const r: any = await postNext('GetUser', state.cookies, {});
+        const r: any = await postNext('GetUser', state.cookies, {}, state.bearer);
         const monthly = extractMonthlyLimit(r);
         if (monthly != null) out.monthlyNis = monthly;
       } catch {
@@ -426,7 +430,7 @@ export class LocalTenbisClient implements TenbisClient {
     if (out.monthlyNis == null) {
       for (const ep of ['GetUserTransactionsReport', 'UserTransactionsReport', 'GetUserReport', 'GetBillingReport']) {
         try {
-          const r: any = await postNext(ep, state.cookies, {});
+          const r: any = await postNext(ep, state.cookies, {}, state.bearer);
           const monthly = extractMonthlyLimit(r);
           if (monthly != null) { out.monthlyNis = monthly; break; }
         } catch {
@@ -443,6 +447,7 @@ export class LocalTenbisClient implements TenbisClient {
   async placeOrder(session: TenbisSession, input: PlaceOrderInput): Promise<TenbisOrderResult> {
     const state = parse(session);
     const jar = state.cookies;
+    const bearer = state.bearer;
     const guid = state.shoppingCartGuid;
     if (!guid) return { ok: false, errorCode: 'unknown', errorMessage: 'no shopping cart' };
 
@@ -462,11 +467,11 @@ export class LocalTenbisClient implements TenbisClient {
         cityId: addr.cityId,
         streetId: addr.streetId,
         isBigCity: true,
-      });
+      }, bearer);
       await postNext('SetDeliveryMethodInOrder', jar, {
         shoppingCartGuid: guid,
         deliveryMethod: input.pickup ? 'takeaway' : 'delivery',
-      });
+      }, bearer);
       await postNext('SetRestaurantInOrder', jar, {
         shoppingCartGuid: guid,
         isMobileDevice: false,
@@ -474,7 +479,7 @@ export class LocalTenbisClient implements TenbisClient {
         // A future delivery time schedules the order; otherwise it's ASAP.
         deliveryRuleType: input.deliverAt ? 'Future' : 'Asap',
         ...(input.deliverAt ? { orderDeliveryTime: input.deliverAt } : {}),
-      });
+      }, bearer);
       await postNext('SetDishListInShoppingCart', jar, {
         shoppingCartGuid: guid,
         dishList: [
@@ -488,16 +493,16 @@ export class LocalTenbisClient implements TenbisClient {
             categoryId: input.categoryId ? Number(input.categoryId) : undefined,
           },
         ],
-      });
+      }, bearer);
       const couponR: any = await postNext('ChooseAndSetBestDiscountCouponValueInOrder', jar, {
         shoppingCartGuid: guid,
         includeUserCoupons: input.useCoupons ?? false,
-      }).catch(() => ({}));
+      }, bearer).catch(() => ({}));
       const discountNis = numOrUndef(couponR.Data?.discountAmount ?? couponR.Data?.couponValue);
 
       // Payment: the 10Bis Moneycard (company allowance). VERIFY LIVE: source of
       // cardId — likely from GetPayments after the restaurant is set.
-      const payR: any = await postNext('GetPayments', jar, { shoppingCartGuid: guid }).catch(() => ({ Data: [] }));
+      const payR: any = await postNext('GetPayments', jar, { shoppingCartGuid: guid }, bearer).catch(() => ({ Data: [] }));
       const card = (payR.Data ?? []).find((p: any) => p.paymentMethod === 'Moneycard') ?? (payR.Data ?? [])[0];
       if (card) {
         const sum = card.sum ?? undefined;
@@ -507,7 +512,7 @@ export class LocalTenbisClient implements TenbisClient {
         await postNext('SetPaymentsInOrder', jar, {
           shoppingCartGuid: guid,
           payments: [{ ...card, assigned: true }],
-        });
+        }, bearer);
       }
 
       const submit: any = await postNext('SubmitOrder', jar, {
@@ -515,7 +520,7 @@ export class LocalTenbisClient implements TenbisClient {
         isMobileDevice: false,
         dontWantCutlery: input.dontWantCutlery ?? false,
         orderRemarks: input.orderRemarks ?? '',
-      });
+      }, bearer);
       const od = submit.Data?.orderData ?? {};
       // Persist any refreshed cookies/guid back is the caller's job (we mutated jar in place).
       return {
