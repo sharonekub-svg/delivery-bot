@@ -2,19 +2,20 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { store } from '../lib/store';
+import { parseCredentials } from '../lib/curlParse';
 
 /**
- * שלב 1: חיבור ל-10bis. מדריכים את המשתמש להעתיק את הסשן מכלי הפיתוח, מאמתים
- * בצד השרת, וזוכרים בדפדפן. כפתור "דלג" למטה מימין מאפשר לדלג אם כבר מחוברים.
+ * שלב 1: חיבור ל-10bis. מדריכים את המשתמש להעתיק *שתי* בקשות מכלי הפיתוח —
+ * אחת מ-NextApi (נושאת את העוגייה) ואחת מ-api.10bis.co.il (נושאת את הטוקן) —
+ * מאמתים בצד השרת, וזוכרים בדפדפן. חיווי חי מראה מה כבר זוהה בהדבקה.
  */
 const STEPS: [string, string][] = [
   ['היכנסו לתן ביס במחשב', 'במחשב (הכי קל ככה, לא בנייד) פתחו את 10bis.co.il בכרום או אדג׳, והתחברו לחשבון שלכם כרגיל.'],
   ['לחצו F12 במקלדת', 'הקישו F12 (בשורה העליונה של המקלדת). ייפתח חלון של כלי פיתוח בצד או בתחתית המסך — זה תקין, אל תיבהלו.'],
   ['פתחו את הלשונית Network', 'בחלון שנפתח, לחצו למעלה על הכיתוב "Network". אם לא רואים אותו, לחצו על החץ הכפול » ובחרו אותו מהרשימה.'],
-  ['סננו לפי NextApi', 'בחלון Network יש תיבת חיפוש קטנה (כתוב בה "Filter"). לחצו עליה והקלידו: NextApi — כך יישארו רק השורות הנכונות.'],
-  ['רעננו את העמוד', 'עכשיו הקישו F5 לרענון. תופיע רשימה של שורות עם שמות כמו GetUser, GetUserAddresses, SetAddressInOrder — אלה בדיוק מה שצריך.'],
-  ['העתיקו את GetUser', 'קליק ימני על השורה GetUser ‏(אם אין, על כל שורה אחרת ברשימה) ← Copy ← Copy as cURL ‏(ב-Windows אולי כתוב "Copy as cURL (bash)" — זה אותו דבר).'],
-  ['הדביקו כאן ולחצו התחברו', 'חזרו לעמוד הזה, לחצו על התיבה למטה, הדביקו (Ctrl+V), ולחצו "התחברו". זהו — נקרא לבד את ההיסטוריה, התקציב והקופונים שלכם.'],
+  ['בקשה 1 (עוגייה): העתיקו את GetUser', 'בתיבת הסינון ("Filter") הקלידו NextApi והקישו F5. קליק ימני על השורה GetUser ← Copy ← Copy as cURL. הדביקו בתיבה למטה. זו מביאה היסטוריה, תקציב וקופונים.'],
+  ['בקשה 2 (טוקן): העתיקו שורה מ-api.10bis', 'נקו את הסינון והקלידו במקום זה api.10bis (או Restaurants). קליק ימני על שורה אחת משם ← Copy ← Copy as cURL. הדביקו אותה בתיבה *מתחת* לבקשה הראשונה. זו מביאה תפריטים ומאפשרת להזמין.'],
+  ['לחצו התחברו', 'כשהחיווי למטה מראה ✓ עוגייה ו-✓ טוקן — לחצו "התחברו". אם יש רק עוגייה זה גם יעבוד, פשוט בלי תפריטים חיים.'],
 ];
 
 export default function Connect() {
@@ -25,6 +26,9 @@ export default function Connect() {
   const [hasSession, setHasSession] = useState(false);
 
   useEffect(() => { setHasSession(!!store.getSession()); }, []);
+
+  // חיווי חי: מה זוהה במה שהודבק עד כה (עוגייה / טוקן).
+  const detected = parseCredentials(raw);
 
   async function connect(e: React.FormEvent) {
     e.preventDefault();
@@ -88,12 +92,19 @@ export default function Connect() {
         <textarea
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
-          placeholder="הדביקו כאן את הבקשה שהעתקתם (curl '…' -H 'cookie: …' …)"
+          placeholder="הדביקו כאן את שתי הבקשות, אחת מתחת לשנייה (curl '…' -H 'cookie: …' …)"
           style={textarea}
           spellCheck={false}
           dir="ltr"
         />
-        <button type="submit" disabled={busy || raw.trim().length < 10} style={{ ...button, opacity: busy || raw.trim().length < 10 ? 0.6 : 1 }}>
+        {raw.trim().length > 0 && (
+          <div style={{ display: 'flex', gap: 8, marginTop: 10, fontSize: 14 }}>
+            <span style={detected.cookie ? detPillOn : detPillOff}>{detected.cookie ? '✓' : '◻︎'} עוגייה</span>
+            <span style={detected.bearer ? detPillOn : detPillOff}>{detected.bearer ? '✓' : '◻︎'} טוקן</span>
+            {!detected.cookie && <span style={{ color: 'rgba(255,255,255,0.5)', alignSelf: 'center' }}>צריך לפחות עוגייה (בקשת GetUser)</span>}
+          </div>
+        )}
+        <button type="submit" disabled={busy || !detected.cookie} style={{ ...button, opacity: busy || !detected.cookie ? 0.6 : 1 }}>
           {busy ? 'מתחבר…' : 'התחברו'}
         </button>
       </form>
@@ -114,6 +125,9 @@ const num: React.CSSProperties = { flex: '0 0 auto', width: 28, height: 28, bord
 const textarea: React.CSSProperties = { width: '100%', minHeight: 120, padding: 12, fontSize: 13, fontFamily: 'ui-monospace, monospace', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 12, boxSizing: 'border-box', resize: 'vertical' };
 const button: React.CSSProperties = { marginTop: 12, background: '#f97316', color: '#fff', border: 'none', borderRadius: 9999, padding: '12px 24px', fontSize: 16, fontWeight: 600, cursor: 'pointer' };
 const connectedNote: React.CSSProperties = { background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.4)', borderRadius: 12, padding: 12, marginTop: 8, color: '#86efac', fontSize: 14 };
+const detPillBase: React.CSSProperties = { borderRadius: 9999, padding: '4px 12px', fontWeight: 600, border: '1px solid' };
+const detPillOn: React.CSSProperties = { ...detPillBase, background: 'rgba(34,197,94,0.15)', borderColor: 'rgba(34,197,94,0.6)', color: '#86efac' };
+const detPillOff: React.CSSProperties = { ...detPillBase, background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.5)' };
 const skipBtn: React.CSSProperties = {
   position: 'fixed', bottom: 20, right: 20, background: 'rgba(255,255,255,0.1)', color: '#fff',
   border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(10px)',
