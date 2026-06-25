@@ -105,10 +105,14 @@ export default function Profile() {
         if (data.profile) setUserProfile(data.profile);
         if (data.coupons) setCoupons(data.coupons);
         setInsightsState('done');
+        // The employer's monthly allowance comes straight from the 10Bis profile —
+        // auto-fill it whenever the user hasn't set their own, even on return visits.
+        if (data.insights.monthlyBudgetNis && !p?.monthlyBudgetNis) {
+          setMonthlyBudget(String(data.insights.monthlyBudgetNis));
+        }
         if (!hadProfile) {
           const i = data.insights;
           if (i.dailyBudgetNis) setBudget(i.dailyBudgetNis);
-          if (i.monthlyBudgetNis) setMonthlyBudget(String(i.monthlyBudgetNis));
           if (i.topRestaurants.length) setFavorites(i.topRestaurants.join(', '));
           if (i.favorites.length) setLikes(i.favorites.map((f) => f.dishName).join(', '));
         }
@@ -212,17 +216,19 @@ export default function Profile() {
           </div>
         </div>
 
-        <div style={lbl}>תקציב חודשי כולל (₪) — לא חובה
-          <input type="number" value={monthlyBudget} onChange={(e) => setMonthlyBudget(e.target.value)} placeholder="למשל 1000" style={ctl} />
+        <div style={lbl}>תקציב חודשי כולל (₪)
+          <input type="number" value={monthlyBudget} onChange={(e) => setMonthlyBudget(e.target.value)} placeholder="נטען לבד מ-10bis…" style={ctl} />
           <div style={hint}>
-            הבוט יוודא שסך כל ההזמנות שלכם בחודש לא יעבור את הסכום הזה — וכך יפרוס לכם את ההזמנות לאורך החודש.
+            {insights?.monthlyBudgetNis != null
+              ? 'מילאנו את זה אוטומטית מהקצבה החודשית שמוגדרת לכם ב-10bis. אפשר לשנות אם רוצים.'
+              : 'הבוט יוודא שסך כל ההזמנות בחודש לא יעבור את הסכום הזה, ויפרוס לכם אותן לאורך החודש.'}
             {monthlyBudget && Number(monthlyBudget) > 0 && insights?.spentThisMonthNis != null &&
               ` כרגע הוצאתם ₪${insights.spentThisMonthNis} החודש, נשאר ₪${Math.max(0, Number(monthlyBudget) - insights.spentThisMonthNis)}.`}
           </div>
-          {insights?.monthlyBudgetNis != null && (
+          {insights?.monthlyBudgetNis != null && Number(monthlyBudget) !== insights.monthlyBudgetNis && (
             <div style={chipRow}>
               <button type="button" onClick={() => setMonthlyBudget(String(insights.monthlyBudgetNis))} style={preset}>
-                לפי המגבלה מהמעסיק: ₪{insights.monthlyBudgetNis}
+                חזרה לקצבה מ-10bis: ₪{insights.monthlyBudgetNis}
               </button>
             </div>
           )}

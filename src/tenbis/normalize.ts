@@ -90,9 +90,13 @@ export function findTransactionArray(root: Json, maxDepth = 5): Json[] {
 }
 
 const MONTHLY_LIMIT_KEYS = [
+  // billing-report / payment style
   'monthlyLimit', 'MonthlyLimit', 'monthlyAmountLimit', 'MonthlyAmountLimit',
-  'companyMonthlyLimit', 'monthlyBudget', 'monthlyMaxAmount', 'maxMonthlyAmount',
-  'monthlyAllowance', 'monthlyTotalLimit', 'creditLimit',
+  'companyMonthlyLimit', 'monthlyMaxAmount', 'maxMonthlyAmount', 'monthlyTotalLimit',
+  'creditLimit',
+  // user-profile / company style (the allowance the employer set on the account)
+  'monthlyBudget', 'companyMonthlyBudget', 'monthlyCompanyBudget', 'companyBudget',
+  'userMonthlyBudget', 'monthlyAllowance', 'companyAllowance', 'budgetAmount',
 ];
 
 /**

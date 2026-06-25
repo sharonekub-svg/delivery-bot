@@ -34,6 +34,9 @@ describe('extractMonthlyLimit', () => {
   it('finds a nested PascalCase MonthlyAmountLimit', () => {
     expect(extractMonthlyLimit({ Data: { report: { budget: { MonthlyAmountLimit: '880' } } } })).toBe(880);
   });
+  it('finds the allowance on a user profile (GetUser) shape', () => {
+    expect(extractMonthlyLimit({ Data: { firstName: 'Dana', companyMonthlyBudget: 1000 } })).toBe(1000);
+  });
   it('returns undefined when absent', () => {
     expect(extractMonthlyLimit({ Data: { dailyLimit: 40 } })).toBeUndefined();
   });

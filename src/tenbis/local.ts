@@ -392,7 +392,19 @@ export class LocalTenbisClient implements TenbisClient {
       /* no payments info — fine */
     }
 
-    // Monthly limit from the billing report (the user's "monthly limit").
+    // The employer-set monthly allowance usually lives right on the user profile
+    // (GetUser) — the user "set" it when they joined the company on 10Bis.
+    if (out.monthlyNis == null) {
+      try {
+        const r: any = await postNext('GetUser', state.cookies, {});
+        const monthly = extractMonthlyLimit(r);
+        if (monthly != null) out.monthlyNis = monthly;
+      } catch {
+        /* fall through to the report */
+      }
+    }
+
+    // Last resort: the billing/transactions report.
     if (out.monthlyNis == null) {
       for (const ep of ['GetUserTransactionsReport', 'UserTransactionsReport', 'GetUserReport', 'GetBillingReport']) {
         try {
