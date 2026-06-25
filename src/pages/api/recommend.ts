@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { recommendForUser } from '../../services/menu';
+import { recommendForUser, historyOptions } from '../../services/menu';
 import { defaultPreferences } from '../../domain/preferences';
 import type { Preferences } from '../../domain/types';
 import type { TenbisSession } from '../../tenbis/types';
@@ -23,9 +23,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const count = Number(body.count);
   if (Number.isFinite(count) && count > 0) prefs.optionCount = Math.min(count, 8);
   const craving = body.craving ? String(body.craving) : undefined;
+  const source = body.source ? String(body.source) : undefined;
 
   try {
-    const options = await recommendForUser(session, addressId, prefs, craving);
+    // source=history → suggest from the user's past orders instead of the live menu.
+    const options = source === 'history'
+      ? await historyOptions(session, craving, prefs.optionCount || 6)
+      : await recommendForUser(session, addressId, prefs, craving);
     return res.status(200).json({ ok: true, options });
   } catch (err) {
     console.error('recommend error', err);

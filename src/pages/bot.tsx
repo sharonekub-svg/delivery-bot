@@ -9,36 +9,37 @@ interface DishOption {
   description?: string; deepLink?: string; etaMinutes?: number;
   popular?: boolean; isGreen?: boolean; healthWarnings?: ('sugar' | 'sodium' | 'fat')[];
 }
+interface Msg { id: number; role: 'bot' | 'user'; kind: 'text' | 'dish'; text?: string; dish?: DishOption; }
+type Stage = 'days' | 'daysManual' | 'craving' | 'loading' | 'dish' | 'overbudget' | 'ordered';
 
 const WARN_LABEL: Record<string, string> = { sugar: 'סוכר גבוה', sodium: 'נתרן גבוה', fat: 'שומן רווי גבוה' };
-interface Msg { id: number; role: 'bot' | 'user'; kind: 'text' | 'dish'; text?: string; dish?: DishOption; }
-type Stage = 'freq' | 'craving' | 'loading' | 'dish' | 'overbudget' | 'ordered';
+const DAY_LABELS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']; // 0=ראשון … 6=שבת
+const WORK_DAYS = [0, 1, 2, 3, 4];
 
-const FREQ = [
-  { label: 'פעם בשבוע', value: 1 },
-  { label: '2–3 פעמים', value: 3 },
-  { label: 'כל יום', value: 5 },
-];
+// קטגוריות הדשבורד: בוחרים מה בא לכם והבוט מביא — מהתפריט החי או מההזמנות הקודמות.
 const CRAVINGS = [
-  { key: 'sushi', label: 'סושי' },
+  { key: 'prev', label: '⭐ מההזמנות הקודמות שלי' },
   { key: 'burger', label: 'המבורגר' },
   { key: 'pizza', label: 'פיצה' },
+  { key: 'sushi', label: 'סושי' },
   { key: 'salad', label: 'סלט בריא' },
   { key: 'meat', label: 'בשר' },
   { key: 'any', label: 'שתבחר בשבילי' },
 ];
 
 /**
- * הצ'אט. ממשק שיחה (בלי AI) שמציע אוכל לפי המטרות שבפרופיל, שואל כמה פעמים בשבוע
- * רוצים להזמין, ומזמין בלחיצה. הכול מונע מהמנוע הקיים — אפס מפתחות.
+ * הצ'אט/דשבורד. בלי שאלות מיותרות: בוחרים ימים (ימי עבודה או ידני), ואז קטגוריה,
+ * והבוט מציע — קודם מההזמנות הקודמות שלכם, ואם אין, מהתפריט החי. מזמינים בלחיצה.
  */
 export default function Bot() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [log, setLog] = useState<Msg[]>([]);
-  const [stage, setStage] = useState<Stage>('freq');
+  const [stage, setStage] = useState<Stage>('days');
   const [options, setOptions] = useState<DishOption[]>([]);
   const [idx, setIdx] = useState(0);
+  const [fromHistory, setFromHistory] = useState(false);
+  const [selDays, setSelDays] = useState<number[]>(WORK_DAYS);
   const idRef = useRef(0);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -48,40 +49,64 @@ export default function Bot() {
     if (!store.getSession()) { router.replace('/connect'); return; }
     if (!store.getProfile()) { router.replace('/profile'); return; }
     setReady(true);
-    add({ role: 'bot', kind: 'text', text: 'היי, אני העוזר שלך לצהריים. כמה פעמים בשבוע בא לך שאמצא לך אוכל?' });
+    add({ role: 'bot', kind: 'text', text: 'היי, אני העוזר שלך לצהריים 👋 באילו ימים בא לך שאזמין לך אוכל?' });
   }, [router, add]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [log, stage]);
 
-  function pickFreq(f: { label: string; value: number }) {
-    add({ role: 'user', kind: 'text', text: f.label });
+  function saveDays(days: number[], label: string) {
+    add({ role: 'user', kind: 'text', text: label });
     const p = store.getProfile();
-    if (p) store.setProfile({ ...p, ordersPerWeek: f.value });
-    setTimeout(() => { add({ role: 'bot', kind: 'text', text: 'מעולה. ועל מה בא לך עכשיו? אתאים את זה למטרות שלך.' }); setStage('craving'); }, 250);
+    if (p) store.setProfile({ ...p, activeDays: days });
+    setTimeout(() => {
+      add({ role: 'bot', kind: 'text', text: 'מעולה. רוצה שאזמין לפי ההזמנות הקודמות שלך, או נבחר קטגוריה?' });
+      setStage('craving');
+    }, 200);
+  }
+
+  function toggleSel(d: number) {
+    setSelDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()));
+  }
+
+  async function getOptions(craving?: string, forceHistory = false): Promise<DishOption[]> {
+    const res = await fetch('/api/recommend', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        session: store.getSession(), preferences: store.getProfile(), addressId: store.getAddress(),
+        craving, source: forceHistory ? 'history' : undefined, count: 6,
+      }),
+    });
+    if (res.status === 401) { router.replace('/connect'); return []; }
+    const data = await res.json();
+    return res.ok && data.ok ? (data.options ?? []) : [];
   }
 
   async function pickCraving(c: { key: string; label: string }) {
     add({ role: 'user', kind: 'text', text: c.label });
     setStage('loading');
-    add({ role: 'bot', kind: 'text', text: 'רגע, מחפש לך את הכי טוב…' });
     try {
-      const res = await fetch('/api/recommend', {
-        method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          session: store.getSession(), preferences: store.getProfile(), addressId: store.getAddress(),
-          craving: c.key === 'any' ? undefined : c.key, count: 6,
-        }),
-      });
-      const data = await res.json();
-      if (res.status === 401) { router.replace('/connect'); return; }
-      if (!res.ok || !data.ok || !(data.options?.length)) {
-        add({ role: 'bot', kind: 'text', text: 'לא מצאתי כרגע משהו מתאים בקטגוריה הזו. ננסה סוג אחר?' });
+      let opts: DishOption[] = [];
+      let hist = false;
+      if (c.key === 'prev') {
+        opts = await getOptions(undefined, true);
+        hist = true;
+      } else {
+        opts = await getOptions(c.key === 'any' ? undefined : c.key);
+        if (opts.length === 0) {
+          // אין במלאי החי? נחפש מההזמנות הקודמות שלך באותה קטגוריה.
+          opts = await getOptions(c.key === 'any' ? undefined : c.key, true);
+          hist = true;
+        }
+      }
+      if (opts.length === 0) {
+        add({ role: 'bot', kind: 'text', text: 'לא הצלחתי למצוא משהו מתאים כרגע — ננסה קטגוריה אחרת?' });
         setStage('craving');
         return;
       }
-      setOptions(data.options);
+      setOptions(opts);
       setIdx(0);
-      presentDish(data.options[0], 'מצאתי. הנה הפירוט המלא:');
+      setFromHistory(hist);
+      presentDish(opts[0], hist ? 'הזמנת את זה בעבר — רוצה שוב?' : 'מצאתי בשבילך:');
     } catch {
       add({ role: 'bot', kind: 'text', text: 'תקלת רשת. ננסה שוב?' });
       setStage('craving');
@@ -96,13 +121,12 @@ export default function Bot() {
 
   function another() {
     const next = idx + 1;
+    add({ role: 'user', kind: 'text', text: 'משהו אחר' });
     if (next < options.length) {
       setIdx(next);
-      add({ role: 'user', kind: 'text', text: 'משהו אחר' });
-      presentDish(options[next], 'אז אולי זה:');
+      presentDish(options[next], fromHistory ? 'גם את זה הזמנת:' : 'אז אולי זה:');
     } else {
-      add({ role: 'user', kind: 'text', text: 'משהו אחר' });
-      add({ role: 'bot', kind: 'text', text: 'אלה כל האפשרויות שמצאתי. ננסה סוג אוכל אחר?' });
+      add({ role: 'bot', kind: 'text', text: 'אלה כל האפשרויות שמצאתי. ננסה קטגוריה אחרת?' });
       setStage('craving');
     }
   }
@@ -112,7 +136,6 @@ export default function Bot() {
     if (!dish) return;
     setStage('loading');
     if (!approveOverBudget) add({ role: 'user', kind: 'text', text: 'כן, הזמינו' });
-    add({ role: 'bot', kind: 'text', text: 'מזמין…' });
     try {
       const p = store.getProfile();
       const res = await fetch('/api/order', {
@@ -130,7 +153,7 @@ export default function Bot() {
         add({ role: 'bot', kind: 'text', text: `הוזמן: ${dish.dishName} מ${dish.restaurantName}. בתיאבון.${r.discountNis ? `\nחסכת ₪${r.discountNis} עם קופון.` : ''}${dish.etaMinutes != null ? `\nזמן משלוח משוער: כ-${dish.etaMinutes} דקות.` : ''}${r.trackerDeepLink ? `\nמעקב: ${r.trackerDeepLink}` : ''}` });
         setStage('ordered');
       } else if (r.errorCode === 'budget_exceeded') {
-        add({ role: 'bot', kind: 'text', text: `${r.errorMessage ?? 'זה מעל התקציב היומי.'} להזמין בכל זאת?` });
+        add({ role: 'bot', kind: 'text', text: `${r.errorMessage ?? 'זה מעל התקציב.'} להזמין בכל זאת?` });
         setStage('overbudget');
       } else {
         add({ role: 'bot', kind: 'text', text: `ההזמנה נכשלה: ${data.error ?? r.errorMessage ?? 'שגיאה לא ידועה.'} ננסה אפשרות אחרת?` });
@@ -165,13 +188,26 @@ export default function Bot() {
       </div>
 
       <div style={bar}>
-        {stage === 'freq' && FREQ.map((f) => <Chip key={f.value} label={f.label} onClick={() => pickFreq(f)} />)}
-        {stage === 'craving' && CRAVINGS.map((c) => <Chip key={c.key} label={c.label} onClick={() => pickCraving(c)} />)}
+        {stage === 'days' && (
+          <>
+            <Chip label="ימי עבודה (א׳–ה׳)" primary onClick={() => saveDays(WORK_DAYS, 'ימי עבודה (א׳–ה׳)')} />
+            <Chip label="בחירה ידנית של ימים" onClick={() => { add({ role: 'user', kind: 'text', text: 'בחירה ידנית' }); setStage('daysManual'); }} />
+          </>
+        )}
+        {stage === 'daysManual' && (
+          <>
+            {DAY_LABELS.map((d, i) => (
+              <Chip key={d} label={d} primary={selDays.includes(i)} onClick={() => toggleSel(i)} />
+            ))}
+            <Chip label="המשך ←" primary onClick={() => saveDays(selDays, `בימים: ${selDays.map((i) => DAY_LABELS[i]).join(', ') || '—'}`)} />
+          </>
+        )}
+        {stage === 'craving' && CRAVINGS.map((c) => <Chip key={c.key} label={c.label} primary={c.key === 'prev'} onClick={() => pickCraving(c)} />)}
         {stage === 'dish' && (
           <>
             <Chip label="כן, הזמינו" primary onClick={() => order(false)} />
             <Chip label="משהו אחר" onClick={another} />
-            <Chip label="סוג אחר" onClick={() => { add({ role: 'user', kind: 'text', text: 'סוג אחר' }); add({ role: 'bot', kind: 'text', text: 'בטח. על מה בא לך?' }); setStage('craving'); }} />
+            <Chip label="קטגוריה אחרת" onClick={() => { add({ role: 'user', kind: 'text', text: 'קטגוריה אחרת' }); setStage('craving'); }} />
           </>
         )}
         {stage === 'overbudget' && (

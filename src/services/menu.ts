@@ -72,6 +72,38 @@ function matchesCraving(dish: TenbisDish, words: string[]): boolean {
   return words.some((w) => hay.includes(w.toLowerCase()));
 }
 
+/**
+ * Options built purely from the user's *past orders* — "order what I had before".
+ * Most-ordered first; when a craving is given we keep only past orders whose dish
+ * or restaurant name matches it (so "burger" surfaces the burger place they use).
+ * Falls back to the full favourites list if nothing matches the craving.
+ */
+export async function historyOptions(session: TenbisSession, craving?: string, count = 6): Promise<DishOption[]> {
+  const history = await getTenbisClient().getHistory(session, 120).catch(() => []);
+  const map = new Map<string, { item: (typeof history)[number]; count: number }>();
+  for (const h of history) {
+    const e = map.get(h.dishId);
+    if (e) e.count += 1;
+    else map.set(h.dishId, { item: h, count: 1 });
+  }
+  let entries = [...map.values()].sort((a, b) => b.count - a.count);
+  const words = craving ? CRAVINGS[craving] : undefined;
+  if (words) {
+    const filtered = entries.filter((e) => {
+      const hay = `${e.item.dishName} ${e.item.restaurantName}`.toLowerCase();
+      return words.some((w) => hay.includes(w.toLowerCase()));
+    });
+    if (filtered.length) entries = filtered;
+  }
+  return entries.slice(0, count).map((e) => ({
+    dishId: e.item.dishId,
+    restaurantId: e.item.restaurantId,
+    dishName: e.item.dishName,
+    restaurantName: e.item.restaurantName,
+    priceNis: e.item.priceNis,
+  }));
+}
+
 export async function recommendForUser(session: TenbisSession, addressId: string, prefs: Preferences, craving?: string): Promise<DishOption[]> {
   const { dishes: all, etaByRestaurant } = await gatherDishes(session, addressId, prefs);
   let dishes = all;
