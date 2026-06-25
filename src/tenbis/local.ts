@@ -144,21 +144,36 @@ export class LocalTenbisClient implements TenbisClient {
   async sessionFromManualInput(input: ManualCredentials): Promise<TenbisSession> {
     const jar = input.cookie ? cookieStringToJar(input.cookie) : {};
     if (Object.keys(jar).length === 0 && !input.bearer) {
-      throw new Error('No cookie or bearer token found in the pasted data.');
+      throw new Error('לא נמצאה עוגייה בהדבקה. ודאו שהעתקתם בקשת NextApi (למשל GetUser) כ-cURL.');
     }
-    // GetUser both validates the credentials and initialises a shopping cart
-    // (returns the user id + ShoppingCartGuid we need to build an order later).
-    const r: any = await postNext('GetUser', jar, {});
-    const d = r.Data ?? {};
+    // Validate the credentials and grab the user id + ShoppingCartGuid for later.
+    // GetUser is the ideal validator, but if it's unavailable on this account we
+    // accept any authenticated NextApi call so a good cookie still connects.
+    let d: any = {};
+    let guid: string | undefined;
+    let ok = false;
+    let lastErr = '';
+    for (const ep of ['GetUser', 'GetUserAddresses']) {
+      try {
+        const r: any = await postNext(ep, jar, {});
+        if (Array.isArray(r.Data)) {
+          guid = r.ShoppingCartGuid ?? guid;
+        } else {
+          d = r.Data ?? d;
+          guid = r.ShoppingCartGuid ?? d.shoppingCartGuid ?? guid;
+        }
+        ok = true;
+        break;
+      } catch (e) {
+        lastErr = (e as Error).message;
+      }
+    }
+    if (!ok) throw new Error(lastErr || 'אימות מול 10bis נכשל.');
 
     // Many accounts no longer expose a separate catalog bearer — the cookie
     // authenticates the catalog host too. When the user didn't paste a token,
-    // bootstrap catalog access from the cookie via RefreshToken (best-effort):
-    // it refreshes auth cookies and may hand back a token we can reuse.
-    let bearer = input.bearer;
-    if (!bearer) {
-      bearer = await this.bootstrapCatalogToken(jar);
-    }
+    // bootstrap catalog access from the cookie (best-effort, time-boxed).
+    const bearer = input.bearer ?? (await this.bootstrapCatalogToken(jar));
 
     return pack({
       email: d.email ?? '',
@@ -166,17 +181,20 @@ export class LocalTenbisClient implements TenbisClient {
       bearer,
       userToken: d.userToken ?? d.sessionToken,
       userId: d.userId,
-      shoppingCartGuid: r.ShoppingCartGuid ?? d.shoppingCartGuid,
+      shoppingCartGuid: guid,
     });
   }
 
-  /** Try to obtain catalog auth from the cookie alone. Never throws. */
+  /** Try to obtain catalog auth from the cookie alone. Never throws, time-boxed. */
   private async bootstrapCatalogToken(jar: Record<string, string>): Promise<string | undefined> {
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
       const res = await fetch(`${API}/Authentication/RefreshToken`, {
         method: 'POST',
         headers: { 'x-app-type': 'mobileWeb', cookie: cookieHeader(jar) },
-      });
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timer));
       absorbCookies(res, jar); // refreshed cookies may themselves authenticate the catalog
       if (!res.ok) return undefined;
       const j: any = await res.json().catch(() => null);

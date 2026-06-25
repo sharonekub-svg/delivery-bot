@@ -47,7 +47,7 @@ export default function Connect() {
         setStatus('✅ התחברתם! עכשיו ספרו לנו איך אתם אוהבים לאכול…');
         router.push('/profile');
       } else {
-        setStatus(`❌ ${data.error ?? 'החיבור נכשל.'}`);
+        setStatus(`❌ ${data.error ?? 'החיבור נכשל.'}${data.detail ? `\n\nפרטים טכניים: ${data.detail}` : ''}`);
       }
     } catch {
       setStatus('❌ תקלת רשת — נסו שוב.');
@@ -110,7 +110,7 @@ export default function Connect() {
           {busy ? 'מתחבר…' : 'התחברו'}
         </button>
       </form>
-      {status && <p style={{ marginTop: 16 }}>{status}</p>}
+      {status && <p style={{ marginTop: 16, whiteSpace: 'pre-wrap' }}>{status}</p>}
 
       <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginTop: 24 }}>
         נשלח פעם אחת ב-HTTPS לאימות, ואז נשמר רק בדפדפן הזה. שום דבר לא נשמר בשרת משותף.

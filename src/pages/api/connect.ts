@@ -31,6 +31,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   } catch (err) {
     console.error('connect error', err);
-    return res.status(401).json({ ok: false, error: 'הפרטים לא עבדו — ייתכן שפג תוקפם. העתיקו מחדש ונסו שוב.' });
+    const detail = String((err as Error)?.message ?? '').slice(0, 300);
+    return res.status(401).json({
+      ok: false,
+      error: 'הפרטים לא עבדו — ייתכן שפג תוקפם. העתיקו מחדש (בקשת GetUser) ונסו שוב.',
+      detail: detail || undefined,
+    });
   }
 }
