@@ -69,6 +69,7 @@ export default function Lunch() {
         body: JSON.stringify({
           session: store.getSession(), preferences: p, addressId: store.getAddress(),
           dishId: opt.dishId, restaurantId: opt.restaurantId, categoryId: opt.categoryId, approveOverBudget,
+          priceNis: opt.priceNis,
           pickup: p?.pickup, dontWantCutlery: p?.dontWantCutlery, useCoupons: p?.useCoupons, orderRemarks: p?.orderRemarks,
         }),
       });

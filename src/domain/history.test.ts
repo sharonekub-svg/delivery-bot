@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { summarizeHistory } from './history';
+import { summarizeHistory, spendThisMonth } from './history';
 import type { TenbisHistoryItem } from '../tenbis/types';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -67,6 +67,16 @@ describe('summarizeHistory', () => {
     // 6 orders within 30 days: 52+52+52+49+49+38 = 292; avg = 49.
     expect(s.monthlySpendNis).toBe(292);
     expect(s.avgOrderNis).toBe(49);
+  });
+
+  it('sums only the current calendar month for spendThisMonth', () => {
+    const now = new Date(2026, 5, 25); // June 2026
+    const items: TenbisHistoryItem[] = [
+      { dishId: 'a', dishName: 'A', restaurantId: '1', restaurantName: 'R', priceNis: 50, orderedAt: new Date(2026, 5, 3).toISOString() },
+      { dishId: 'b', dishName: 'B', restaurantId: '1', restaurantName: 'R', priceNis: 40, orderedAt: new Date(2026, 5, 20).toISOString() },
+      { dishId: 'c', dishName: 'C', restaurantId: '1', restaurantName: 'R', priceNis: 99, orderedAt: new Date(2026, 4, 28).toISOString() }, // May — excluded
+    ];
+    expect(spendThisMonth(items, now)).toBe(90);
   });
 
   it('handles empty history without inventing anything', () => {

@@ -35,8 +35,24 @@ export interface HistorySummary {
   remainingTodayNis?: number;
   /** What the user actually spent over the last 30 days (from history). */
   monthlySpendNis: number;
+  /** Spent so far in the current calendar month (the allowance resets monthly). */
+  spentThisMonthNis: number;
+  /** Monthly allowance minus this calendar month's spend, if the limit is known. */
+  remainingThisMonthNis?: number;
   /** Average price per order across the whole history (rounded). */
   avgOrderNis: number;
+}
+
+/** Sum of orders placed in the same calendar month as `now`. */
+export function spendThisMonth(history: TenbisHistoryItem[], now = new Date()): number {
+  return Math.round(
+    history
+      .filter((h) => {
+        const d = new Date(h.orderedAt);
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      })
+      .reduce((sum, h) => sum + h.priceNis, 0),
+  );
 }
 
 const CAPS = { recent: 8, favorites: 5, rarely: 5, restaurants: 4 } as const;
@@ -107,6 +123,10 @@ export function summarizeHistory(
     ? Math.round(history.reduce((sum, h) => sum + h.priceNis, 0) / history.length)
     : 0;
 
+  const spentThisMonthNis = spendThisMonth(history);
+  const remainingThisMonthNis =
+    monthlyBudgetNis != null ? monthlyBudgetNis - spentThisMonthNis : undefined;
+
   return {
     totalOrders: history.length,
     recent,
@@ -117,6 +137,8 @@ export function summarizeHistory(
     dailyBudgetNis,
     remainingTodayNis: budget?.remainingTodayNis,
     monthlySpendNis,
+    spentThisMonthNis,
+    remainingThisMonthNis,
     avgOrderNis,
   };
 }

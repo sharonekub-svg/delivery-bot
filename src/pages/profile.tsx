@@ -291,9 +291,10 @@ function InsightsCard({ state, insights, coupons }: { state: string; insights: H
       <div style={{ fontWeight: 700, color: '#fdba74', marginBottom: 8 }}>מה שראינו אצלכם ב-10bis</div>
       {(insights.monthlyBudgetNis != null || insights.remainingTodayNis != null || insights.monthlySpendNis > 0) && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-          {insights.monthlyBudgetNis != null && <Stat label="תקציב חודשי מהמעסיק">₪{insights.monthlyBudgetNis}</Stat>}
+          {insights.monthlyBudgetNis != null && <Stat label="תקציב חודשי (מגבלה)">₪{insights.monthlyBudgetNis}</Stat>}
+          {insights.remainingThisMonthNis != null && <Stat label="נשאר החודש">₪{insights.remainingThisMonthNis}</Stat>}
+          {insights.spentThisMonthNis > 0 && <Stat label="הוצאת החודש">₪{insights.spentThisMonthNis}</Stat>}
           {insights.remainingTodayNis != null && <Stat label="נשאר היום">₪{insights.remainingTodayNis}</Stat>}
-          {insights.monthlySpendNis > 0 && <Stat label="הוצאת ב-30 יום">₪{insights.monthlySpendNis}</Stat>}
           {insights.avgOrderNis > 0 && <Stat label="ממוצע להזמנה">₪{insights.avgOrderNis}</Stat>}
         </div>
       )}

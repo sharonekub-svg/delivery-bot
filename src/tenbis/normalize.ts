@@ -89,6 +89,39 @@ export function findTransactionArray(root: Json, maxDepth = 5): Json[] {
   return best;
 }
 
+const MONTHLY_LIMIT_KEYS = [
+  'monthlyLimit', 'MonthlyLimit', 'monthlyAmountLimit', 'MonthlyAmountLimit',
+  'companyMonthlyLimit', 'monthlyBudget', 'monthlyMaxAmount', 'maxMonthlyAmount',
+  'monthlyAllowance', 'monthlyTotalLimit', 'creditLimit',
+];
+
+/**
+ * Pull the employer's monthly limit out of a billing/transactions report,
+ * wherever 10Bis nests it. Returns the first positive number found under any of
+ * the known "monthly limit" field names.
+ */
+export function extractMonthlyLimit(payload: Json): number | undefined {
+  return findNumberByKeys(payload, MONTHLY_LIMIT_KEYS);
+}
+
+function findNumberByKeys(root: Json, keys: readonly string[], maxDepth = 6): number | undefined {
+  const wanted = new Set(keys.map((k) => k.toLowerCase()));
+  let found: number | undefined;
+  function visit(node: Json, depth: number) {
+    if (found != null || depth > maxDepth || node == null || typeof node !== 'object') return;
+    for (const k of Object.keys(node)) {
+      const v = node[k];
+      if (wanted.has(k.toLowerCase())) {
+        const n = num(v);
+        if (n > 0) { found = n; return; }
+      }
+      if (v && typeof v === 'object') visit(v, depth + 1);
+    }
+  }
+  visit(root, 0);
+  return found;
+}
+
 export function normalizeHistory(payload: Json): TenbisHistoryItem[] {
   const txns = findTransactionArray(payload);
   const out: TenbisHistoryItem[] = [];

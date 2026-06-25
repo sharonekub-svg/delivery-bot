@@ -120,6 +120,7 @@ export default function Bot() {
         body: JSON.stringify({
           session: store.getSession(), preferences: p, addressId: store.getAddress(),
           dishId: dish.dishId, restaurantId: dish.restaurantId, categoryId: dish.categoryId, approveOverBudget,
+          priceNis: dish.priceNis,
           pickup: p?.pickup, dontWantCutlery: p?.dontWantCutlery, useCoupons: p?.useCoupons, orderRemarks: p?.orderRemarks,
         }),
       });

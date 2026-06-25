@@ -1,6 +1,6 @@
 import type { TenbisClient } from './client';
 import { cookieStringToJar } from '../lib/curlParse';
-import { normalizeHistory } from './normalize';
+import { normalizeHistory, extractMonthlyLimit } from './normalize';
 import type {
   LoginChallenge,
   ManualCredentials,
@@ -369,26 +369,43 @@ export class LocalTenbisClient implements TenbisClient {
   }
 
   async getBudget(session: TenbisSession): Promise<TenbisBudget> {
-    // The company allowance lives on the user's 10Bis Moneycard, surfaced by
-    // GetPayments once a cart exists. Field names vary across captures, so we
-    // read defensively and fall back to {} (preferences then drive the budget).
-    // VERIFY LIVE: confirm the exact monthly/daily/balance field names.
+    // Two sources: the daily allowance lives on the Moneycard (GetPayments); the
+    // employer's *monthly limit* lives in the billing/transactions report. Read
+    // both defensively and merge; fall back to {} when nothing is exposed.
+    const state = parse(session);
+    const out: TenbisBudget = {};
+
+    // Daily allowance / remaining-today from the Moneycard.
     try {
-      const state = parse(session);
       const r: any = await postNext('GetPayments', state.cookies, { shoppingCartGuid: state.shoppingCartGuid });
       const payments: any[] = r.Data?.payments ?? r.Data ?? [];
       const card =
         payments.find((p) => p.paymentMethod === 'Moneycard') ??
         payments.find((p) => p.isMoneycard || p.companyId) ??
         payments[0];
-      if (!card) return {};
-      const monthlyNis = numOrUndef(card.monthlyMaxAmount ?? card.monthlyLimit ?? card.monthlyBudget);
-      const dailyNis = numOrUndef(card.dailyMaxAmount ?? card.dailyLimit ?? card.maxAmount ?? card.dailyBudget);
-      const remainingTodayNis = numOrUndef(card.balance ?? card.remainingAmount ?? card.sum ?? card.availableAmount);
-      return { monthlyNis, dailyNis, remainingTodayNis };
+      if (card) {
+        out.monthlyNis = numOrUndef(card.monthlyMaxAmount ?? card.monthlyLimit ?? card.monthlyBudget);
+        out.dailyNis = numOrUndef(card.dailyMaxAmount ?? card.dailyLimit ?? card.maxAmount ?? card.dailyBudget);
+        out.remainingTodayNis = numOrUndef(card.balance ?? card.remainingAmount ?? card.sum ?? card.availableAmount);
+      }
     } catch {
-      return {};
+      /* no payments info — fine */
     }
+
+    // Monthly limit from the billing report (the user's "monthly limit").
+    if (out.monthlyNis == null) {
+      for (const ep of ['GetUserTransactionsReport', 'UserTransactionsReport', 'GetUserReport', 'GetBillingReport']) {
+        try {
+          const r: any = await postNext(ep, state.cookies, {});
+          const monthly = extractMonthlyLimit(r);
+          if (monthly != null) { out.monthlyNis = monthly; break; }
+        } catch {
+          /* try the next candidate */
+        }
+      }
+    }
+
+    return out;
   }
 
   // ---- Order ----

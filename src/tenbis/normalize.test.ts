@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeHistory, findTransactionArray, toIso } from './normalize';
+import { normalizeHistory, findTransactionArray, toIso, extractMonthlyLimit } from './normalize';
 
 describe('toIso', () => {
   it('parses ASP.NET /Date(ms)/', () => {
@@ -24,6 +24,18 @@ describe('findTransactionArray', () => {
   it('ignores unrelated arrays', () => {
     const payload = { Data: { banners: [{ url: 'x' }, { url: 'y' }], transactions: [{ restaurantName: 'A', date: '2026-06-01' }] } };
     expect(findTransactionArray(payload)[0].restaurantName).toBe('A');
+  });
+});
+
+describe('extractMonthlyLimit', () => {
+  it('finds a top-level monthlyLimit', () => {
+    expect(extractMonthlyLimit({ Data: { monthlyLimit: 1000, used: 240 } })).toBe(1000);
+  });
+  it('finds a nested PascalCase MonthlyAmountLimit', () => {
+    expect(extractMonthlyLimit({ Data: { report: { budget: { MonthlyAmountLimit: '880' } } } })).toBe(880);
+  });
+  it('returns undefined when absent', () => {
+    expect(extractMonthlyLimit({ Data: { dailyLimit: 40 } })).toBeUndefined();
   });
 });
 
