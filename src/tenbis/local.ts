@@ -150,14 +150,40 @@ export class LocalTenbisClient implements TenbisClient {
     // (returns the user id + ShoppingCartGuid we need to build an order later).
     const r: any = await postNext('GetUser', jar, {});
     const d = r.Data ?? {};
+
+    // Many accounts no longer expose a separate catalog bearer — the cookie
+    // authenticates the catalog host too. When the user didn't paste a token,
+    // bootstrap catalog access from the cookie via RefreshToken (best-effort):
+    // it refreshes auth cookies and may hand back a token we can reuse.
+    let bearer = input.bearer;
+    if (!bearer) {
+      bearer = await this.bootstrapCatalogToken(jar);
+    }
+
     return pack({
       email: d.email ?? '',
       cookies: jar,
-      bearer: input.bearer,
+      bearer,
       userToken: d.userToken ?? d.sessionToken,
       userId: d.userId,
       shoppingCartGuid: r.ShoppingCartGuid ?? d.shoppingCartGuid,
     });
+  }
+
+  /** Try to obtain catalog auth from the cookie alone. Never throws. */
+  private async bootstrapCatalogToken(jar: Record<string, string>): Promise<string | undefined> {
+    try {
+      const res = await fetch(`${API}/Authentication/RefreshToken`, {
+        method: 'POST',
+        headers: { 'x-app-type': 'mobileWeb', cookie: cookieHeader(jar) },
+      });
+      absorbCookies(res, jar); // refreshed cookies may themselves authenticate the catalog
+      if (!res.ok) return undefined;
+      const j: any = await res.json().catch(() => null);
+      return j?.Data?.token ?? j?.Data?.accessToken ?? j?.token ?? j?.accessToken ?? undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   async refreshSession(session: TenbisSession): Promise<TenbisSession> {

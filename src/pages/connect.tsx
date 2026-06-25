@@ -13,9 +13,9 @@ const STEPS: [string, string][] = [
   ['היכנסו לתן ביס במחשב', 'במחשב (הכי קל ככה, לא בנייד) פתחו את 10bis.co.il בכרום או אדג׳, והתחברו לחשבון שלכם כרגיל.'],
   ['לחצו F12 במקלדת', 'הקישו F12 (בשורה העליונה של המקלדת). ייפתח חלון של כלי פיתוח בצד או בתחתית המסך — זה תקין, אל תיבהלו.'],
   ['פתחו את הלשונית Network', 'בחלון שנפתח, לחצו למעלה על הכיתוב "Network". אם לא רואים אותו, לחצו על החץ הכפול » ובחרו אותו מהרשימה.'],
-  ['בקשה 1 (עוגייה): העתיקו את GetUser', 'בתיבת הסינון ("Filter") הקלידו NextApi והקישו F5. קליק ימני על השורה GetUser ← Copy ← Copy as cURL. הדביקו בתיבה למטה. זו מביאה היסטוריה, תקציב וקופונים.'],
-  ['בקשה 2 (טוקן): העתיקו שורה מ-api.10bis', 'נקו את הסינון והקלידו במקום זה api.10bis (או Restaurants). קליק ימני על שורה אחת משם ← Copy ← Copy as cURL. הדביקו אותה בתיבה *מתחת* לבקשה הראשונה. זו מביאה תפריטים ומאפשרת להזמין.'],
-  ['לחצו התחברו', 'כשהחיווי למטה מראה ✓ עוגייה ו-✓ טוקן — לחצו "התחברו". אם יש רק עוגייה זה גם יעבוד, פשוט בלי תפריטים חיים.'],
+  ['העתיקו את GetUser (זה כל מה שצריך)', 'בתיבת הסינון ("Filter") הקלידו NextApi והקישו F5. קליק ימני על השורה GetUser ← Copy ← Copy as cURL. הדביקו בתיבה למטה. זו מביאה היסטוריה, תקציב, קופונים — והכול.'],
+  ['רק אם יש לכם טוקן (לא חובה!)', 'אצל רוב המשתמשים אין טוקן נפרד וזה מצוין — העוגייה מספיקה. אם בכל זאת תרצו: נקו את הסינון, הקלידו api.10bis, קליק ימני על שורה ← Copy as cURL, והדביקו גם אותה. אם אין — דלגו על השלב הזה.'],
+  ['לחצו התחברו', 'כשהחיווי למטה מראה ✓ עוגייה — לחצו "התחברו". זהו, מוכנים. (✓ טוקן זה בונוס, לא חובה.)'],
 ];
 
 export default function Connect() {
@@ -98,10 +98,12 @@ export default function Connect() {
           dir="ltr"
         />
         {raw.trim().length > 0 && (
-          <div style={{ display: 'flex', gap: 8, marginTop: 10, fontSize: 14 }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 10, fontSize: 14, alignItems: 'center' }}>
             <span style={detected.cookie ? detPillOn : detPillOff}>{detected.cookie ? '✓' : '◻︎'} עוגייה</span>
-            <span style={detected.bearer ? detPillOn : detPillOff}>{detected.bearer ? '✓' : '◻︎'} טוקן</span>
-            {!detected.cookie && <span style={{ color: 'rgba(255,255,255,0.5)', alignSelf: 'center' }}>צריך לפחות עוגייה (בקשת GetUser)</span>}
+            <span style={detected.bearer ? detPillOn : detPillOff}>{detected.bearer ? '✓' : '◻︎'} טוקן (לא חובה)</span>
+            {detected.cookie
+              ? <span style={{ color: '#86efac' }}>מוכן להתחברות 🎉</span>
+              : <span style={{ color: 'rgba(255,255,255,0.5)' }}>הדביקו את בקשת GetUser</span>}
           </div>
         )}
         <button type="submit" disabled={busy || !detected.cookie} style={{ ...button, opacity: busy || !detected.cookie ? 0.6 : 1 }}>
