@@ -252,6 +252,14 @@ function InsightsCard({ state, insights }: { state: string; insights: HistorySum
   return (
     <div style={insightsBox}>
       <div style={{ fontWeight: 700, color: '#fdba74', marginBottom: 8 }}>מה שראינו אצלכם ב-10bis</div>
+      {(insights.monthlyBudgetNis != null || insights.remainingTodayNis != null || insights.monthlySpendNis > 0) && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+          {insights.monthlyBudgetNis != null && <Stat label="תקציב חודשי מהמעסיק">₪{insights.monthlyBudgetNis}</Stat>}
+          {insights.remainingTodayNis != null && <Stat label="נשאר היום">₪{insights.remainingTodayNis}</Stat>}
+          {insights.monthlySpendNis > 0 && <Stat label="הוצאת ב-30 יום">₪{insights.monthlySpendNis}</Stat>}
+          {insights.avgOrderNis > 0 && <Stat label="ממוצע להזמנה">₪{insights.avgOrderNis}</Stat>}
+        </div>
+      )}
       {top && <div style={{ marginBottom: 8 }}>נתחיל מההמלצה לפי ההיסטוריה: <b>{top.dishName}</b> (הזמנתם {top.count} פעמים).</div>}
       {insights.recent.length > 0 && (
         <Line label="הזמנות אחרונות">{insights.recent.slice(0, 4).map((r) => r.dishName).join(' · ')}</Line>
@@ -263,6 +271,15 @@ function InsightsCard({ state, insights }: { state: string; insights: HistorySum
         <Line label="כמעט לא הזמנתם">{insights.rarely.map((r) => r.dishName).join(' · ')}</Line>
       )}
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 8 }}>מילאנו את התקציב, המסעדות והטעמים מראש מהנתונים האלה — אפשר לשנות הכל למטה.</div>
+    </div>
+  );
+}
+
+function Stat({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '8px 12px', minWidth: 96 }}>
+      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 800 }}>{children}</div>
     </div>
   );
 }

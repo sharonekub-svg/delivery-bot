@@ -57,6 +57,18 @@ describe('summarizeHistory', () => {
     expect(s.dailyBudgetNis).toBe(45);
   });
 
+  it('passes through the remaining-today allowance', () => {
+    const s = summarizeHistory(history, { monthlyNis: 880, remainingTodayNis: 22 });
+    expect(s.remainingTodayNis).toBe(22);
+  });
+
+  it('sums last-30-day spend and averages order price from real orders', () => {
+    const s = summarizeHistory(history);
+    // 6 orders within 30 days: 52+52+52+49+49+38 = 292; avg = 49.
+    expect(s.monthlySpendNis).toBe(292);
+    expect(s.avgOrderNis).toBe(49);
+  });
+
   it('handles empty history without inventing anything', () => {
     const s = summarizeHistory([]);
     expect(s).toMatchObject({ totalOrders: 0, recent: [], favorites: [], rarely: [], topRestaurants: [] });

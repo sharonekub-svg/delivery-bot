@@ -31,6 +31,12 @@ export interface HistorySummary {
   monthlyBudgetNis?: number;
   /** Per-day budget: the API's daily figure, else monthly / working days. */
   dailyBudgetNis?: number;
+  /** Allowance left on the Moneycard today, if 10Bis exposes it. */
+  remainingTodayNis?: number;
+  /** What the user actually spent over the last 30 days (from history). */
+  monthlySpendNis: number;
+  /** Average price per order across the whole history (rounded). */
+  avgOrderNis: number;
 }
 
 const CAPS = { recent: 8, favorites: 5, rarely: 5, restaurants: 4 } as const;
@@ -93,6 +99,14 @@ export function summarizeHistory(
     budget?.dailyNis ??
     (monthlyBudgetNis != null ? deriveDailyBudget(monthlyBudgetNis) : undefined);
 
+  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const monthlySpendNis = Math.round(
+    history.filter((h) => new Date(h.orderedAt).getTime() >= cutoff).reduce((sum, h) => sum + h.priceNis, 0),
+  );
+  const avgOrderNis = history.length
+    ? Math.round(history.reduce((sum, h) => sum + h.priceNis, 0) / history.length)
+    : 0;
+
   return {
     totalOrders: history.length,
     recent,
@@ -101,5 +115,8 @@ export function summarizeHistory(
     topRestaurants,
     monthlyBudgetNis,
     dailyBudgetNis,
+    remainingTodayNis: budget?.remainingTodayNis,
+    monthlySpendNis,
+    avgOrderNis,
   };
 }

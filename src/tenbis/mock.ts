@@ -13,11 +13,11 @@ import type {
 const DAY = 24 * 60 * 60 * 1000;
 
 const DISHES: TenbisDish[] = [
-  { id: 'd1', restaurantId: 'r1', restaurantName: 'Greens & Co', name: 'Grilled Chicken Quinoa Bowl', description: 'Grilled chicken breast, quinoa, roasted veg.', priceNis: 52, tags: ['high-protein'], proteinG: 41, caloriesKcal: 610, deepLink: 'https://example/d1' },
-  { id: 'd2', restaurantId: 'r1', restaurantName: 'Greens & Co', name: 'Mediterranean Salmon Salad', description: 'Salmon, mixed greens, tahini.', priceNis: 58, tags: ['high-protein', 'omega3'], proteinG: 34, caloriesKcal: 540, deepLink: 'https://example/d2' },
-  { id: 'd3', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Chicken Shawarma Plate', description: 'Shawarma, salad, hummus.', priceNis: 49, tags: ['high-protein'], proteinG: 38, caloriesKcal: 720, deepLink: 'https://example/d3' },
+  { id: 'd1', restaurantId: 'r1', restaurantName: 'Greens & Co', name: 'Grilled Chicken Quinoa Bowl', description: 'Grilled chicken breast, quinoa, roasted veg.', priceNis: 52, tags: ['high-protein', 'popular', 'healthy'], proteinG: 41, caloriesKcal: 610, popular: true, isGreen: true, deepLink: 'https://example/d1' },
+  { id: 'd2', restaurantId: 'r1', restaurantName: 'Greens & Co', name: 'Mediterranean Salmon Salad', description: 'Salmon, mixed greens, tahini.', priceNis: 58, tags: ['high-protein', 'omega3', 'healthy'], proteinG: 34, caloriesKcal: 540, isGreen: true, deepLink: 'https://example/d2' },
+  { id: 'd3', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Chicken Shawarma Plate', description: 'Shawarma, salad, hummus.', priceNis: 49, tags: ['high-protein', 'popular'], proteinG: 38, caloriesKcal: 720, popular: true, healthWarnings: ['sodium', 'fat'], deepLink: 'https://example/d3' },
   { id: 'd4', restaurantId: 'r3', restaurantName: 'Tokyo Express', name: 'Salmon Poke Bowl', description: 'Salmon, rice, edamame, avocado.', priceNis: 56, tags: ['high-protein'], proteinG: 30, caloriesKcal: 580, deepLink: 'https://example/d4' },
-  { id: 'd5', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Falafel Pita', description: 'Falafel, salad, tahini.', priceNis: 38, tags: ['vegan'], proteinG: 16, caloriesKcal: 650, deepLink: 'https://example/d5' },
+  { id: 'd5', restaurantId: 'r2', restaurantName: 'Pita Bar', name: 'Falafel Pita', description: 'Falafel, salad, tahini.', priceNis: 38, tags: ['vegan'], proteinG: 16, caloriesKcal: 650, healthWarnings: ['sugar'], deepLink: 'https://example/d5' },
 ];
 
 /** Deterministic fake 10Bis used for tests and until live verification. */

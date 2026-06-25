@@ -52,6 +52,13 @@ export interface TenbisDish {
   // Optional nutrition if the API exposes it.
   proteinG?: number;
   caloriesKcal?: number;
+  /** 10Bis flags a frequently-ordered dish as popular. */
+  popular?: boolean;
+  /** 10Bis "green symbol" — flagged by the chain as a healthier choice. */
+  isGreen?: boolean;
+  /** Israeli mandatory front-of-pack warnings 10Bis exposes per dish. */
+  healthWarnings?: ('sugar' | 'sodium' | 'fat')[];
+  imageUrl?: string;
   deepLink?: string; // direct link to item page in the app
 }
 

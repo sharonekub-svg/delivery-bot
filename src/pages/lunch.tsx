@@ -7,6 +7,19 @@ interface DishOption {
   dishId: string; restaurantId: string; categoryId?: string; dishName: string;
   restaurantName: string; priceNis: number; proteinG?: number; caloriesKcal?: number;
   description?: string; deepLink?: string; etaMinutes?: number;
+  popular?: boolean; isGreen?: boolean; healthWarnings?: ('sugar' | 'sodium' | 'fat')[];
+}
+
+const WARN_LABEL: Record<string, string> = { sugar: 'סוכר גבוה', sodium: 'נתרן גבוה', fat: 'שומן רווי גבוה' };
+function Badges({ dish }: { dish: DishOption }) {
+  if (!dish.popular && !dish.isGreen && !dish.healthWarnings?.length) return null;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+      {dish.popular && <span style={badge('#f59e0b')}>⭐ פופולרי</span>}
+      {dish.isGreen && <span style={badge('#16a34a')}>🟢 בריא</span>}
+      {dish.healthWarnings?.map((w) => <span key={w} style={badge('#b91c1c')}>{WARN_LABEL[w]}</span>)}
+    </div>
+  );
 }
 interface OrderState {
   dishId: string; ok?: boolean; pending?: boolean; overBudget?: boolean; message?: string; trackerDeepLink?: string;
@@ -111,6 +124,7 @@ export default function Lunch() {
               <div style={{ fontSize: 24, fontWeight: 800, margin: '6px 0 2px' }}>רוצה {top.dishName}?</div>
               <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 15 }}>מ{top.restaurantName}</div>
               {top.description && <div style={{ color: '#fdba74', fontSize: 14, marginTop: 6 }}>{top.description}</div>}
+              <Badges dish={top} />
               <div style={{ marginTop: 10 }}>
                 <span style={heroPill}>₪{top.priceNis}</span>
                 {top.proteinG != null && <span style={heroPill}>{top.proteinG}ג חלבון</span>}
@@ -137,6 +151,7 @@ export default function Lunch() {
                           <div style={{ fontWeight: 600, fontSize: 17 }}>{opt.dishName}</div>
                           <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>{opt.restaurantName}</div>
                           {opt.description && <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginTop: 4 }}>{opt.description}</div>}
+                          <Badges dish={opt} />
                           <div style={{ marginTop: 8 }}>
                             <span style={pill}>₪{opt.priceNis}</span>
                             {opt.proteinG != null && <span style={pill}>{opt.proteinG}ג חלבון</span>}
@@ -181,6 +196,7 @@ function OrderStatus({ o, onForce }: { o: OrderState | null; onForce: () => void
 const wrap: React.CSSProperties = { maxWidth: 640, margin: '0 auto', padding: '28px 20px 60px', minHeight: '100vh' };
 const card: React.CSSProperties = { display: 'flex', gap: 12, alignItems: 'flex-start', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 16, padding: 16 };
 const pill: React.CSSProperties = { display: 'inline-block', background: 'rgba(255,255,255,0.08)', borderRadius: 9999, padding: '2px 10px', marginInlineEnd: 6, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' };
+const badge = (color: string): React.CSSProperties => ({ display: 'inline-block', background: `${color}22`, border: `1px solid ${color}`, color: '#fff', borderRadius: 9999, padding: '2px 10px', fontSize: 12, fontWeight: 600 });
 const orderBtn: React.CSSProperties = { flex: '0 0 auto', background: '#f97316', color: '#fff', border: 'none', borderRadius: 9999, padding: '10px 18px', fontSize: 15, fontWeight: 600, cursor: 'pointer' };
 const smallBtn: React.CSSProperties = { background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 9999, padding: '6px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer' };
 const errorBox: React.CSSProperties = { background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(248,113,113,0.4)', borderRadius: 12, padding: 14, color: '#fca5a5', marginTop: 12 };
