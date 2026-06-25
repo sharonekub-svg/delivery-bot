@@ -27,26 +27,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const tenbis = getTenbisClient();
   const priceNis = Number(body.priceNis);
 
-  // Monthly cap: keep the whole month's orders under the employer's monthly
-  // limit. We read the limit + this month's spend live, so it holds even across
-  // devices. Skipped when the user already approved going over, or when we can't
-  // determine a price/limit.
+  // Monthly cap: keep the whole month's orders under the budget. The cap the
+  // *user set* in their profile wins; if they didn't set one we fall back to the
+  // employer's monthly limit from 10Bis. This naturally limits how many orders
+  // fit in a month. Skipped when the user already approved going over.
   if (!body.approveOverBudget && Number.isFinite(priceNis) && priceNis > 0) {
     try {
-      const [budget, history] = await Promise.all([
-        tenbis.getBudget(session).catch((): TenbisBudget => ({})),
-        tenbis.getHistory(session, 31).catch(() => []),
-      ]);
-      const check = checkMonthlyBudget(budget.monthlyNis, spendThisMonth(history), priceNis);
-      if (!check.withinBudget) {
-        return res.status(200).json({
-          ok: false,
-          result: {
+      let cap = prefs.monthlyBudgetNis;
+      if (cap == null) {
+        const budget = await tenbis.getBudget(session).catch((): TenbisBudget => ({}));
+        cap = budget.monthlyNis;
+      }
+      if (cap != null && cap > 0) {
+        const history = await tenbis.getHistory(session, 31).catch(() => []);
+        const check = checkMonthlyBudget(cap, spendThisMonth(history), priceNis);
+        if (!check.withinBudget) {
+          return res.status(200).json({
             ok: false,
-            errorCode: 'budget_exceeded',
-            errorMessage: `ההזמנה תחרוג מהתקציב החודשי שלך — נשאר ₪${check.remainingNis} מתוך ₪${budget.monthlyNis} החודש.`,
-          },
-        });
+            result: {
+              ok: false,
+              errorCode: 'budget_exceeded',
+              errorMessage: `ההזמנה תחרוג מהתקציב החודשי שהגדרת — נשאר ₪${check.remainingNis} מתוך ₪${cap} החודש.`,
+            },
+          });
+        }
       }
     } catch {
       /* if the live check fails, fall through to the per-order ceiling below */

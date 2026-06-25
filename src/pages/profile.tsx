@@ -39,6 +39,7 @@ export default function Profile() {
   const [favorites, setFavorites] = useState('');
   const [allergies, setAllergies] = useState('');
   const [budget, setBudget] = useState(40);
+  const [monthlyBudget, setMonthlyBudget] = useState(''); // '' = no monthly cap
   const [beverage, setBeverage] = useState(false);
   const [timeFrom, setTimeFrom] = useState('12:30');
   const [timeTo, setTimeTo] = useState('17:30');
@@ -75,6 +76,7 @@ export default function Profile() {
       setFavorites(p.favoriteRestaurantNames.join(', '));
       setAllergies(p.exclusions.join(', '));
       setBudget(p.dailyBudgetNis);
+      if (p.monthlyBudgetNis) setMonthlyBudget(String(p.monthlyBudgetNis));
       setBeverage(p.includeBeverage);
       if (p.timeFrom) setTimeFrom(p.timeFrom);
       if (p.timeTo) setTimeTo(p.timeTo);
@@ -106,6 +108,7 @@ export default function Profile() {
         if (!hadProfile) {
           const i = data.insights;
           if (i.dailyBudgetNis) setBudget(i.dailyBudgetNis);
+          if (i.monthlyBudgetNis) setMonthlyBudget(String(i.monthlyBudgetNis));
           if (i.topRestaurants.length) setFavorites(i.topRestaurants.join(', '));
           if (i.favorites.length) setLikes(i.favorites.map((f) => f.dishName).join(', '));
         }
@@ -148,6 +151,7 @@ export default function Profile() {
       goal: g.value,
       weeklyProteinTargetG: dailyProtein > 0 ? dailyProtein * 7 : undefined,
       dailyBudgetNis: budget,
+      monthlyBudgetNis: Number(monthlyBudget) > 0 ? Number(monthlyBudget) : undefined,
       includeBeverage: beverage,
       timeFrom,
       timeTo,
@@ -206,6 +210,22 @@ export default function Profile() {
               <button type="button" key={b} onClick={() => setBudget(b)} style={budget === b ? presetOn : preset}>₪{b}</button>
             ))}
           </div>
+        </div>
+
+        <div style={lbl}>תקציב חודשי כולל (₪) — לא חובה
+          <input type="number" value={monthlyBudget} onChange={(e) => setMonthlyBudget(e.target.value)} placeholder="למשל 1000" style={ctl} />
+          <div style={hint}>
+            הבוט יוודא שסך כל ההזמנות שלכם בחודש לא יעבור את הסכום הזה — וכך יפרוס לכם את ההזמנות לאורך החודש.
+            {monthlyBudget && Number(monthlyBudget) > 0 && insights?.spentThisMonthNis != null &&
+              ` כרגע הוצאתם ₪${insights.spentThisMonthNis} החודש, נשאר ₪${Math.max(0, Number(monthlyBudget) - insights.spentThisMonthNis)}.`}
+          </div>
+          {insights?.monthlyBudgetNis != null && (
+            <div style={chipRow}>
+              <button type="button" onClick={() => setMonthlyBudget(String(insights.monthlyBudgetNis))} style={preset}>
+                לפי המגבלה מהמעסיק: ₪{insights.monthlyBudgetNis}
+              </button>
+            </div>
+          )}
         </div>
 
         <div style={lbl}>באיזה טווח שעות להזמין?

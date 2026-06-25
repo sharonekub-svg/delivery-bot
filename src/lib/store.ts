@@ -27,6 +27,8 @@ export interface StoredProfile {
   goal?: string;
   weeklyProteinTargetG?: number;
   dailyBudgetNis: number;
+  /** User-set monthly cap (₪). The bot won't let a month's orders exceed it. */
+  monthlyBudgetNis?: number;
   includeBeverage: boolean;
   /** Preferred ordering window, local HH:mm. */
   timeFrom: string;

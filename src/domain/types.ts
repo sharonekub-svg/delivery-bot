@@ -21,6 +21,8 @@ export interface Preferences {
   // 5. Daily budget (NIS)
   dailyBudgetNis: number;
   budgetIsManual: boolean;
+  /** User-set monthly cap: the bot keeps the whole month's orders under this. */
+  monthlyBudgetNis?: number;
   // 6. Active days (0=Sun..6=Sat). Default Sun–Thu.
   activeDays: number[];
   // 7. Planning horizon
