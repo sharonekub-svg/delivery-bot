@@ -3,7 +3,7 @@
  * taste profile once and the site remembers it. We keep it (and the validated
  * 10Bis session) in localStorage on the user's own device — no server database.
  */
-const KEYS = { session: 'lh_session', prefs: 'lh_prefs', address: 'lh_address' } as const;
+const KEYS = { session: 'lh_session', prefs: 'lh_prefs', address: 'lh_address', addresses: 'lh_addresses' } as const;
 
 function read<T>(key: string): T | null {
   if (typeof window === 'undefined') return null;
@@ -51,6 +51,13 @@ export interface StoredProfile {
   orderRemarks?: string;
 }
 
+/** A delivery address as 10Bis knows it — used for the home/work picker. */
+export interface StoredAddress {
+  id: string;
+  label: string;
+  raw?: string;
+}
+
 export const store = {
   getSession: () => read<{ token: string; expiresAt: number }>(KEYS.session),
   setSession: (s: unknown) => write(KEYS.session, s),
@@ -58,6 +65,8 @@ export const store = {
   setProfile: (p: StoredProfile) => write(KEYS.prefs, p),
   getAddress: () => read<string>(KEYS.address),
   setAddress: (id: string) => write(KEYS.address, id),
+  getAddresses: () => read<StoredAddress[]>(KEYS.addresses),
+  setAddresses: (a: StoredAddress[]) => write(KEYS.addresses, a),
   clear: () => {
     if (typeof window === 'undefined') return;
     Object.values(KEYS).forEach((k) => window.localStorage.removeItem(k));

@@ -65,6 +65,25 @@ function byDish(history: TenbisHistoryItem[]): DishStat[] {
   return [...map.values()];
 }
 
+/**
+ * The single most-ordered dish in each restaurant, restaurants ranked by that
+ * dish's order count. This gives a *varied* "order from my history" list — your
+ * go-to at each place (the top item at McDonald's, the top at Greens, …) instead
+ * of five variations of the same most-recent dish.
+ */
+export function topDishPerRestaurant(history: TenbisHistoryItem[], cap = 6): DishStat[] {
+  const best = new Map<string, DishStat>(); // restaurantName -> its most-ordered dish
+  for (const s of byDish(history)) {
+    const cur = best.get(s.restaurantName);
+    if (!cur || s.count > cur.count || (s.count === cur.count && s.lastOrderedAt > cur.lastOrderedAt)) {
+      best.set(s.restaurantName, s);
+    }
+  }
+  return [...best.values()]
+    .sort((a, b) => b.count - a.count || (a.lastOrderedAt < b.lastOrderedAt ? 1 : -1))
+    .slice(0, cap);
+}
+
 export function summarizeHistory(
   history: TenbisHistoryItem[],
   budget?: TenbisBudget,

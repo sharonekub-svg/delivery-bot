@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       ok: true,
       session,
-      addresses: addresses.map((a) => ({ id: a.id, label: a.label })),
+      addresses: addresses.map((a) => ({ id: a.id, label: a.label, raw: a.raw })),
     });
   } catch (err) {
     console.error('connect error', err);

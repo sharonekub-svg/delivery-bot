@@ -19,9 +19,12 @@ The flow is dead simple:
    scheduled (future) delivery, skip-cutlery, auto-apply coupons, a standing
    note to the restaurant, plus per-dish popular/healthy/health-warning badges.
    Saved and remembered, so you never answer twice.
-3. **Lunch** (`/lunch`) — uses your remembered profile to pull and rank today's
-   live 10Bis menu through the recommendation engine, and orders the dish you
-   pick.
+3. **Lunch** (`/lunch`) — you choose what to base the picks on (**your previous
+   orders** — your most-ordered dish at each restaurant that's available today —
+   or **your protein goal**), pick **where** it goes (home / work), and confirm.
+   It doesn't order *now*: it **schedules** the order for the next active day and
+   time from your profile (10Bis future delivery), so the food arrives when you
+   said, where you said.
 
 > **No required env vars, no database, no AI key.** Your profile and validated
 > 10Bis session are remembered in your own browser (localStorage); the server

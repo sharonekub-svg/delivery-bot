@@ -38,6 +38,7 @@ export default function Connect() {
       const data = await res.json();
       if (res.ok && data.ok) {
         store.setSession(data.session);
+        if (data.addresses?.length) store.setAddresses(data.addresses);
         if (data.addresses?.[0]?.id) store.setAddress(data.addresses[0].id);
         setStatus('✅ התחברתם! עכשיו ספרו לנו איך אתם אוהבים לאכול…');
         router.push('/profile');

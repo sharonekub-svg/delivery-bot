@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { store } from '../lib/store';
+import { nextDeliverySlot, describeSlot } from '../domain/schedule';
 
 interface DishOption {
   dishId: string; restaurantId: string; categoryId?: string; dishName: string;
@@ -111,22 +112,25 @@ export default function Bot() {
     const dish = options[idx];
     if (!dish) return;
     setStage('loading');
-    if (!approveOverBudget) add({ role: 'user', kind: 'text', text: 'כן, הזמינו' });
-    add({ role: 'bot', kind: 'text', text: 'מזמין…' });
+    if (!approveOverBudget) add({ role: 'user', kind: 'text', text: 'כן, קבעו' });
+    add({ role: 'bot', kind: 'text', text: 'קובע…' });
     try {
       const p = store.getProfile();
+      const slot = p ? nextDeliverySlot(p.activeDays ?? [0, 1, 2, 3, 4], p.timeFrom || '12:30') : null;
       const res = await fetch('/api/order', {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           session: store.getSession(), preferences: p, addressId: store.getAddress(),
           dishId: dish.dishId, restaurantId: dish.restaurantId, categoryId: dish.categoryId, approveOverBudget,
+          deliverAt: slot?.iso,
           pickup: p?.pickup, dontWantCutlery: p?.dontWantCutlery, useCoupons: p?.useCoupons, orderRemarks: p?.orderRemarks,
         }),
       });
       const data = await res.json();
       const r = data.result ?? {};
       if (data.ok) {
-        add({ role: 'bot', kind: 'text', text: `הוזמן: ${dish.dishName} מ${dish.restaurantName}. בתיאבון.${r.discountNis ? `\nחסכת ₪${r.discountNis} עם קופון.` : ''}${dish.etaMinutes != null ? `\nזמן משלוח משוער: כ-${dish.etaMinutes} דקות.` : ''}${r.trackerDeepLink ? `\nמעקב: ${r.trackerDeepLink}` : ''}` });
+        const when = slot ? `\nיגיע ${describeSlot(slot)} — לא עכשיו.` : '';
+        add({ role: 'bot', kind: 'text', text: `נקבע: ${dish.dishName} מ${dish.restaurantName}.${when}${r.discountNis ? `\nחסכת ₪${r.discountNis} עם קופון.` : ''}${r.trackerDeepLink ? `\nמעקב: ${r.trackerDeepLink}` : ''}` });
         setStage('ordered');
       } else if (r.errorCode === 'budget_exceeded') {
         add({ role: 'bot', kind: 'text', text: `${r.errorMessage ?? 'זה מעל התקציב היומי.'} להזמין בכל זאת?` });
@@ -168,7 +172,7 @@ export default function Bot() {
         {stage === 'craving' && CRAVINGS.map((c) => <Chip key={c.key} label={c.label} onClick={() => pickCraving(c)} />)}
         {stage === 'dish' && (
           <>
-            <Chip label="כן, הזמינו" primary onClick={() => order(false)} />
+            <Chip label="כן, קבעו את זה" primary onClick={() => order(false)} />
             <Chip label="משהו אחר" onClick={another} />
             <Chip label="סוג אחר" onClick={() => { add({ role: 'user', kind: 'text', text: 'סוג אחר' }); add({ role: 'bot', kind: 'text', text: 'בטח. על מה בא לך?' }); setStage('craving'); }} />
           </>

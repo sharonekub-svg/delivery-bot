@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { summarizeHistory } from './history';
+import { summarizeHistory, topDishPerRestaurant } from './history';
 import type { TenbisHistoryItem } from '../tenbis/types';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -73,5 +73,26 @@ describe('summarizeHistory', () => {
     const s = summarizeHistory([]);
     expect(s).toMatchObject({ totalOrders: 0, recent: [], favorites: [], rarely: [], topRestaurants: [] });
     expect(s.dailyBudgetNis).toBeUndefined();
+  });
+});
+
+describe('topDishPerRestaurant', () => {
+  it('returns one dish per restaurant — the most-ordered there — ranked by count', () => {
+    const tops = topDishPerRestaurant(history);
+    // One entry per restaurant (Greens, Pita Bar), no repeats.
+    expect(tops).toHaveLength(2);
+    expect(tops[0].dishId).toBe('d1'); // Chicken Bowl, 3 orders -> first
+    // Pita Bar's top is Shawarma (2) over Falafel (1).
+    const pita = tops.find((t) => t.restaurantName === 'Pita Bar');
+    expect(pita?.dishId).toBe('d2');
+    expect(pita?.count).toBe(2);
+  });
+
+  it('caps the number of restaurants returned', () => {
+    expect(topDishPerRestaurant(history, 1)).toHaveLength(1);
+  });
+
+  it('returns nothing for empty history', () => {
+    expect(topDishPerRestaurant([])).toEqual([]);
   });
 });
