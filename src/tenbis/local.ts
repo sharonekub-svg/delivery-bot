@@ -1,5 +1,6 @@
 import type { TenbisClient } from './client';
 import { cookieStringToJar } from '../lib/curlParse';
+import { finalizeHistory, mapTransactionsReport } from './transactions';
 import type {
   LoginChallenge,
   ManualCredentials,
@@ -96,6 +97,21 @@ async function postNext<T = any>(path: string, jar: Record<string, string>, body
     throw new Error(`10Bis ${path} failed: ${JSON.stringify(json.Errors ?? [])}`);
   }
   return json as unknown as T;
+}
+
+/** GET from NextApi with cookies (some report endpoints are GET, not POST). */
+async function getNext<T = any>(path: string, jar: Record<string, string>): Promise<T> {
+  const res = await fetch(`${NEXT}/${path}`, {
+    headers: { 'x-app-type': 'mobileWeb', cookie: cookieHeader(jar) },
+  });
+  absorbCookies(res, jar);
+  if (res.status === 401) throw new SessionExpired();
+  if (!res.ok) throw new Error(`10Bis ${path} -> ${res.status}`);
+  const json = (await res.json()) as { Success?: boolean; Errors?: unknown[] };
+  if (json && json.Success === false) {
+    throw new Error(`10Bis ${path} failed: ${JSON.stringify(json.Errors ?? [])}`);
+  }
+  return json as T;
 }
 
 async function getApi<T = any>(path: string, jar: Record<string, string>, bearer?: string): Promise<T> {
@@ -239,27 +255,49 @@ export class LocalTenbisClient implements TenbisClient {
     }));
   }
 
-  async getHistory(session: TenbisSession, _sinceDays: number): Promise<TenbisHistoryItem[]> {
-    // VERIFY LIVE: confirm the user-transactions endpoint/shape; the capture
-    // showed GetLastTransactionWithoutReview but not full history. Empty history
-    // is safe (engine just loses the fatigue/frequency signal).
-    try {
-      const state = parse(session);
-      const r: any = await postNext('GetUserTransactionsReport', state.cookies, {});
-      const list: any[] = r.Data?.transactions ?? r.Data ?? [];
-      return list
-        .filter((t) => t.dishName || t.restaurantName)
-        .map((t) => ({
-          dishId: String(t.dishId ?? ''),
-          dishName: t.dishName ?? '',
-          restaurantId: String(t.restaurantId ?? ''),
-          restaurantName: t.restaurantName ?? '',
-          priceNis: Number(t.sum ?? t.price ?? 0),
-          orderedAt: t.orderDate ?? t.date ?? new Date().toISOString(),
-        }));
-    } catch {
-      return [];
+  async getHistory(session: TenbisSession, sinceDays: number): Promise<TenbisHistoryItem[]> {
+    const state = parse(session);
+    const collected: TenbisHistoryItem[] = [];
+
+    // Primary: the endpoint behind the web app's "ההזמנות שלי" page. It is a
+    // GET and takes a month offset (dateBias: 0 = this month, -1 = last month…),
+    // so walk back enough months to cover the requested window.
+    const months = Math.max(1, Math.min(3, Math.ceil(sinceDays / 30)));
+    for (let bias = 0; bias > -months; bias--) {
+      try {
+        const r: any = await getNext(
+          `UserTransactionsReport?type=MonthToDateReport&culture=he-IL&uiCulture=he&dateBias=${bias}`,
+          state.cookies,
+        );
+        collected.push(...mapTransactionsReport(r));
+      } catch (err) {
+        console.warn(`10bis UserTransactionsReport dateBias=${bias} failed:`, (err as Error).message);
+        break; // older months use the same endpoint — no point retrying
+      }
     }
+
+    // Fallback: earlier POST guess, kept in case the account predates the GET report.
+    if (collected.length === 0) {
+      try {
+        const r: any = await postNext('GetUserTransactionsReport', state.cookies, {});
+        collected.push(...mapTransactionsReport(r));
+      } catch (err) {
+        console.warn('10bis GetUserTransactionsReport failed:', (err as Error).message);
+      }
+    }
+
+    // Last resort (endpoint confirmed in the capture): at least the latest order.
+    if (collected.length === 0) {
+      try {
+        const r: any = await postNext('GetLastTransactionWithoutReview', state.cookies, {});
+        const d = r.Data ?? {};
+        collected.push(...mapTransactionsReport({ Data: { orderList: [d.transaction ?? d.order ?? d] } }));
+      } catch (err) {
+        console.warn('10bis GetLastTransactionWithoutReview failed:', (err as Error).message);
+      }
+    }
+
+    return finalizeHistory(collected, sinceDays);
   }
 
   async getRestaurants(session: TenbisSession, addressId: string): Promise<TenbisRestaurant[]> {
