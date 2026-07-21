@@ -32,3 +32,10 @@ export function isActiveDay(prefs: Preferences, date: Date, timeZone: string): b
   const dow = new Date(date.toLocaleString('en-US', { timeZone })).getDay();
   return prefs.activeDays.includes(dow);
 }
+
+/** True on the first active day of the week — when the weekly preview goes out. */
+export function isFirstActiveDayOfWeek(prefs: Preferences, date: Date, timeZone: string): boolean {
+  if (prefs.activeDays.length === 0) return false;
+  const dow = new Date(date.toLocaleString('en-US', { timeZone })).getDay();
+  return dow === Math.min(...prefs.activeDays);
+}

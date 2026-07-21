@@ -167,6 +167,32 @@ export async function todaysSuggestions(userId: string): Promise<OrderRecord[]> 
   return (data ?? []).map(rowToOrder);
 }
 
+/** How many options were offered today — keeps "more options" numbering unambiguous. */
+export async function todaysOfferedCount(userId: string): Promise<number> {
+  const since = new Date(Date.now() - 12 * 3600 * 1000).toISOString();
+  const { count } = await db()
+    .from('orders')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', since);
+  return count ?? 0;
+}
+
+/** Placed orders since the start of the current month, for the stats command. */
+export async function monthStats(userId: string): Promise<{ spendNis: number; count: number }> {
+  const start = new Date();
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+  const { data } = await db()
+    .from('orders')
+    .select('price_nis')
+    .eq('user_id', userId)
+    .eq('status', 'placed')
+    .gte('created_at', start.toISOString());
+  const rows = data ?? [];
+  return { spendNis: rows.reduce((s, r: any) => s + (r.price_nis ?? 0), 0), count: rows.length };
+}
+
 export async function pendingOrderForUser(userId: string): Promise<OrderRecord | null> {
   const { data } = await db()
     .from('orders')
