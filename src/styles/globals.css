@@ -92,3 +92,34 @@ select option { color: #000; }
 
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 9999px; }
+
+/* Micro-interactions */
+button, a {
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+button:not(:disabled):hover { transform: translateY(-1px); }
+button:not(:disabled):active { transform: scale(0.97); }
+:focus-visible { outline: 2px solid rgba(249, 115, 22, 0.7); outline-offset: 2px; border-radius: 6px; }
+
+/* Loading skeleton shimmer */
+.skeleton {
+  background: linear-gradient(100deg,
+    rgba(255,255,255,0.04) 40%,
+    rgba(255,255,255,0.1) 50%,
+    rgba(255,255,255,0.04) 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+@keyframes shimmer {
+  0% { background-position: 120% 0; }
+  100% { background-position: -80% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

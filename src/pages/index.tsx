@@ -28,7 +28,8 @@ function MaterialIcon({ d }: { d: string }) {
   return <svg viewBox="0 0 24 24" fill="currentColor" width={24} height={24}><path d={d} /></svg>;
 }
 
-const NAV = ['בית', 'איך זה עובד', 'יכולות', 'תן ביס', 'תמיכה'];
+const NAV = ['בית', 'איך זה עובד', 'יכולות', 'וואטסאפ', 'תמיכה'];
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER; // e.g. 972501234567
 const CUISINES = ['סושי', 'המבורגר', 'פיצה', 'סלט', 'בשר'];
 
 const CARDS = [
@@ -49,6 +50,12 @@ const CARDS = [
     tags: ['בחירה חכמה', 'פירוט מלא', 'לחיצה אחת', 'הזמנה אמיתית'],
     title: 'הזמנה בלחיצה',
     body: 'הבוט מציע מהתפריט החי של תן ביס לפי המטרות שלך — מסעדה, זמן משלוח, חלבון ותיאור — ומזמין כשאתה מאשר.',
+  },
+  {
+    icon: 'M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.06L2 22l5.06-1.33A9.96 9.96 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm0 18c-1.6 0-3.1-.47-4.36-1.28l-.31-.19-3 .79.8-2.93-.2-.32A7.94 7.94 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8Z',
+    tags: ['הצעה כל בוקר', 'טייס אוטומטי', '"עוד" ו"שבוע"', 'עברית חופשית'],
+    title: 'גם בוואטסאפ',
+    body: 'הבוט כותב לך כל בוקר עם ההצעות של היום, מבין עברית חופשית — "כן", "עוד", "בלי גלוטן", "תקציב 50" — ואפילו מתכנן שבוע שלם מראש.',
   },
 ];
 
@@ -167,10 +174,19 @@ export default function Home() {
             ))}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 56 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 56, flexWrap: 'wrap' }}>
             <Link href="/connect" className="liquid-glass-strong font-body" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 9999, padding: '12px 24px', fontSize: 15, fontWeight: 500, color: '#fff', textDecoration: 'none' }}>
               בואו נתחיל <ArrowUpRight size={20} />
             </Link>
+            {WHATSAPP_NUMBER ? (
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('התחל')}`} target="_blank" rel="noreferrer" className="liquid-glass font-body" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 9999, padding: '12px 24px', fontSize: 15, fontWeight: 500, color: '#fff', textDecoration: 'none' }}>
+                💬 דברו איתי בוואטסאפ
+              </a>
+            ) : (
+              <Link href="/bot" className="liquid-glass font-body" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 9999, padding: '12px 24px', fontSize: 15, fontWeight: 500, color: '#fff', textDecoration: 'none' }}>
+                💬 נסו את הבוט עכשיו
+              </Link>
+            )}
           </div>
         </div>
       </section>

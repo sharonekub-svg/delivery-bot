@@ -8,6 +8,7 @@ interface DishOption {
   restaurantName: string; priceNis: number; proteinG?: number; caloriesKcal?: number;
   description?: string; deepLink?: string; etaMinutes?: number;
   popular?: boolean; isGreen?: boolean; healthWarnings?: ('sugar' | 'sodium' | 'fat')[];
+  reasons?: string[];
 }
 
 const WARN_LABEL: Record<string, string> = { sugar: 'סוכר גבוה', sodium: 'נתרן גבוה', fat: 'שומן רווי גבוה' };
@@ -39,6 +40,7 @@ export default function Bot() {
   const [stage, setStage] = useState<Stage>('freq');
   const [options, setOptions] = useState<DishOption[]>([]);
   const [idx, setIdx] = useState(0);
+  const [draft, setDraft] = useState('');
   const idRef = useRef(0);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -60,8 +62,8 @@ export default function Bot() {
     setTimeout(() => { add({ role: 'bot', kind: 'text', text: 'מעולה. ועל מה בא לך עכשיו? אתאים את זה למטרות שלך.' }); setStage('craving'); }, 250);
   }
 
-  async function pickCraving(c: { key: string; label: string }) {
-    add({ role: 'user', kind: 'text', text: c.label });
+  async function pickCraving(c: { key: string; label: string }, query?: string) {
+    add({ role: 'user', kind: 'text', text: query ?? c.label });
     setStage('loading');
     add({ role: 'bot', kind: 'text', text: 'רגע, מחפש לך את הכי טוב…' });
     try {
@@ -69,7 +71,7 @@ export default function Bot() {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           session: store.getSession(), preferences: store.getProfile(), addressId: store.getAddress(),
-          craving: c.key === 'any' ? undefined : c.key, count: 6,
+          craving: c.key === 'any' || query ? undefined : c.key, query, count: 6,
         }),
       });
       const data = await res.json();
@@ -147,6 +149,42 @@ export default function Bot() {
     setStage('craving');
   }
 
+  /**
+   * Free text from the input bar. Understands inline commands the same way the
+   * WhatsApp bot does — "תקציב 50" and "בלי גלוטן" update the remembered
+   * profile — and anything else becomes a live menu search.
+   */
+  function handleFreeText(raw: string) {
+    const text = raw.trim();
+    if (!text || stage === 'loading') return;
+
+    const budget = text.toLowerCase().match(/^(?:תקציב|budget)\s+(\d{1,4})/u);
+    if (budget) {
+      const amount = parseInt(budget[1], 10);
+      const p = store.getProfile();
+      if (p) store.setProfile({ ...p, dailyBudgetNis: amount });
+      add({ role: 'user', kind: 'text', text });
+      add({ role: 'bot', kind: 'text', text: `סגור — התקציב היומי עודכן ל-₪${amount}. על מה בא לך?` });
+      setStage('craving');
+      return;
+    }
+
+    const exclusion = text.match(/^(?:בלי|without|no)\s+(.{2,40})$/iu);
+    if (exclusion) {
+      const item = exclusion[1].trim();
+      const p = store.getProfile();
+      if (p && !p.exclusions.includes(item.toLowerCase())) {
+        store.setProfile({ ...p, exclusions: [...p.exclusions, item.toLowerCase()] });
+      }
+      add({ role: 'user', kind: 'text', text });
+      add({ role: 'bot', kind: 'text', text: `נרשם — בלי ${item} מעכשיו. על מה בא לך?` });
+      setStage('craving');
+      return;
+    }
+
+    pickCraving({ key: 'any', label: text }, text);
+  }
+
   if (!ready) return <main style={wrap}><p style={{ color: 'rgba(255,255,255,0.6)', padding: 16 }}>טוען…</p></main>;
 
   return (
@@ -181,6 +219,21 @@ export default function Bot() {
         )}
         {stage === 'ordered' && <Chip label="להזמין עוד" primary onClick={restart} />}
         {stage === 'loading' && <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14 }}>רגע…</span>}
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleFreeText(draft); setDraft(''); }}
+          style={{ display: 'flex', gap: 8, width: '100%', marginTop: 4 }}
+        >
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder='כתבו חופשי: "משהו אסייתי", "בלי בצל", "תקציב 50"…'
+            disabled={stage === 'loading'}
+            style={inputBox}
+          />
+          <button type="submit" disabled={stage === 'loading' || !draft.trim()} style={{ ...sendBtn, opacity: stage === 'loading' || !draft.trim() ? 0.5 : 1 }}>
+            שליחה
+          </button>
+        </form>
       </div>
     </main>
   );
@@ -213,6 +266,13 @@ function DishCard({ dish }: { dish: DishOption }) {
           </div>
         )}
         {dish.description && <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, marginTop: 8, lineHeight: 1.5 }}>{dish.description}</div>}
+        {dish.reasons && dish.reasons.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+            {dish.reasons.slice(0, 3).map((r) => (
+              <span key={r} style={{ display: 'inline-block', background: 'rgba(59,130,246,0.14)', border: '1px solid rgba(147,197,253,0.4)', color: '#bfdbfe', borderRadius: 9999, padding: '2px 10px', fontSize: 12 }}>💡 {r}</span>
+            ))}
+          </div>
+        )}
         <div style={detailRows}>
           <Row label="מחיר" value={`₪${dish.priceNis}`} />
           {dish.etaMinutes != null && <Row label="זמן משלוח משוער" value={`כ-${dish.etaMinutes} דקות`} />}
@@ -248,5 +308,7 @@ const head: React.CSSProperties = { display: 'flex', alignItems: 'center', justi
 const feed: React.CSSProperties = { flex: 1, overflowY: 'auto', padding: 16 };
 const bar: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 8, padding: 12, borderTop: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' };
 const dishCard: React.CSSProperties = { maxWidth: '88%', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(253,186,116,0.5)', borderRadius: 16, padding: 16, backdropFilter: 'blur(8px)' };
+const inputBox: React.CSSProperties = { flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 9999, padding: '10px 16px', fontSize: 15, color: '#fff', outline: 'none' };
+const sendBtn: React.CSSProperties = { background: '#f97316', color: '#fff', border: 'none', borderRadius: 9999, padding: '10px 18px', fontSize: 15, fontWeight: 600, cursor: 'pointer' };
 const badge = (color: string): React.CSSProperties => ({ display: 'inline-block', background: `${color}22`, border: `1px solid ${color}`, color: '#fff', borderRadius: 9999, padding: '2px 10px', fontSize: 12, fontWeight: 600 });
 const detailRows: React.CSSProperties = { marginTop: 12, fontSize: 14, color: '#fff' };

@@ -1,7 +1,30 @@
 # 🍽️ Lunch Helper
 
-A **website** where you connect your **10Bis** account, chat with a bot about how
-you like to eat, and it recommends — and orders — your lunch.
+A **website + WhatsApp assistant** where you connect your **10Bis** account,
+chat with a bot about how you like to eat, and it recommends — and orders —
+your lunch.
+
+## What's new in v2
+
+- **Smarter recommendation engine** — beyond budget/protein/fatigue, it now
+  scores taste match (your stated likes + favourite restaurants), 10Bis health
+  signals (green badge, front-of-pack warnings), calories for low-carb goals,
+  protein-per-shekel value, and rotates near-tied dishes daily so picks never
+  feel stuck. Every pick carries Hebrew **reasons** ("עתיר חלבון", "בתוך
+  התקציב") shown in the site and in WhatsApp.
+- **Weekly meal plan** — `domain/weeklyPlan.ts` builds a budget-aware,
+  no-repeats plan across your active days. Ask the WhatsApp bot with *שבוע*, or
+  set the weekly planning horizon to get a preview at the start of each week.
+- **WhatsApp bot speaks Hebrew** — the parser understands עברית ("כן",
+  "דלג", "בטל", "עוד", "תפריט"…) alongside English, plus new commands: *עוד*
+  (more options, numbering continues), *שבוע* (weekly plan), *תקציב* (monthly
+  stats) / *תקציב 50* (set budget inline), *בלי גלוטן* (add an exclusion
+  mid-chat), *הפסק*/*המשך* (pause/resume). Free text falls back to Claude to
+  interpret intent ("בא לי לדלג היום" just works).
+- **Site polish** — the lunch page explains each pick, has skeleton loading,
+  refresh and "more options"; the chat page gained a free-text input that
+  understands search, "בלי X" and "תקציב N" locally; buttons got
+  micro-interactions and reduced-motion support.
 
 The flow is dead simple:
 
@@ -52,10 +75,12 @@ crypto/config (`lib/`) are shared with — and reused from — the original bot.
 
 ---
 
-## Legacy: WhatsApp bot
+## WhatsApp assistant
 
-The repo still contains the original WhatsApp assistant (Twilio + Supabase +
-Vercel Cron). It is no longer the focus but is kept intact and described below.
+The WhatsApp assistant (Twilio + Supabase + Vercel Cron) is a first-class
+surface again: it shares the same recommendation engine and 10Bis client as the
+site, speaks Hebrew, and adds proactive daily prompts, autopilot with a cancel
+window, weekly plans, and inline preference edits over chat.
 
 > Status: **scaffold complete and building/green**. Runs end-to-end today against
 > a *mock* 10Bis. The one piece that needs your input is the real **10Bis local

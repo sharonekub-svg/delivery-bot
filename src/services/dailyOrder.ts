@@ -1,5 +1,6 @@
 import { recommend, type ScoredDish } from '../domain/recommendation';
-import { isActiveDay } from '../domain/preferences';
+import { buildWeeklyPlan } from '../domain/weeklyPlan';
+import { isActiveDay, isFirstActiveDayOfWeek } from '../domain/preferences';
 import { config } from '../lib/config';
 import { describeOptions } from '../lib/claude';
 import { getPreferences, loadSession, getUserByPhone } from '../lib/repo';
@@ -18,6 +19,7 @@ import type { User } from '../domain/types';
 export async function runDailyForUser(user: User, now = new Date()): Promise<void> {
   const prefs = await getPreferences(user.id);
   if (!user.onboardingComplete) return;
+  if (prefs.paused) return; // user said "הפסק" — stay quiet until "המשך"
   if (!isActiveDay(prefs, now, config.timezone)) return;
   if (!prefs.primaryAddressId) return;
 
@@ -38,9 +40,15 @@ export async function runDailyForUser(user: User, now = new Date()): Promise<voi
     tenbis.getHistory(session, 90),
   ]);
 
+  // Weekly planning horizon: open the week with a full-week preview (PRD §3.2 #7).
+  if (prefs.planningHorizon === 'weekly' && isFirstActiveDayOfWeek(prefs, now, config.timezone)) {
+    const plan = buildWeeklyPlan(dishes, prefs, history, now);
+    if (plan.days.length > 0) await sendProactive(user.whatsappPhone, tpl.weeklyPlanMsg(plan));
+  }
+
   const picked = recommend(dishes, prefs, history, now);
   if (picked.length === 0) {
-    await sendText(user.whatsappPhone, "I couldn't find anything matching your preferences and budget right now. Reply *PREFS* to adjust.");
+    await sendText(user.whatsappPhone, 'לא מצאתי משהו שמתאים להעדפות ולתקציב שלך כרגע. השיבו *העדפות* כדי להתאים.');
     return;
   }
 

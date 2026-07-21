@@ -8,6 +8,7 @@ interface DishOption {
   restaurantName: string; priceNis: number; proteinG?: number; caloriesKcal?: number;
   description?: string; deepLink?: string; etaMinutes?: number;
   popular?: boolean; isGreen?: boolean; healthWarnings?: ('sugar' | 'sodium' | 'fat')[];
+  reasons?: string[];
 }
 
 const WARN_LABEL: Record<string, string> = { sugar: 'סוכר גבוה', sodium: 'נתרן גבוה', fat: 'שומן רווי גבוה' };
@@ -21,6 +22,27 @@ function Badges({ dish }: { dish: DishOption }) {
     </div>
   );
 }
+function Reasons({ reasons }: { reasons?: string[] }) {
+  if (!reasons?.length) return null;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+      {reasons.slice(0, 3).map((r) => (
+        <span key={r} style={reasonChip}>💡 {r}</span>
+      ))}
+    </div>
+  );
+}
+
+function SkeletonCards() {
+  return (
+    <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="skeleton" style={{ height: i === 0 ? 180 : 110, borderRadius: i === 0 ? 20 : 16 }} />
+      ))}
+    </div>
+  );
+}
+
 interface OrderState {
   dishId: string; ok?: boolean; pending?: boolean; overBudget?: boolean; message?: string; trackerDeepLink?: string;
 }
@@ -34,7 +56,7 @@ export default function Lunch() {
   const [order, setOrder] = useState<OrderState | null>(null);
   const [profile, setProfile] = useState<ReturnType<typeof store.getProfile>>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (count = 4) => {
     const session = store.getSession();
     const preferences = store.getProfile();
     const addressId = store.getAddress();
@@ -45,7 +67,7 @@ export default function Lunch() {
     try {
       const res = await fetch('/api/recommend', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ session, preferences, addressId }),
+        body: JSON.stringify({ session, preferences, addressId, count }),
       });
       const data = await res.json();
       if (res.status === 401) { router.replace('/connect'); return; }
@@ -88,9 +110,12 @@ export default function Lunch() {
 
   return (
     <main style={wrap}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
         <h1 className="font-heading" style={{ fontSize: 32, margin: 0 }}>הבחירות של היום</h1>
-        <Link href="/profile" style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>עריכת פרופיל</Link>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button onClick={() => load()} disabled={loading} style={{ ...smallBtn, opacity: loading ? 0.5 : 1 }} title="רענון ההמלצות">⟳ רענון</button>
+          <Link href="/profile" style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>עריכת פרופיל</Link>
+        </div>
       </header>
       <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>נבחרו מהתפריט החי של 10bis כדי להתאים לטעם, למטרות ולתקציב שלכם.</p>
 
@@ -102,11 +127,16 @@ export default function Lunch() {
         </div>
       )}
 
-      {loading && <p style={{ color: 'rgba(255,255,255,0.6)' }}>מחפש את האפשרויות הכי טובות בשבילכם…</p>}
+      {loading && (
+        <>
+          <p style={{ color: 'rgba(255,255,255,0.6)' }}>מחפש את האפשרויות הכי טובות בשבילכם…</p>
+          <SkeletonCards />
+        </>
+      )}
       {error && (
         <div style={errorBox}>
           {error}
-          <div style={{ marginTop: 8 }}><button onClick={load} style={smallBtn}>נסו שוב</button></div>
+          <div style={{ marginTop: 8 }}><button onClick={() => load()} style={smallBtn}>נסו שוב</button></div>
         </div>
       )}
 
@@ -127,6 +157,7 @@ export default function Lunch() {
               <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 15 }}>מ{top.restaurantName}</div>
               {top.description && <div style={{ color: '#fdba74', fontSize: 14, marginTop: 6 }}>{top.description}</div>}
               <Badges dish={top} />
+              <Reasons reasons={top.reasons} />
               <div style={{ marginTop: 10 }}>
                 <span style={heroPill}>₪{top.priceNis}</span>
                 {top.proteinG != null && <span style={heroPill}>{top.proteinG}ג חלבון</span>}
@@ -154,6 +185,7 @@ export default function Lunch() {
                           <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>{opt.restaurantName}</div>
                           {opt.description && <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginTop: 4 }}>{opt.description}</div>}
                           <Badges dish={opt} />
+                          <Reasons reasons={opt.reasons} />
                           <div style={{ marginTop: 8 }}>
                             <span style={pill}>₪{opt.priceNis}</span>
                             {opt.proteinG != null && <span style={pill}>{opt.proteinG}ג חלבון</span>}
@@ -173,6 +205,11 @@ export default function Lunch() {
                   })}
                 </div>
               </>
+            )}
+            {!loading && options.length < 8 && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+                <button onClick={() => load(8)} style={smallBtn}>הציגו עוד אפשרויות</button>
+              </div>
             )}
           </>
         );
@@ -206,3 +243,4 @@ const modeNote: React.CSSProperties = { background: 'rgba(59,130,246,0.12)', bor
 const heroCard: React.CSSProperties = { background: 'rgba(249,115,22,0.12)', border: '2px solid rgba(253,186,116,0.55)', borderRadius: 20, padding: 20, marginTop: 16, backdropFilter: 'blur(8px)' };
 const heroPill: React.CSSProperties = { display: 'inline-block', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(253,186,116,0.5)', borderRadius: 9999, padding: '3px 12px', marginInlineEnd: 6, fontSize: 13, fontWeight: 700, color: '#fff' };
 const heroBtn: React.CSSProperties = { marginTop: 16, width: '100%', background: '#f97316', color: '#fff', border: 'none', borderRadius: 9999, padding: '16px 24px', fontSize: 19, fontWeight: 800, cursor: 'pointer' };
+const reasonChip: React.CSSProperties = { display: 'inline-block', background: 'rgba(59,130,246,0.14)', border: '1px solid rgba(147,197,253,0.4)', color: '#bfdbfe', borderRadius: 9999, padding: '2px 10px', fontSize: 12, fontWeight: 500 };

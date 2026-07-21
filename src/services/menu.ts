@@ -56,6 +56,8 @@ export interface DishOption {
   isGreen?: boolean;
   healthWarnings?: ('sugar' | 'sodium' | 'fat')[];
   imageUrl?: string;
+  /** Hebrew one-liners from the engine explaining why this was picked. */
+  reasons?: string[];
 }
 
 /** Craving keyword → words we look for in a dish name / description / restaurant. */
@@ -72,13 +74,27 @@ function matchesCraving(dish: TenbisDish, words: string[]): boolean {
   return words.some((w) => hay.includes(w.toLowerCase()));
 }
 
-export async function recommendForUser(session: TenbisSession, addressId: string, prefs: Preferences, craving?: string): Promise<DishOption[]> {
+export async function recommendForUser(
+  session: TenbisSession,
+  addressId: string,
+  prefs: Preferences,
+  craving?: string,
+  query?: string,
+): Promise<DishOption[]> {
   const { dishes: all, etaByRestaurant } = await gatherDishes(session, addressId, prefs);
   let dishes = all;
   const words = craving ? CRAVINGS[craving] : undefined;
   if (words) {
     const filtered = dishes.filter((d) => matchesCraving(d, words));
     if (filtered.length > 0) dishes = filtered; // fall back to everything if no match
+  }
+  // Free-text search ("בא לי משהו אסייתי"): match any word against the dish haystack.
+  if (query?.trim()) {
+    const queryWords = query.trim().toLowerCase().split(/\s+/).filter((w) => w.length >= 2);
+    if (queryWords.length > 0) {
+      const filtered = dishes.filter((d) => matchesCraving(d, queryWords));
+      if (filtered.length > 0) dishes = filtered;
+    }
   }
   const history = await getTenbisClient().getHistory(session, 30).catch(() => []);
   return recommend(dishes, prefs, history).map((s) => ({
@@ -97,5 +113,6 @@ export async function recommendForUser(session: TenbisSession, addressId: string
     isGreen: s.dish.isGreen,
     healthWarnings: s.dish.healthWarnings,
     imageUrl: s.dish.imageUrl,
+    reasons: s.reasons,
   }));
 }

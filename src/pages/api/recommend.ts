@@ -23,9 +23,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const count = Number(body.count);
   if (Number.isFinite(count) && count > 0) prefs.optionCount = Math.min(count, 8);
   const craving = body.craving ? String(body.craving) : undefined;
+  const query = body.query ? String(body.query).slice(0, 80) : undefined;
 
   try {
-    const options = await recommendForUser(session, addressId, prefs, craving);
+    const options = await recommendForUser(session, addressId, prefs, craving, query);
     return res.status(200).json({ ok: true, options });
   } catch (err) {
     console.error('recommend error', err);

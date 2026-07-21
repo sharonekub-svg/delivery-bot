@@ -2,18 +2,39 @@ import type { TenbisDish, TenbisHistoryItem } from '../tenbis/types';
 import type { Preferences } from './types';
 
 /**
- * Recommendation engine (PRD §4.1).
+ * Recommendation engine v2 (PRD §4.1, extended).
  *
- *   Score = w1*BudgetFit + w2*MacroGoal + w3*HistoricalFrequency - w4*RecentFatigue
+ *   Score = w1*BudgetFit + w2*MacroGoal + w3*Taste + w4*Health
+ *         + w5*HistoricalFrequency + w6*DailyVariety - w7*RecentFatigue
  *
  * All component scores are normalised to [0,1] so weights are comparable.
+ * Every pick also carries human-readable Hebrew `reasons` so the UI and the
+ * WhatsApp bot can explain *why* a dish was chosen.
  */
-export const WEIGHTS = { budget: 0.3, macro: 0.3, frequency: 0.25, fatigue: 0.4 };
+export const WEIGHTS = {
+  budget: 0.25,
+  macro: 0.3,
+  taste: 0.2,
+  health: 0.15,
+  frequency: 0.15,
+  variety: 0.05,
+  fatigue: 0.4,
+};
 
 export interface ScoredDish {
   dish: TenbisDish;
   score: number;
-  breakdown: { budget: number; macro: number; frequency: number; fatigue: number };
+  breakdown: {
+    budget: number;
+    macro: number;
+    taste: number;
+    health: number;
+    frequency: number;
+    variety: number;
+    fatigue: number;
+  };
+  /** Hebrew one-liners explaining the pick, e.g. "עתיר חלבון (42 ג׳)". */
+  reasons: string[];
 }
 
 function budgetFit(dish: TenbisDish, dailyBudgetNis: number): number {
@@ -28,13 +49,48 @@ function budgetFit(dish: TenbisDish, dailyBudgetNis: number): number {
 function macroGoal(dish: TenbisDish, prefs: Preferences): number {
   if (prefs.macroFocus === 'high_protein') {
     if (dish.proteinG == null) return dish.tags?.includes('high-protein') ? 0.7 : 0.4;
-    // 40g+ protein = full marks.
-    return Math.min(1, dish.proteinG / 40);
+    // 40g+ protein = full marks, with a protein-per-shekel value bonus so a
+    // cheap 35g bowl can beat an expensive 40g steak.
+    const absolute = Math.min(1, dish.proteinG / 40);
+    const perShekel = dish.priceNis > 0 ? Math.min(1, dish.proteinG / dish.priceNis) : 0;
+    return 0.8 * absolute + 0.2 * perShekel;
   }
   if (prefs.macroFocus === 'low_carb') {
-    return dish.tags?.includes('low-carb') ? 1 : 0.4;
+    let s = dish.tags?.includes('low-carb') ? 1 : 0.4;
+    // Calorie-aware: a light dish supports the goal even without the tag.
+    if (dish.caloriesKcal != null) {
+      if (dish.caloriesKcal <= 550) s = Math.max(s, 0.8);
+      else if (dish.caloriesKcal >= 900) s = Math.min(s, 0.25);
+    }
+    return s;
   }
   return 0.6; // balanced: neutral
+}
+
+/** Match against the user's stated likes and favourite restaurants. */
+function tasteMatch(dish: TenbisDish, prefs: Preferences): number {
+  const hay = `${dish.name} ${dish.description ?? ''} ${dish.restaurantName} ${(dish.tags ?? []).join(' ')}`.toLowerCase();
+  const likes = (prefs.inclusions ?? []).filter(Boolean);
+  const favRestaurants = (prefs.favoriteRestaurantNames ?? []).filter(Boolean);
+  if (likes.length === 0 && favRestaurants.length === 0) return 0.5; // neutral
+
+  let s = 0.3; // stated preferences exist but this dish matches none of them
+  if (likes.some((l) => hay.includes(l.toLowerCase()))) s += 0.4;
+  const rest = dish.restaurantName.toLowerCase();
+  if (favRestaurants.some((f) => rest.includes(f.toLowerCase()) || f.toLowerCase().includes(rest))) s += 0.3;
+  return Math.min(1, s);
+}
+
+/** 10Bis health signals: green badge up, front-of-pack warnings down. */
+function healthSignal(dish: TenbisDish, prefs: Preferences): number {
+  let s = 0.5;
+  if (dish.isGreen) s += 0.4;
+  const warnings = dish.healthWarnings?.length ?? 0;
+  // Warnings matter more when the user has a health-driven goal.
+  const penalty = prefs.macroFocus === 'balanced' ? 0.15 : 0.2;
+  s -= warnings * penalty;
+  if (dish.popular) s += 0.1;
+  return Math.max(0, Math.min(1, s));
 }
 
 function historicalFrequency(dish: TenbisDish, history: TenbisHistoryItem[]): number {
@@ -42,6 +98,21 @@ function historicalFrequency(dish: TenbisDish, history: TenbisHistoryItem[]): nu
   const count = history.filter((h) => h.dishId === dish.id).length;
   const max = Math.max(1, ...history.map((h) => history.filter((x) => x.dishId === h.dishId).length));
   return count / max;
+}
+
+/**
+ * Deterministic daily rotation: a small per-(dish, date) jitter so near-tied
+ * dishes trade places across days and the picks never feel stuck — without
+ * making recommendations random within the same day.
+ */
+function dailyVariety(dishId: string, now: Date): number {
+  const key = `${dishId}:${now.toISOString().slice(0, 10)}`;
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 0xffffffff;
 }
 
 /** Recency-weighted fatigue: ordered yesterday hurts most, decays over a week. */
@@ -67,6 +138,25 @@ export function passesHardFilters(dish: TenbisDish, prefs: Preferences): boolean
   return true;
 }
 
+function buildReasons(dish: TenbisDish, b: ScoredDish['breakdown'], prefs: Preferences): string[] {
+  const reasons: string[] = [];
+  if (prefs.macroFocus === 'high_protein' && dish.proteinG != null && dish.proteinG >= 30) {
+    reasons.push(`עתיר חלבון (${dish.proteinG} ג׳)`);
+  }
+  if (prefs.macroFocus === 'low_carb' && dish.caloriesKcal != null && dish.caloriesKcal <= 550) {
+    reasons.push(`קל יחסית (${dish.caloriesKcal} קק״ל)`);
+  }
+  if (b.budget >= 1) reasons.push('משאיר מרווח בתקציב');
+  else if (b.budget > 0) reasons.push('בתוך התקציב היומי');
+  if (b.taste > 0.5 && (prefs.inclusions?.length || prefs.favoriteRestaurantNames?.length)) {
+    reasons.push('מתאים לטעם שציינתם');
+  }
+  if (dish.isGreen) reasons.push('מסומן כבחירה בריאה');
+  if (dish.popular) reasons.push('פופולרי במסעדה');
+  if (b.frequency >= 0.6) reasons.push('אהבתם בעבר');
+  return reasons;
+}
+
 export function scoreDish(
   dish: TenbisDish,
   prefs: Preferences,
@@ -76,15 +166,21 @@ export function scoreDish(
   const breakdown = {
     budget: budgetFit(dish, prefs.dailyBudgetNis),
     macro: macroGoal(dish, prefs),
+    taste: tasteMatch(dish, prefs),
+    health: healthSignal(dish, prefs),
     frequency: historicalFrequency(dish, history),
+    variety: dailyVariety(dish.id, now),
     fatigue: recentFatigue(dish, history, now),
   };
   const score =
     WEIGHTS.budget * breakdown.budget +
     WEIGHTS.macro * breakdown.macro +
-    WEIGHTS.frequency * breakdown.frequency -
+    WEIGHTS.taste * breakdown.taste +
+    WEIGHTS.health * breakdown.health +
+    WEIGHTS.frequency * breakdown.frequency +
+    WEIGHTS.variety * breakdown.variety -
     WEIGHTS.fatigue * breakdown.fatigue;
-  return { dish, score, breakdown };
+  return { dish, score, breakdown, reasons: buildReasons(dish, breakdown, prefs) };
 }
 
 /**

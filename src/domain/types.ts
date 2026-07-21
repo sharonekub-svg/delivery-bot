@@ -32,6 +32,8 @@ export interface Preferences {
   mode: RecommendationMode;
   // 10. Delivery address
   primaryAddressId?: string;
+  /** Daily suggestions paused via WhatsApp ("הפסק") until resumed ("המשך"). */
+  paused?: boolean;
 }
 
 export interface User {
