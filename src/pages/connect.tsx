@@ -7,13 +7,37 @@ import { store } from '../lib/store';
  * שלב 1: חיבור ל-10bis. מדריכים את המשתמש להעתיק את הסשן מכלי הפיתוח, מאמתים
  * בצד השרת, וזוכרים בדפדפן. כפתור "דלג" למטה מימין מאפשר לדלג אם כבר מחוברים.
  */
-const STEPS: [string, string][] = [
-  ['היכנסו לתן ביס במחשב', 'במחשב (הכי קל ככה, לא בנייד) פתחו את האתר 10bis.co.il והתחברו לחשבון שלכם כרגיל.'],
-  ['לחצו F12 במקלדת', 'הקישו על הכפתור F12 (בשורה העליונה של המקלדת). ייפתח חלון נוסף בצד או בתחתית המסך — זה תקין.'],
-  ['פתחו את הלשונית Network', 'בחלון שנפתח, לחצו על הכיתוב "Network". אם אתם לא רואים אותו, לחצו על החץ הכפול » ובחרו אותו מהרשימה.'],
-  ['רעננו את העמוד', 'כשהחלון פתוח, הקישו F5 כדי לרענן. תתחיל להופיע רשימה ארוכה של שורות בחלון ה-Network.'],
-  ['העתיקו בקשה אחת', 'לחצו קליק ימני על שורה כלשהי שמופיעה בה המילה "NextApi", ואז בחרו: Copy ואז Copy as cURL.'],
-  ['הדביקו כאן ולחצו התחברו', 'חזרו לעמוד הזה, לחצו על התיבה למטה, הדביקו (Ctrl+V), ולחצו על "התחברו".'],
+const ext: React.CSSProperties = { color: '#fdba74', textDecoration: 'underline', fontWeight: 600 };
+const kbd: React.CSSProperties = {
+  display: 'inline-block', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.3)',
+  borderRadius: 6, padding: '1px 7px', fontFamily: 'ui-monospace, monospace', fontSize: 13, fontWeight: 700,
+};
+
+const STEPS: [string, React.ReactNode][] = [
+  [
+    'היכנסו לתן ביס במחשב',
+    <>במחשב (הכי קל ככה, לא בנייד) פתחו את האתר <a href="https://www.10bis.co.il" target="_blank" rel="noreferrer" style={ext}>10bis.co.il ←</a> והתחברו לחשבון שלכם כרגיל.</>,
+  ],
+  [
+    'לחצו F12 במקלדת',
+    <>הקישו על הכפתור <span style={kbd}>F12</span> (בשורה העליונה של המקלדת). ייפתח חלון נוסף בצד או בתחתית המסך — זה תקין. לא עבד? נסו <span style={kbd}>Ctrl</span>+<span style={kbd}>Shift</span>+<span style={kbd}>I</span>, או במק: <span style={kbd}>⌘</span>+<span style={kbd}>⌥</span>+<span style={kbd}>I</span>.</>,
+  ],
+  [
+    'פתחו את הלשונית Network',
+    <>בחלון שנפתח, לחצו על הכיתוב <span style={kbd}>Network</span>. אם אתם לא רואים אותו, לחצו על החץ הכפול » ובחרו אותו מהרשימה.</>,
+  ],
+  [
+    'רעננו את העמוד',
+    <>כשהחלון פתוח, הקישו <span style={kbd}>F5</span> כדי לרענן. תתחיל להופיע רשימה ארוכה של שורות בחלון ה-Network.</>,
+  ],
+  [
+    'העתיקו בקשה אחת',
+    <>הקלידו <span style={kbd}>NextApi</span> בתיבת הסינון (Filter) שבראש החלון — יישארו רק השורות הנכונות. לחצו קליק ימני על אחת מהן, ואז בחרו: <span style={kbd}>Copy</span> ואז <span style={kbd}>Copy as cURL</span>.</>,
+  ],
+  [
+    'הדביקו כאן ולחצו התחברו',
+    <>חזרו לעמוד הזה, לחצו על התיבה למטה, הדביקו (<span style={kbd}>Ctrl</span>+<span style={kbd}>V</span>), ולחצו על "התחברו".</>,
+  ],
 ];
 
 export default function Connect() {
