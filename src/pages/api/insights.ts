@@ -24,11 +24,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tenbis.getUserProfile(session).catch(() => ({})),
       tenbis.getCoupons(session).catch(() => []),
     ]);
+    // When history came back empty, surface the per-endpoint trace so the
+    // profile page can show *why* instead of implying the account has no orders.
+    const historyDebug = history.length === 0 ? ((tenbis as any).lastHistoryDebug as string[] | undefined) : undefined;
     return res.status(200).json({
       ok: true,
       insights: summarizeHistory(history, budget),
       profile,
       coupons,
+      historyDebug,
     });
   } catch (err) {
     console.error('insights error', err);
