@@ -124,6 +124,9 @@ async function getApi<T = any>(path: string, jar: Record<string, string>, bearer
 }
 
 export class LocalTenbisClient implements TenbisClient {
+  /** Human-readable trace of the last getHistory run, for surfacing in the UI. */
+  lastHistoryDebug: string[] = [];
+
   // ---- Auth (SMS OTP, two steps) ----
 
   async requestLoginCode(email: string): Promise<LoginChallenge> {
@@ -258,6 +261,7 @@ export class LocalTenbisClient implements TenbisClient {
   async getHistory(session: TenbisSession, sinceDays: number): Promise<TenbisHistoryItem[]> {
     const state = parse(session);
     const collected: TenbisHistoryItem[] = [];
+    const debug: string[] = [];
 
     // Primary: the endpoint behind the web app's "ההזמנות שלי" page. It is a
     // GET and takes a month offset (dateBias: 0 = this month, -1 = last month…),
@@ -269,9 +273,11 @@ export class LocalTenbisClient implements TenbisClient {
           `UserTransactionsReport?type=MonthToDateReport&culture=he-IL&uiCulture=he&dateBias=${bias}`,
           state.cookies,
         );
-        collected.push(...mapTransactionsReport(r));
+        const items = mapTransactionsReport(r);
+        collected.push(...items);
+        debug.push(`UserTransactionsReport(dateBias=${bias}): ok, ${items.length} rows`);
       } catch (err) {
-        console.warn(`10bis UserTransactionsReport dateBias=${bias} failed:`, (err as Error).message);
+        debug.push(`UserTransactionsReport(dateBias=${bias}): ${(err as Error).message}`);
         break; // older months use the same endpoint — no point retrying
       }
     }
@@ -280,9 +286,11 @@ export class LocalTenbisClient implements TenbisClient {
     if (collected.length === 0) {
       try {
         const r: any = await postNext('GetUserTransactionsReport', state.cookies, {});
-        collected.push(...mapTransactionsReport(r));
+        const items = mapTransactionsReport(r);
+        collected.push(...items);
+        debug.push(`GetUserTransactionsReport: ok, ${items.length} rows`);
       } catch (err) {
-        console.warn('10bis GetUserTransactionsReport failed:', (err as Error).message);
+        debug.push(`GetUserTransactionsReport: ${(err as Error).message}`);
       }
     }
 
@@ -291,12 +299,16 @@ export class LocalTenbisClient implements TenbisClient {
       try {
         const r: any = await postNext('GetLastTransactionWithoutReview', state.cookies, {});
         const d = r.Data ?? {};
-        collected.push(...mapTransactionsReport({ Data: { orderList: [d.transaction ?? d.order ?? d] } }));
+        const items = mapTransactionsReport({ Data: { orderList: [d.transaction ?? d.order ?? d] } });
+        collected.push(...items);
+        debug.push(`GetLastTransactionWithoutReview: ok, ${items.length} rows`);
       } catch (err) {
-        console.warn('10bis GetLastTransactionWithoutReview failed:', (err as Error).message);
+        debug.push(`GetLastTransactionWithoutReview: ${(err as Error).message}`);
       }
     }
 
+    this.lastHistoryDebug = debug;
+    if (collected.length === 0) console.warn('10bis history empty:', debug.join(' | '));
     return finalizeHistory(collected, sinceDays);
   }
 

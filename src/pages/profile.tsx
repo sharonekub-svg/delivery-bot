@@ -49,6 +49,7 @@ export default function Profile() {
   const [insights, setInsights] = useState<HistorySummary | null>(null);
   const [userProfile, setUserProfile] = useState<TenbisUserProfile | null>(null);
   const [coupons, setCoupons] = useState<TenbisCoupon[]>([]);
+  const [historyDebug, setHistoryDebug] = useState<string[]>([]);
   const [insightsState, setInsightsState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
 
   // אפשרויות הזמנה.
@@ -97,11 +98,12 @@ export default function Profile() {
       body: JSON.stringify({ session }),
     })
       .then((r) => r.json())
-      .then((data: { ok: boolean; insights?: HistorySummary; profile?: TenbisUserProfile; coupons?: TenbisCoupon[] }) => {
+      .then((data: { ok: boolean; insights?: HistorySummary; profile?: TenbisUserProfile; coupons?: TenbisCoupon[]; historyDebug?: string[] }) => {
         if (!data.ok || !data.insights) { setInsightsState('error'); return; }
         setInsights(data.insights);
         if (data.profile) setUserProfile(data.profile);
         if (data.coupons) setCoupons(data.coupons);
+        if (data.historyDebug) setHistoryDebug(data.historyDebug);
         setInsightsState('done');
         if (!hadProfile) {
           const i = data.insights;
@@ -175,7 +177,7 @@ export default function Profile() {
       )}
       <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: 0 }}>ממלאים פעם אחת. נזכור את זה ונשתמש בו כדי לבחור לכם צהריים בכל פעם.</p>
 
-      <InsightsCard state={insightsState} insights={insights} coupons={coupons} />
+      <InsightsCard state={insightsState} insights={insights} coupons={coupons} historyDebug={historyDebug} />
 
       <form onSubmit={save}>
         <label style={lbl}>מה אתם בדרך כלל אוהבים לאכול?
@@ -278,19 +280,22 @@ export default function Profile() {
 }
 
 /** כרטיס הסיכום של ההיסטוריה — נשען רק על מה ש-10bis החזיר, בלי להמציא. */
-function InsightsCard({ state, insights, coupons }: { state: string; insights: HistorySummary | null; coupons: TenbisCoupon[] }) {
+function InsightsCard({ state, insights, coupons, historyDebug }: { state: string; insights: HistorySummary | null; coupons: TenbisCoupon[]; historyDebug?: string[] }) {
   if (state === 'idle') return null;
   if (state === 'loading') return <div style={insightsBox}>קוראים את ההיסטוריה שלכם ב-10bis…</div>;
   if (state === 'error') return <div style={insightsBox}>לא הצלחנו לקרוא היסטוריה כרגע — אפשר למלא ידנית למטה.</div>;
   if (!insights || insights.totalOrders === 0) {
     return (
       <div style={insightsBox}>
-        לא מצאנו היסטוריית הזמנות לקרוא ממנה. אם אתם בטוחים שיש לכם הזמנות ב-10bis,
-        נסו להתחבר מחדש — והפעם העתיקו את הבקשה דווקא מתוך{' '}
-        <a href="https://www.10bis.co.il/next/user-transactions" target="_blank" rel="noreferrer" style={{ color: '#fdba74', fontWeight: 600 }}>
-          דף "ההזמנות שלי" ←
-        </a>{' '}
-        (F12 ← Network ← רענון ← Copy as cURL). בינתיים אפשר למלא ידנית למטה.
+        לא הצלחנו למשוך היסטוריית הזמנות מהחיבור הזה. זה לא אומר שאין לכם הזמנות —
+        כנראה שהחיבור לא כולל את ההרשאה לדוח. נסו להתנתק ולהתחבר מחדש עם העתקה
+        טרייה (F12 ← Network ← רענון ← שורה עם NextApi ← Copy as cURL). בינתיים אפשר למלא ידנית למטה.
+        {historyDebug && historyDebug.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>מה השרת ניסה (להעביר לתמיכה):</div>
+            <pre dir="ltr" style={debugPre}>{historyDebug.join('\n')}</pre>
+          </div>
+        )}
       </div>
     );
   }
@@ -400,3 +405,4 @@ const dayOn: React.CSSProperties = { ...dayOff, background: '#f97316', borderCol
 const hint: React.CSSProperties = { fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 6 };
 const optRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, fontWeight: 400, margin: '10px 0' };
 const insightsBox: React.CSSProperties = { background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(253,186,116,0.4)', borderRadius: 14, padding: 16, margin: '16px 0', color: '#fff' };
+const debugPre: React.CSSProperties = { background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: 10, fontSize: 11, lineHeight: 1.5, color: 'rgba(255,255,255,0.7)', overflowX: 'auto', whiteSpace: 'pre-wrap', textAlign: 'left' };
