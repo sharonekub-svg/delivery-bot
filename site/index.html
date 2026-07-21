@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>רועי קובובסקי · עורך דין — משפט מנהלי, מכרזים וליטיגציה מנהלית</title>
+  <meta name="description" content="עו״ד רועי קובובסקי — משרד בוטיק למשפט מנהלי, דיני מכרזים וליטיגציה מנהלית. 17 שנים בשבלת ושות׳ (מתוכן 10 כשותף) וכחמש שנים כשותף ב-D.L.E. מדורג ב-Legal 500. מגדלי עזריאלי, תל אביב." />
+  <meta name="theme-color" content="#0a2540" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="רועי קובובסקי · עורך דין — משפט מנהלי ומכרזים" />
+  <meta property="og:description" content="משרד בוטיק למשפט מנהלי, דיני מכרזים וליטיגציה מנהלית · מדורג Legal 500 · 17 שנים בשבלת (10 כשותף) · כ-5 שנים שותף ב-D.L.E" />
+  <meta property="og:locale" content="he_IL" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- הלוגו של המשרד (הקובץ שיעל הכינה) — לשים בתיקייה assets בשם logo.png -->
+  <link rel="icon" href="assets/logo.png" />
+
+  <style>
+/* =========================================================
+   רועי קובובסקי · משרד עורך דין
+   עיצוב: מקצועי, RTL. שחור-לבן — מונוכרום אלגנטי.
+   ========================================================= */
+
+:root {
+  --ink:        #121212;   /* כמעט-שחור (רקעים כהים) */
+  --ink-2:      #1d1d1d;
+  --ink-soft:   #343434;
+  --blue:       #141414;   /* אקסנט על רקע בהיר = שחור */
+  --blue-deep:  #000000;   /* שחור מלא */
+  --blue-light: #f0f0f0;   /* אקסנט על רקע כהה = לבן-אפור */
+  --sky:        #f5f5f4;   /* אפור-לבן, רקע בהיר */
+  --sky-2:      #e9e9e7;
+  --paper:      #ffffff;
+  --text:       #141414;
+  --text-soft:  #565656;
+  --line:       #e2e2e0;   /* קו אפור עדין */
+  --radius:     14px;
+  --radius-lg:  22px;
+  --shadow:     0 18px 50px -20px rgba(0,0,0,.30);
+  --shadow-sm:  0 8px 24px -14px rgba(0,0,0,.38);
+  --maxw:       1180px;
+  --serif:      "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
+  --sans:       "Assistant", system-ui, "Segoe UI", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--sky);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+.wrap { width: min(var(--maxw), 92%); margin-inline: auto; }
+
+h1, h2, h3 { font-family: var(--serif); font-weight: 700; line-height: 1.18; color: var(--ink); }
+
+.section { padding: clamp(4.5rem, 9vw, 8rem) 0; }
+
+.eyebrow {
+  font-size: .82rem;
+  letter-spacing: .22em;
+  font-weight: 700;
+  color: var(--blue-deep);
+  text-transform: none;
+  margin-bottom: 1rem;
+}
+.eyebrow.light { color: var(--blue); }
+
+.accent { color: var(--blue); }
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .5rem;
+  padding: .95rem 2.1rem;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 1.02rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: transform .2s ease, background .25s ease, color .25s ease, box-shadow .25s ease;
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--blue); color: var(--ink); box-shadow: 0 12px 30px -12px rgba(120,120,120,.7); }
+.btn-primary:hover { background: var(--blue-deep); transform: translateY(-2px); }
+.btn-ghost { background: transparent; color: var(--sky); border-color: rgba(255,255,255,.35); }
+.btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+.btn-light { background: var(--sky); color: var(--ink); }
+.btn-light:hover { background: #fff; transform: translateY(-2px); }
+.btn-block { width: 100%; }
+
+/* ===== Header / Nav ===== */
+.site-header {
+  position: fixed; inset-block-start: 0; inset-inline: 0; z-index: 100;
+  padding: 1.15rem 0;
+  transition: background .35s ease, padding .35s ease, box-shadow .35s ease;
+}
+.site-header.scrolled {
+  background: rgba(0,0,0,.92);
+  backdrop-filter: blur(12px);
+  padding: .7rem 0;
+  box-shadow: 0 10px 30px -18px rgba(0,0,0,.6);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+
+.brand { display: flex; align-items: center; gap: .75rem; text-decoration: none; }
+.brand-mark {
+  display: grid; place-items: center;
+  width: 46px; height: 46px; border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.brand-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.brand-mark.brand-mark--empty { display: none; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+.brand-text strong { color: #fff; font-size: 1.1rem; font-family: var(--serif); }
+.brand-text em { color: var(--blue-light); font-style: normal; font-size: .78rem; letter-spacing: .08em; }
+.scrolled .brand-text strong { color: #fff; }
+
+.nav-links { display: flex; align-items: center; gap: 2rem; }
+.nav-links a { color: rgba(255,255,255,.85); text-decoration: none; font-weight: 500; font-size: 1rem; transition: color .2s; }
+.nav-links a:hover { color: var(--blue-light); }
+.nav-links .nav-cta {
+  border: 1.5px solid var(--blue-light); color: var(--blue-light);
+  padding: .5rem 1.4rem; border-radius: 999px;
+}
+.nav-links .nav-cta:hover { background: var(--blue-light); color: var(--ink); }
+
+.nav-toggle { display: none; background: none; border: 0; cursor: pointer; width: 42px; height: 42px; flex-direction: column; justify-content: center; gap: 6px; }
+.nav-toggle span { display: block; height: 2px; width: 26px; background: #fff; margin-inline-start: auto; transition: transform .3s, opacity .3s; }
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+/* ===== Hero ===== */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex; align-items: center;
+  color: var(--sky);
+  padding: 9rem 0 4rem;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(120% 90% at 85% 0%, rgba(120,120,120,.22), transparent 55%),
+    radial-gradient(90% 70% at 0% 100%, rgba(120,120,120,.10), transparent 50%),
+    linear-gradient(160deg, #000000 0%, var(--ink) 45%, var(--ink-2) 100%);
+}
+.hero-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(120% 100% at 80% 0%, #000, transparent 70%);
+          mask-image: radial-gradient(120% 100% at 80% 0%, #000, transparent 70%);
+}
+.hero-inner {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+}
+.hero-copy { max-width: 640px; }
+.hero .eyebrow { color: var(--blue-light); }
+
+/* Hero figure / photo */
+.hero-figure { position: relative; margin: 0; justify-self: center; width: 100%; max-width: 380px; }
+.hero-photo {
+  position: relative;
+  aspect-ratio: 4/5;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--ink-soft), var(--ink));
+  box-shadow: 0 40px 80px -30px rgba(0,0,0,.7);
+  border: 1px solid rgba(120,120,120,.35);
+}
+.hero-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; z-index: 1; filter: grayscale(1) contrast(1.03); }
+.hero-photo::after {
+  content: ""; position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,.55) 100%);
+}
+.hero-photo-mono {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--serif); font-weight: 900; font-size: 5rem;
+  color: rgba(255,255,255,.9); letter-spacing: .05em; z-index: 0;
+}
+.hero-figure::before {
+  content: ""; position: absolute; inset-block: 26px -18px; inset-inline-start: -18px;
+  width: 60%; border-radius: var(--radius-lg);
+  border: 1px solid rgba(120,120,120,.4); z-index: -1;
+}
+.hero-badge {
+  position: absolute; z-index: 3;
+  inset-block-end: -18px; inset-inline-start: 50%; transform: translateX(50%);
+  background: rgba(0,0,0,.9); backdrop-filter: blur(8px);
+  border: 1px solid rgba(120,120,120,.4);
+  padding: .7rem 1.4rem; border-radius: 12px;
+  display: flex; flex-direction: column; line-height: 1.35; white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+.hero-badge strong { color: #fff; font-family: var(--serif); font-size: 1.02rem; }
+.hero-badge span { color: var(--blue-light); font-size: .82rem; }
+.hero-title {
+  color: #fff;
+  font-size: clamp(2.6rem, 6.4vw, 4.7rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  margin-bottom: 1.6rem;
+}
+.hero-lead {
+  font-size: clamp(1.1rem, 2vw, 1.32rem);
+  color: rgba(247,244,238,.82);
+  max-width: 640px;
+  margin-bottom: 2.4rem;
+  font-weight: 300;
+}
+.hero-actions { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 3.4rem; }
+
+.hero-stats {
+  display: flex; flex-wrap: wrap; gap: 2.6rem;
+  list-style: none;
+  border-top: 1px solid rgba(255,255,255,.14);
+  padding-top: 2rem;
+}
+.hero-stats li { display: flex; flex-direction: column; }
+.hero-stats strong { font-family: var(--serif); font-size: 1.35rem; color: var(--blue-light); }
+.hero-stats span { font-size: .95rem; color: rgba(247,244,238,.65); }
+
+/* ===== Section heads ===== */
+.section-head { max-width: 620px; margin-bottom: 3.4rem; }
+.section-head h2 { font-size: clamp(2rem, 4vw, 2.9rem); margin-bottom: 1rem; }
+.section-sub, .contact-sub { color: var(--text-soft); font-size: 1.1rem; }
+
+/* ===== About ===== */
+.about { background: var(--paper); }
+.about-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+.about-portrait { position: relative; }
+.portrait-frame {
+  position: relative;
+  aspect-ratio: 4/5;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, var(--ink-2), var(--ink));
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.portrait-frame::before {
+  content: ""; position: absolute; inset: 14px;
+  border: 1px solid rgba(120,120,120,.4); border-radius: 16px;
+}
+.portrait-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 22%; z-index: 1; filter: grayscale(1) contrast(1.03); }
+.portrait-mono {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--serif); font-weight: 900;
+  font-size: clamp(4rem, 12vw, 7rem);
+  color: rgba(255,255,255,.85);
+  letter-spacing: .05em; z-index: 0;
+}
+.portrait-caption { z-index: 2; }
+.portrait-caption {
+  position: absolute; inset-block-end: 22px; inset-inline-start: 22px;
+  background: rgba(0,0,0,.78); backdrop-filter: blur(6px);
+  padding: .7rem 1.1rem; border-radius: 12px;
+  display: flex; flex-direction: column; line-height: 1.3;
+}
+.portrait-caption strong { color: #fff; font-family: var(--serif); }
+.portrait-caption span { color: var(--blue-light); font-size: .82rem; }
+
+.about-text h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); margin-bottom: 1.4rem; }
+.about-text p { color: var(--text-soft); margin-bottom: 1.15rem; font-size: 1.06rem; }
+.about-more { display: inline-block; margin-top: 1.4rem; font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 2px solid var(--ink); padding-bottom: .15rem; }
+.about-more:hover { color: #000; border-color: #000; }
+
+.fact-list { list-style: none; margin-top: 1.8rem; display: grid; gap: .1rem; border-top: 1px solid var(--line); }
+.fact-list li { display: flex; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid var(--line); }
+.fact-k { flex: 0 0 130px; font-weight: 700; color: var(--ink); }
+.fact-v { color: var(--text-soft); }
+
+/* ===== Practice cards ===== */
+.practice { background: var(--sky); }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 2.1rem 1.8rem;
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ""; position: absolute; inset-block-start: 0; inset-inline-start: 0;
+  width: 0; height: 3px; background: var(--blue); transition: width .3s ease;
+}
+.card:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: transparent; }
+.card:hover::before { width: 100%; }
+.card-num { font-family: var(--serif); font-size: 1.05rem; color: var(--blue-deep); font-weight: 700; margin-bottom: .9rem; letter-spacing: .1em; }
+.card h3 { font-size: 1.4rem; margin-bottom: .7rem; }
+.card p { color: var(--text-soft); font-size: 1rem; }
+
+.cards-flagship { margin-bottom: 1.4rem; }
+.cards-secondary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.1rem; }
+.card-sm { padding: 1.5rem 1.4rem; }
+.card-sm h3 { font-size: 1.15rem; margin-bottom: .5rem; }
+.card-sm p { font-size: .95rem; }
+.card-sm::before { display: none; }
+.card-sm:hover { transform: translateY(-4px); }
+
+/* ===== Approach ===== */
+.approach { background: var(--paper); }
+.approach-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(2rem, 5vw, 4.5rem); }
+.approach-intro { position: sticky; top: 6rem; align-self: start; }
+.approach-intro h2 { font-size: clamp(1.9rem, 3.6vw, 2.7rem); margin-bottom: 1.2rem; }
+.approach-intro p { color: var(--text-soft); font-size: 1.08rem; margin-bottom: 1.8rem; }
+.approach-list { list-style: none; display: grid; gap: 1.2rem; }
+.approach-list li { display: flex; gap: 1.2rem; padding: 1.6rem 1.7rem; background: var(--sky); border-radius: var(--radius); border: 1px solid var(--line); }
+.approach-ic { color: var(--blue); font-size: 1.1rem; margin-top: .35rem; flex-shrink: 0; }
+.approach-list h3 { font-size: 1.25rem; margin-bottom: .35rem; }
+.approach-list p { color: var(--text-soft); font-size: 1rem; }
+
+/* ===== FAQ accordion ===== */
+.faq { background: var(--sky); }
+.faq-wrap { max-width: 820px; margin-inline: auto; }
+.faq-list { display: grid; gap: .85rem; }
+.faq-item {
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.faq-item[open] { border-color: rgba(0,0,0,.4); box-shadow: var(--shadow-sm); }
+.faq-item summary {
+  list-style: none; cursor: pointer;
+  padding: 1.15rem 1.4rem; font-weight: 600; font-size: 1.08rem; color: var(--ink);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+"; font-size: 1.5rem; color: var(--blue); font-weight: 400;
+  transition: transform .25s ease; line-height: 1;
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-a { padding: 0 1.4rem 1.25rem; color: var(--text-soft); font-size: 1.02rem; line-height: 1.7; }
+
+/* ===== Contact ===== */
+.contact { background: var(--sky); }
+.contact-list { list-style: none; display: grid; gap: 1.1rem; margin: 2.2rem 0 1.6rem; }
+.contact-list li { display: flex; gap: 1rem; align-items: center; }
+.contact-ic {
+  display: grid; place-items: center; flex-shrink: 0;
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--ink); color: var(--blue-light); font-size: 1.25rem;
+}
+.contact-k { display: block; font-size: .82rem; color: var(--text-soft); letter-spacing: .05em; }
+.contact-v { display: block; font-size: 1.15rem; font-weight: 700; color: var(--ink); text-decoration: none; font-family: var(--serif); }
+a.contact-v:hover { color: var(--blue-deep); }
+.contact-note { color: var(--text-soft); font-size: .96rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+
+/* ===== Contact panel — פאנל כהה (ללא תמונה) + טופס ===== */
+.contact-panel {
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.contact-media {
+  position: relative;
+  min-height: 560px;
+  display: flex; align-items: center;
+  padding: clamp(1.8rem, 3vw, 2.8rem);
+  color: #fff;
+  background:
+    radial-gradient(90% 80% at 85% 0%, rgba(120,120,120,.18), transparent 55%),
+    linear-gradient(160deg, #000 0%, #141414 60%, #1d1d1d 100%);
+}
+.contact-media-inner { position: relative; z-index: 2; width: 100%; }
+.contact-media .eyebrow { color: #fff; opacity: .85; }
+.contact-media h2 { color: #fff; font-size: clamp(1.8rem, 3.5vw, 2.5rem); margin-bottom: .8rem; }
+.contact-media .contact-sub { color: rgba(255,255,255,.85); }
+.contact-media .contact-list { margin: 1.6rem 0 1.2rem; }
+.contact-media .contact-ic { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.25); }
+.contact-media .contact-k { color: rgba(255,255,255,.7); }
+.contact-media .contact-v { color: #fff; }
+.contact-media a.contact-v:hover { color: #d6d6d6; }
+.contact-media .contact-note { color: rgba(255,255,255,.72); border-top-color: rgba(255,255,255,.2); }
+
+/* הטופס בתוך הפאנל — בלי צל/מסגרת כפולים */
+.contact-form-wrap {
+  background: var(--paper);
+  padding: clamp(1.8rem, 3vw, 2.8rem);
+  align-self: center; width: 100%;
+}
+
+@media (max-width: 860px) {
+  .contact-panel { grid-template-columns: 1fr; }
+  .contact-media { min-height: 0; }
+}
+
+/* ===== Form ===== */
+.field { margin-bottom: 1.2rem; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.field label { display: block; font-weight: 600; margin-bottom: .5rem; color: var(--ink); font-size: .98rem; }
+.req { color: var(--blue-deep); }
+.field input, .field textarea {
+  width: 100%;
+  padding: .85rem 1rem;
+  border: 1.5px solid var(--line);
+  border-radius: 11px;
+  font-family: var(--sans); font-size: 1rem; color: var(--text);
+  background: var(--sky);
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+.field input::placeholder, .field textarea::placeholder { color: #9aa3ae; }
+.field input:focus, .field textarea:focus {
+  outline: none; border-color: var(--blue); background: #fff;
+  box-shadow: 0 0 0 4px rgba(120,120,120,.15);
+}
+.field textarea { resize: vertical; }
+
+.form-status { margin-top: 1rem; font-weight: 600; font-size: .98rem; min-height: 1.2em; }
+.form-status.ok { color: #1f7a4d; }
+.form-status.err { color: #b23b3b; }
+.form-fineprint { margin-top: 1rem; font-size: .82rem; color: var(--text-soft); line-height: 1.6; }
+
+/* ===== Footer ===== */
+.site-footer { background: #0a0a0a; color: rgba(247,244,238,.7); padding: 3rem 0; }
+.footer-inner { display: flex; flex-wrap: wrap; gap: 1.6rem 2.5rem; align-items: center; justify-content: space-between; }
+.footer-brand { display: flex; align-items: center; gap: .9rem; }
+.footer-brand strong { display: block; color: #fff; font-family: var(--serif); font-size: 1.05rem; }
+.footer-brand span { font-size: .86rem; }
+.footer-nav { display: flex; gap: 1.6rem; flex-wrap: wrap; }
+.footer-nav a { color: rgba(247,244,238,.75); text-decoration: none; font-size: .95rem; }
+.footer-nav a:hover { color: var(--blue-light); }
+.footer-legal { display: flex; gap: 1rem; align-items: center; font-size: .88rem; flex-wrap: wrap; }
+.footer-legal a { color: var(--blue-light); text-decoration: none; font-weight: 600; }
+
+/* ===== Reveal animation ===== */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .nav-links {
+    position: fixed; inset-block-start: 0; inset-inline-end: 0;
+    height: 100svh; width: min(320px, 82%);
+    background: var(--ink-2);
+    flex-direction: column; align-items: flex-start; justify-content: center;
+    gap: 1.8rem; padding: 2rem 2.4rem;
+    transform: translateX(100%); transition: transform .35s ease;
+    box-shadow: -20px 0 60px -30px #000;
+  }
+  .nav-links.open { transform: translateX(0); }
+  .nav-links a { font-size: 1.25rem; }
+  .nav-toggle { display: flex; z-index: 110; }
+
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero { min-height: auto; padding-block-start: 8rem; }
+  .hero-copy { max-width: none; }
+  .hero-figure { max-width: 300px; margin-block: 2.5rem 1.5rem; }
+  .hero-figure::before { display: none; }
+  .hero-photo-mono { font-size: 3.6rem; }
+
+  .about-grid, .approach-grid { grid-template-columns: 1fr; }
+  .approach-intro { position: static; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .cards-secondary { grid-template-columns: repeat(2, 1fr); }
+  .about-portrait { max-width: 340px; }
+}
+
+@media (max-width: 560px) {
+  .cards { grid-template-columns: 1fr; }
+  .cards-secondary { grid-template-columns: 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+  .hero-stats { gap: 1.4rem 2rem; }
+  .btn { width: 100%; }
+  .hero-actions { flex-direction: column; }
+  .brand-text em { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* מיקוד נגיש (focus-visible) לשיפור UX ונגישות */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--blue-light);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* היסט גלילה כדי שהעוגנים לא יוסתרו מתחת לכותרת הקבועה */
+html { scroll-padding-top: 90px; }
+
+/* כפתור ראשי על רקע כהה (Hero) — לבן על שחור */
+.hero .btn-primary { background: #fff; color: #111; box-shadow: 0 14px 34px -14px rgba(0,0,0,.6); }
+.hero .btn-primary:hover { background: #e4e4e4; }
+.btn-primary { color: #fff; box-shadow: 0 12px 30px -12px rgba(0,0,0,.55); }
+
+/* ===== כפתור חיוג צף (UX) ===== */
+.fab {
+  position: fixed; z-index: 90;
+  inset-block-end: 22px; inset-inline-start: 22px;
+  display: inline-flex; align-items: center; gap: .55rem;
+  background: #141414; color: #fff;
+  padding: .85rem 1.35rem; border-radius: 999px;
+  text-decoration: none; font-weight: 700; font-size: 1rem;
+  box-shadow: 0 14px 34px -10px rgba(0,0,0,.55);
+  transition: transform .2s ease, background .2s ease;
+}
+.fab:hover { transform: translateY(-3px); background: #000; }
+.fab-ic { font-size: 1.15rem; }
+@media (max-width: 560px) {
+  .fab { padding: 1rem; }
+  .fab-text { display: none; }
+}
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Attorney",
+    "name": "רועי קובובסקי, עורכי דין",
+    "alternateName": "ROY KUBOVSKY, ADVOCATES",
+    "description": "משרד בוטיק למשפט מנהלי, דיני מכרזים וליטיגציה מנהלית.",
+    "areaServed": "IL",
+    "knowsLanguage": ["he", "en"],
+    "telephone": "03-6072222",
+    "faxNumber": "03-6072220",
+    "email": "roy.kubovsky@dle.co.il",
+    "sameAs": ["https://www.linkedin.com/in/roy-kubovsky-34ba2a14/"],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "מגדלי עזריאלי 1 (המגדל העגול), קומה 36",
+      "addressLocality": "תל אביב-יפו",
+      "postalCode": "6702101",
+      "addressCountry": "IL"
+    },
+    "knowsAbout": ["משפט מנהלי", "דיני מכרזים", "ליטיגציה מנהלית", "תובענות ייצוגיות", "ליטיגציה מסחרית"]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ===== Navigation ===== -->
+  <header class="site-header" id="siteHeader">
+    <div class="wrap nav-inner">
+      <a href="#top" class="brand" aria-label="רועי קובובסקי, עריכת דין — לראש העמוד">
+        <!-- הלוגו שיעל הכינה — קובץ assets/logo.png -->
+        <span class="brand-mark">
+          <img src="assets/logo.png" alt="לוגו — רועי קובובסקי, עורכי דין"
+               onerror="this.parentElement.classList.add('brand-mark--empty');" />
+        </span>
+        <span class="brand-text">
+          <strong>רועי קובובסקי</strong>
+          <em>משפט מנהלי ומכרזים</em>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="ניווט ראשי">
+        <a href="#about">אודות</a>
+        <a href="#practice">תחומי עיסוק</a>
+        <a href="roy-kubovsky.html">פרופיל אישי</a>
+        <a href="#faq">שאלות נפוצות</a>
+        <a href="#contact" class="nav-cta">קביעת פגישה</a>
+      </nav>
+
+      <button class="nav-toggle" id="navToggle" aria-label="פתיחת תפריט" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero" id="top">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow reveal">משרד בוטיק · מגדלי עזריאלי, תל אביב</p>
+        <h1 class="hero-title reveal">
+          משפט מנהלי ומכרזים —<br />
+          <span class="accent">בעומק של משרד מוביל,</span><br />
+          עם המיקוד של בוטיק.
+        </h1>
+        <p class="hero-lead reveal">
+          אני מלווה חברות, גופים ויזמים במשפט המנהלי — מכרזים ציבוריים, עתירות מנהליות
+          וליטיגציה מול רשויות. אחרי 17 שנים בשבלת ושות׳ — מתוכן עשר כשותף — וכחמש שנים
+          נוספות כשותף בחברת D.L.E, פתחתי משרד משלי — כדי שהתיק שלכם ינוהל על ידי מי
+          שבאמת מכיר אותו: אני.
+        </p>
+        <div class="hero-actions reveal">
+          <a href="#contact" class="btn btn-primary">קביעת פגישת ייעוץ</a>
+          <a href="#practice" class="btn btn-ghost">תחומי העיסוק</a>
+        </div>
+
+        <ul class="hero-stats reveal" aria-label="נתונים">
+          <li><strong>Legal 500</strong><span>עורך דין מומלץ</span></li>
+          <li><strong>17 שנים</strong><span>בשבלת ושות׳ · 10 כשותף</span></li>
+          <li><strong>כ-5 שנים</strong><span>שותף בחברת D.L.E</span></li>
+        </ul>
+      </div>
+
+      <figure class="hero-figure reveal">
+        <div class="hero-photo">
+          <!-- מנסה קודם קובץ מקומי; אם אין, נטענת התמונה שהועלתה; אחרת מונוגרמה -->
+          <img src="assets/roey-hero.jpg" alt="עו״ד רועי קובובסקי" loading="eager"
+               data-fallback="https://i.postimg.cc/fbTm22HN/469183981-1145784470342402-2918503025163317510-n-%281%29.jpg"
+               onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute('data-fallback');}else{this.style.display='none';}" />
+          <span class="hero-photo-mono" aria-hidden="true">רועי קובובסקי</span>
+        </div>
+        <figcaption class="hero-badge">
+          <strong>עו״ד רועי קובובסקי</strong>
+          <span>מייסד המשרד · לשעבר שותף בשבלת ושות׳ וב-D.L.E</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== About ===== -->
+  <section class="section about" id="about">
+    <div class="wrap about-grid">
+      <div class="about-portrait reveal">
+        <div class="portrait-frame">
+          <img class="portrait-img" src="assets/roey-portrait.jpg" alt="עו״ד רועי קובובסקי"
+               loading="lazy"
+               data-fallback="https://media.licdn.com/dms/image/v2/C4D03AQEOGrRD3HJB4A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1516546319744?e=2147483647&amp;v=beta&amp;t=Tfmjurq1aBaALul8ncpc5-M7FAx7s1V3-oYRLQRxbyQ"
+               onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute('data-fallback');}else{this.style.display='none';}" />
+          <div class="portrait-mono" aria-hidden="true">ר״ק</div>
+        </div>
+        <div class="portrait-caption">
+          <strong>עו״ד רועי קובובסקי</strong>
+          <span>מייסד המשרד</span>
+        </div>
+      </div>
+
+      <div class="about-text">
+        <p class="eyebrow reveal">אודות</p>
+        <h2 class="reveal">בניתי את דרכי בתיקים הגדולים. עכשיו אני מביא את הניסיון הזה אליכם — אישית.</h2>
+        <p class="reveal">
+          אני עורך דין המתמחה במשפט מנהלי, בדיני מכרזים ובליטיגציה מנהלית.
+          במשך <strong>17 שנים הייתי חלק ממשרד שבלת ושות׳</strong> — מהמשרדים המובילים בישראל —
+          <strong>מתוכן עשר שנים כשותף</strong>. שם ניהלתי חלק מהתיקים המורכבים במשק:
+          עתירות מנהליות, מכרזים ציבוריים, תובענות ייצוגיות, סכסוכי בעלי מניות ומאבקי שליטה,
+          וליטיגציה מסחרית מורכבת.
+        </p>
+        <p class="reveal">
+          לאחר מכן כיהנתי <strong>כחמש שנים כשותף בחברת D.L.E</strong>, שם המשכתי ללוות
+          לקוחות בתיקים מורכבים בממשק שבין המגזר העסקי לרשויות. בשנת 2020 דורגתי על ידי
+          <strong>Legal 500</strong> כעורך דין מומלץ בתחום התובענות הייצוגיות, וזכיתי להכרה
+          חוזרת במדריכי הדירוג המשפטיים לאורך השנים.
+        </p>
+        <p class="reveal">
+          היום אני מנהל משרד עצמאי מתוך אמונה פשוטה: את הידע והניסיון של משרד גדול אפשר
+          להביא בתוך מסגרת בוטיק — שבה אתם מקבלים את תשומת הלב, הזמינות והאחריות האישית
+          שלי, ישירות.
+        </p>
+
+        <ul class="fact-list reveal">
+          <li><span class="fact-k">התמחות</span><span class="fact-v">משפט מנהלי · מכרזים · ליטיגציה מנהלית</span></li>
+          <li><span class="fact-k">רקע</span><span class="fact-v">17 שנים בשבלת ושות׳ (10 כשותף) · כ-5 שנים שותף ב-D.L.E</span></li>
+          <li><span class="fact-k">הכרה</span><span class="fact-v">Legal 500 — עורך דין מומלץ (2020)</span></li>
+          <li><span class="fact-k">מיקום · שפות</span><span class="fact-v">מגדלי עזריאלי, תל אביב · עברית ואנגלית</span></li>
+        </ul>
+
+        <a href="roy-kubovsky.html" class="about-more reveal">לפרופיל המקצועי המלא ←</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Practice areas ===== -->
+  <section class="section practice" id="practice">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">תחומי עיסוק</p>
+        <h2>שלושת תחומי הליבה שלי — ועומק מוכח סביבם</h2>
+        <p class="section-sub">
+          אני ממוקד במקום שבו נפגשים האזרח והעסק עם הרשות: מכרזים, החלטות מנהליות
+          ורגולציה. וסביב הליבה — ניסיון עשיר שצברתי בליטיגציה אזרחית ומסחרית מורכבת.
+        </p>
+      </div>
+
+      <div class="cards cards-flagship">
+        <article class="card reveal">
+          <div class="card-num">01</div>
+          <h3>משפט מנהלי</h3>
+          <p>ייצוג מול רשויות המדינה והשלטון המקומי: תקיפת החלטות מנהליות, רישוי, רגולציה, וחופש העיסוק — בליווי אסטרטגי מהשלב המוקדם ועד להכרעה.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-num">02</div>
+          <h3>דיני מכרזים</h3>
+          <p>ליווי מציעים ועורכי מכרזים: בחינת תנאי סף, השגות ועררים, פסילת הצעות, ועתירות מכרזים — כדי שהזכייה (או הפסילה) לא תוכרע על טכניקה.</p>
+        </article>
+        <article class="card reveal">
+          <div class="card-num">03</div>
+          <h3>ליטיגציה מנהלית</h3>
+          <p>עתירות מנהליות ועתירות לבג״ץ, וייצוג בהליכים מול ועדות וטריבונלים — ניהול חד ומהיר של הליכים שבהם לוח הזמנים הוא קריטי.</p>
+        </article>
+      </div>
+
+      <div class="cards cards-secondary">
+        <article class="card card-sm reveal">
+          <h3>תובענות ייצוגיות</h3>
+          <p>ניסיון מוכר (Legal 500) בייצוג בתובענות ייצוגיות — בצד המבקש ובצד הנתבע.</p>
+        </article>
+        <article class="card card-sm reveal">
+          <h3>סכסוכי בעלי מניות ושליטה</h3>
+          <p>מאבקי שליטה, קיפוח המיעוט וסכסוכים בין בעלי מניות בחברות.</p>
+        </article>
+        <article class="card card-sm reveal">
+          <h3>ליטיגציה מסחרית מורכבת</h3>
+          <p>מחלוקות אזרחיות-מסחריות מהמורכבות, לרבות משפט בינלאומי פרטי.</p>
+        </article>
+        <article class="card card-sm reveal">
+          <h3>הפצה, קמעונאות ומסחר</h3>
+          <p>ליווי וייצוג בסכסוכי הפצה ובסוגיות משפטיות בעולם הקמעונאי והמסחרי.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Approach ===== -->
+  <section class="section approach" id="approach">
+    <div class="wrap approach-grid">
+      <div class="approach-intro reveal">
+        <p class="eyebrow">הגישה שלי</p>
+        <h2>למה לקוחות בוחרים בבוטיק — דווקא בתיקים הגדולים</h2>
+        <p>
+          משרד ממוקד הוא יתרון, לא פשרה: אתם מקבלים את אותו ניסיון של משרד מוביל — אבל
+          איתי, עורך הדין שבאמת מכיר את התיק, זמין, ואחראי אישית לכל שלב.
+        </p>
+        <a href="#contact" class="btn btn-primary">דברו איתי</a>
+      </div>
+
+      <ul class="approach-list">
+        <li class="reveal">
+          <span class="approach-ic" aria-hidden="true">◆</span>
+          <div>
+            <h3>ניסיון של Big-Law</h3>
+            <p>17 שנים בשבלת ושות׳ (10 כשותף) וכחמש שנים כשותף ב-D.L.E — התיקים המורכבים אינם חדשים לי.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="approach-ic" aria-hidden="true">◆</span>
+          <div>
+            <h3>אחריות אישית</h3>
+            <p>מי שאתם פוגשים הוא מי שמנהל את התיק בבית המשפט — אני. בלי גלגול בין עורכי דין.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="approach-ic" aria-hidden="true">◆</span>
+          <div>
+            <h3>שליטה בלוח הזמנים</h3>
+            <p>במכרזים ובעתירות מנהליות כל יום קובע. אני פועל מהר ובמדויק, כשצריך.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="approach-ic" aria-hidden="true">◆</span>
+          <div>
+            <h3>אסטרטגיה לפני מסמכים</h3>
+            <p>קודם מגדירים מה ניצחון נראה עבורכם — ובונים את הדרך אליו לאחור.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="section faq" id="faq">
+    <div class="wrap faq-wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">שאלות נפוצות</p>
+        <h2>מה שכדאי לדעת מראש</h2>
+        <p class="section-sub">מידע כללי בלבד ואינו מהווה ייעוץ משפטי. לכל מקרה נסיבות משלו — נשמח לבחון את שלכם.</p>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item reveal">
+          <summary>תוך כמה זמן צריך לפעול נגד תוצאת מכרז?</summary>
+          <div class="faq-a">לוחות הזמנים בדיני מכרזים קצרים מאוד — לעיתים ימים ספורים. מומלץ לפנות לייעוץ מיד עם קבלת ההחלטה, עוד לפני שמתגבשת עמדה סופית, כדי לא לאבד את הזכות לפעול.</div>
+        </details>
+        <details class="faq-item reveal">
+          <summary>מהי עתירה מנהלית ומתי היא מתאימה?</summary>
+          <div class="faq-a">עתירה מנהלית היא הליך לתקיפת החלטה של רשות ציבורית בבית המשפט לעניינים מנהליים. היא מתאימה כשהחלטה שלטונית פגעה בכם שלא כדין — ולעיתים יש להגישה בתוך פרק זמן קצוב.</div>
+        </details>
+        <details class="faq-item reveal">
+          <summary>אתה מייצג רק חברות, או גם יחידים?</summary>
+          <div class="faq-a">שניהם. אני מייצג חברות, גופים ציבוריים ופרטיים, יזמים ויחידים — בכל מקום שבו יש מפגש עם רשות, מכרז או מחלוקת מסחרית מורכבת.</div>
+        </details>
+        <details class="faq-item reveal">
+          <summary>מה היתרון של משרד בוטיק על פני משרד גדול?</summary>
+          <div class="faq-a">אתם מקבלים את אותו עומק ניסיון — אבל איתי, ישירות. פחות שכבות, זמינות גבוהה, ואחריות אישית של מי שבנה את הקריירה שלו בדיוק בתיקים כאלה.</div>
+        </details>
+        <details class="faq-item reveal">
+          <summary>איך מתחילים?</summary>
+          <div class="faq-a">בשיחה ראשונית קצרה וללא התחייבות. נבין יחד את העניין, אעריך את הכיוון, ונחליט אם ואיך להתקדם. אפשר להשאיר פרטים בטופס או להתקשר אליי ישירות.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Contact ===== -->
+  <section class="section contact" id="contact">
+    <div class="wrap">
+      <div class="contact-panel">
+      <div class="contact-media reveal">
+        <div class="contact-media-inner">
+        <p class="eyebrow">צרו קשר</p>
+        <h2>נשמח לשמוע מכם</h2>
+        <p class="contact-sub">
+          בין אם אתם זקוקים לייעוץ במשפט מנהלי או במכרז, שוקלים עתירה, או מתמודדים עם
+          מחלוקת מסחרית — השאירו פרטים ואחזור אליכם בהקדם. שיחה ראשונית ללא התחייבות.
+        </p>
+
+        <ul class="contact-list">
+          <li>
+            <span class="contact-ic" aria-hidden="true">☎</span>
+            <div>
+              <span class="contact-k">טלפון</span>
+              <a href="tel:03-6072222" class="contact-v" dir="ltr">03-6072222</a>
+            </div>
+          </li>
+          <li>
+            <span class="contact-ic" aria-hidden="true">🖷</span>
+            <div>
+              <span class="contact-k">פקס</span>
+              <span class="contact-v" dir="ltr">03-6072220</span>
+            </div>
+          </li>
+          <li>
+            <span class="contact-ic" aria-hidden="true">✉</span>
+            <div>
+              <span class="contact-k">דוא״ל</span>
+              <a href="mailto:roy.kubovsky@dle.co.il" class="contact-v" id="emailLink" dir="ltr">roy.kubovsky@dle.co.il</a>
+            </div>
+          </li>
+          <li>
+            <span class="contact-ic" aria-hidden="true">in</span>
+            <div>
+              <span class="contact-k">LinkedIn</span>
+              <a href="https://www.linkedin.com/in/roy-kubovsky-34ba2a14/" class="contact-v" target="_blank" rel="noopener" dir="ltr">Roy Kubovsky</a>
+            </div>
+          </li>
+          <li>
+            <span class="contact-ic" aria-hidden="true">⌖</span>
+            <div>
+              <span class="contact-k">כתובת</span>
+              <span class="contact-v">מגדלי עזריאלי 1 (המגדל העגול), קומה 36, תל אביב-יפו 6702101</span>
+            </div>
+          </li>
+        </ul>
+
+        <p class="contact-note">
+          שעות מענה: א׳–ה׳, 09:00–19:00. פנייה דחופה במכרז או בעתירה? התקשרו ישירות.
+        </p>
+        </div>
+      </div>
+
+      <div class="contact-form-wrap reveal">
+        <form id="leadForm" class="lead-form" novalidate>
+          <div class="field">
+            <label for="f-name">שם מלא <span class="req">*</span></label>
+            <input type="text" id="f-name" name="full_name" autocomplete="name" required maxlength="120" placeholder="ישראל ישראלי" />
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="f-email">אימייל <span class="req">*</span></label>
+              <input type="email" id="f-email" name="email" autocomplete="email" required maxlength="200" placeholder="name@gmail.com" dir="ltr" />
+            </div>
+            <div class="field">
+              <label for="f-phone">טלפון</label>
+              <input type="tel" id="f-phone" name="phone" autocomplete="tel" maxlength="40" placeholder="050-0000000" dir="ltr" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="f-message">במה אוכל לעזור?</label>
+            <textarea id="f-message" name="message" rows="5" maxlength="4000" placeholder="ספרו לי בקצרה על העניין (מכרז, החלטה מנהלית, מחלוקת...)"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn">שליחת הפנייה</button>
+          <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+          <p class="form-fineprint">בשליחת הטופס אתם מאשרים שניצור עמכם קשר בנוגע לפנייה. הפרטים נשמרים בצורה מאובטחת ואינם מועברים לגורם שלישי. השימוש באתר כפוף ל<a href="takanon.html">תקנון האתר</a>.</p>
+        </form>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Floating call button ===== -->
+  <a href="tel:03-6072222" class="fab" aria-label="חייגו עכשיו 03-6072222">
+    <span class="fab-ic" aria-hidden="true">☎</span>
+    <span class="fab-text">חייגו אליי</span>
+  </a>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark">
+          <img src="assets/logo.png" alt="לוגו — רועי קובובסקי, עורכי דין"
+               onerror="this.parentElement.classList.add('brand-mark--empty');" />
+        </span>
+        <div>
+          <strong>רועי קובובסקי, עורכי דין</strong>
+          <span>משפט מנהלי · מכרזים · ליטיגציה מנהלית · מגדלי עזריאלי, תל אביב</span>
+        </div>
+      </div>
+      <nav class="footer-nav" aria-label="ניווט תחתון">
+        <a href="#about">אודות</a>
+        <a href="#practice">תחומי עיסוק</a>
+        <a href="roy-kubovsky.html">פרופיל אישי</a>
+        <a href="#faq">שאלות נפוצות</a>
+        <a href="#contact">צרו קשר</a>
+        <a href="takanon.html">תקנון האתר</a>
+      </nav>
+      <div class="footer-legal">
+        <a href="tel:03-6072222" dir="ltr">03-6072222</a>
+        <span id="year"></span> © כל הזכויות שמורות
+      </div>
+    </div>
+  </footer>
+
+  <script>
+/* אתר עו"ד רועי קובובסקי — הגדרות לקוח.
+   המפתח הציבורי (publishable) בטוח לחשיפה בדפדפן — הגישה מוגבלת
+   באמצעות Row Level Security כך שניתן רק *להגיש* פנייה, לא לקרוא פניות. */
+
+window.SITE_CONFIG = {
+  supabaseUrl: "https://zceoswqrvcqmjjohpeyo.supabase.co",
+  supabaseAnonKey: "sb_publishable_aWietdHty-i2IlGKGk421w_UH4X13q0",
+  // כתובת הדוא"ל המוצגת באתר (מקצועית).
+  contactEmail: "roy.kubovsky@dle.co.il",
+  // כתובת דוא"ל לגיבוי — אם שמירת הפנייה נכשלת, נפתח דוא"ל לכתובת הזו.
+  fallbackEmail: "sharonekub@gmail.com",
+  phone: "03-6072222",
+  fax: "03-6072220",
+  linkedin: "https://www.linkedin.com/in/roy-kubovsky-34ba2a14/",
+};
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script>
+/* אתר עו"ד רועי קובובסקי — אינטראקציות בצד הלקוח */
+(function () {
+  "use strict";
+
+  var cfg = window.SITE_CONFIG || {};
+
+  /* ---------- שנה נוכחית בפוטר ---------- */
+  var yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* ---------- כותרת "נדבקת" בגלילה ---------- */
+  var header = document.getElementById("siteHeader");
+  function onScroll() {
+    if (window.scrollY > 24) header.classList.add("scrolled");
+    else header.classList.remove("scrolled");
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- תפריט מובייל ---------- */
+  var toggle = document.getElementById("navToggle");
+  var links = document.querySelector(".nav-links");
+  function closeMenu() {
+    links.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+  }
+  if (toggle && links) {
+    toggle.addEventListener("click", function () {
+      var open = links.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    links.querySelectorAll("a").forEach(function (a) {
+      a.addEventListener("click", closeMenu);
+    });
+  }
+
+  /* ---------- Reveal on scroll ---------- */
+  var revealEls = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add("in");
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    revealEls.forEach(function (el) { io.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add("in"); });
+  }
+
+  /* ---------- לקוח Supabase (עצל) ---------- */
+  var supa = null;
+  function getSupa() {
+    if (supa) return supa;
+    if (!cfg.supabaseUrl || !cfg.supabaseAnonKey || !window.supabase) return null;
+    supa = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    return supa;
+  }
+
+  /* ---------- שליחת הטופס ---------- */
+  var form = document.getElementById("leadForm");
+  var statusEl = document.getElementById("formStatus");
+  var submitBtn = document.getElementById("submitBtn");
+
+  function setStatus(msg, kind) {
+    statusEl.textContent = msg;
+    statusEl.className = "form-status" + (kind ? " " + kind : "");
+  }
+
+  function mailtoFallback(payload) {
+    var subject = "פנייה מהאתר — " + payload.full_name;
+    var body =
+      "שם: " + payload.full_name + "\n" +
+      "אימייל: " + payload.email + "\n" +
+      "טלפון: " + (payload.phone || "-") + "\n\n" +
+      "הודעה:\n" + (payload.message || "");
+    var to = cfg.fallbackEmail || "";
+    window.location.href =
+      "mailto:" + to +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+  }
+
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      var payload = {
+        full_name: (form.full_name.value || "").trim(),
+        email: (form.email.value || "").trim(),
+        phone: (form.phone.value || "").trim() || null,
+        kind: "general",
+        message: (form.message.value || "").trim() || null,
+        fit_reason: null,
+        user_agent: navigator.userAgent,
+      };
+
+      // בדיקות בסיסיות
+      if (!payload.full_name) { setStatus("נא למלא שם מלא.", "err"); form.full_name.focus(); return; }
+      if (!payload.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) {
+        setStatus("נא למלא כתובת אימייל תקינה.", "err"); form.email.focus(); return;
+      }
+
+      submitBtn.disabled = true;
+      setStatus("שולח…", "");
+
+      var client = getSupa();
+      if (!client) {
+        // אין חיבור למסד הנתונים — נעבור לשליחת דוא"ל
+        setStatus("פותח את תוכנת הדוא״ל שלכם…", "ok");
+        submitBtn.disabled = false;
+        mailtoFallback(payload);
+        return;
+      }
+
+      client.from("roey_leads").insert(payload).then(function (res) {
+        submitBtn.disabled = false;
+        if (res.error) {
+          console.error(res.error);
+          setStatus("אירעה תקלה בשמירה — פותח דוא״ל לשליחה ידנית…", "err");
+          setTimeout(function () { mailtoFallback(payload); }, 900);
+          return;
+        }
+        form.reset();
+        setStatus("הפנייה נשלחה בהצלחה! נחזור אליכם בהקדם.", "ok");
+      }).catch(function (err) {
+        console.error(err);
+        submitBtn.disabled = false;
+        setStatus("אירעה תקלה — פותח דוא״ל לשליחה ידנית…", "err");
+        setTimeout(function () { mailtoFallback(payload); }, 900);
+      });
+    });
+  }
+
+  /* ---------- החלת פרטי קשר מתוך ההגדרות ---------- */
+  var displayEmail = cfg.contactEmail || cfg.fallbackEmail;
+  if (displayEmail) {
+    var emailLink = document.getElementById("emailLink");
+    if (emailLink) {
+      emailLink.textContent = displayEmail;
+      emailLink.href = "mailto:" + displayEmail;
+    }
+  }
+
+  /* ---------- FAQ: אקורדיון (רק אחד פתוח בכל פעם) ---------- */
+  var faqItems = document.querySelectorAll(".faq-item");
+  faqItems.forEach(function (item) {
+    item.addEventListener("toggle", function () {
+      if (item.open) {
+        faqItems.forEach(function (other) {
+          if (other !== item) other.open = false;
+        });
+      }
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

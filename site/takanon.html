@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>תקנון האתר ותנאי שימוש | רועי קובובסקי, עורכי דין</title>
+  <meta name="description" content="תקנון האתר ותנאי השימוש של אתר משרד עו״ד רועי קובובסקי." />
+  <meta name="theme-color" content="#0a2540" />
+  <meta name="robots" content="noindex" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="icon" href="assets/logo.png" />
+
+  <style>
+:root {
+  --ink:        #121212;
+  --ink-2:      #1d1d1d;
+  --accent-l:   #f0f0f0;
+  --sky:        #f5f5f4;
+  --paper:      #ffffff;
+  --text:       #141414;
+  --text-soft:  #565656;
+  --line:       #e2e2e0;
+  --radius-lg:  22px;
+  --shadow:     0 18px 50px -20px rgba(0,0,0,.30);
+  --maxw:       860px;
+  --serif:      "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
+  --sans:       "Assistant", system-ui, "Segoe UI", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--sky);
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { width: min(var(--maxw), 92%); margin-inline: auto; }
+h1, h2 { font-family: var(--serif); font-weight: 700; line-height: 1.2; color: var(--ink); }
+
+a:focus-visible { outline: 3px solid var(--accent-l); outline-offset: 2px; border-radius: 6px; }
+
+/* ===== Header ===== */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(0,0,0,.94);
+  backdrop-filter: blur(12px);
+  padding: .8rem 0;
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.brand { display: flex; align-items: center; gap: .75rem; text-decoration: none; }
+.brand-mark {
+  display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 12px;
+  background: #fff; overflow: hidden; flex-shrink: 0;
+}
+.brand-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.brand-mark.brand-mark--empty { display: none; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+.brand-text strong { color: #fff; font-size: 1.05rem; font-family: var(--serif); }
+.brand-text em { color: var(--accent-l); font-style: normal; font-size: .76rem; letter-spacing: .08em; }
+.back-link { color: rgba(255,255,255,.85); text-decoration: none; font-weight: 500; }
+.back-link:hover { color: #fff; }
+
+/* ===== Page band ===== */
+.page-band {
+  background: linear-gradient(160deg, #000 0%, var(--ink) 55%, var(--ink-2) 100%);
+  color: #fff;
+  padding: 3rem 0 4.5rem;
+}
+.page-band h1 { color: #fff; font-size: clamp(1.9rem, 4.5vw, 2.8rem); font-weight: 900; }
+.page-band p { color: rgba(255,255,255,.72); margin-top: .4rem; }
+
+/* ===== Terms body ===== */
+.terms { margin-top: -2.4rem; padding-bottom: clamp(4rem, 8vw, 6rem); }
+.terms-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: clamp(1.8rem, 4vw, 3rem);
+}
+.terms-card section { margin-bottom: 2rem; }
+.terms-card section:last-child { margin-bottom: 0; }
+.terms-card h2 { font-size: 1.25rem; margin-bottom: .6rem; }
+.terms-card p, .terms-card li { color: var(--text-soft); font-size: 1.01rem; }
+.terms-card ul { padding-inline-start: 1.3rem; display: grid; gap: .35rem; }
+.terms-card a { color: var(--ink); font-weight: 600; }
+.updated { font-size: .88rem; color: var(--text-soft); border-top: 1px solid var(--line); padding-top: 1.2rem; margin-top: 2rem; }
+
+/* ===== Footer ===== */
+.site-footer { background: #0a0a0a; color: rgba(247,244,238,.7); padding: 2.4rem 0; }
+.footer-inner { display: flex; flex-wrap: wrap; gap: 1rem 2.5rem; align-items: center; justify-content: space-between; font-size: .92rem; }
+.footer-inner a { color: var(--accent-l); text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="site-header">
+    <div class="wrap nav-inner">
+      <a href="index.html" class="brand" aria-label="רועי קובובסקי, עורכי דין — לעמוד הבית">
+        <span class="brand-mark">
+          <img src="assets/logo.png" alt="לוגו — רועי קובובסקי, עורכי דין"
+               onerror="this.parentElement.classList.add('brand-mark--empty');" />
+        </span>
+        <span class="brand-text">
+          <strong>רועי קובובסקי</strong>
+          <em>משפט מנהלי ומכרזים</em>
+        </span>
+      </a>
+      <a href="index.html" class="back-link">→ חזרה לעמוד הבית</a>
+    </div>
+  </header>
+
+  <!-- ===== Page band ===== -->
+  <div class="page-band">
+    <div class="wrap">
+      <h1>תקנון האתר ותנאי שימוש</h1>
+      <p>רועי קובובסקי, עורכי דין</p>
+    </div>
+  </div>
+
+  <!-- ===== Terms ===== -->
+  <main class="terms">
+    <div class="wrap">
+      <div class="terms-card">
+
+        <section>
+          <h2>1. כללי</h2>
+          <p>
+            אתר זה (להלן: "האתר") מופעל על ידי משרד רועי קובובסקי, עורכי דין (להלן:
+            "המשרד"). הגלישה באתר והשימוש בו מהווים הסכמה לתנאי תקנון זה. אם אינכם
+            מסכימים לתנאים — הנכם מתבקשים להימנע משימוש באתר. התקנון מנוסח בלשון זכר
+            מטעמי נוחות בלבד ומופנה לכל המגדרים.
+          </p>
+        </section>
+
+        <section>
+          <h2>2. המידע באתר אינו ייעוץ משפטי</h2>
+          <p>
+            המידע המופיע באתר, לרבות תיאור תחומי עיסוק, מאמרים, תשובות לשאלות נפוצות
+            וכל תוכן אחר, נועד למסירת מידע כללי בלבד. אין לראות בו ייעוץ משפטי, חוות
+            דעת משפטית או תחליף לייעוץ משפטי פרטני המתחשב בנסיבותיו של כל מקרה. אין
+            להסתמך על המידע באתר לצורך קבלת החלטות משפטיות, ובכלל זה בעניינים שבהם
+            חלים מועדים קצובים (כגון הליכי מכרזים ועתירות מנהליות).
+          </p>
+        </section>
+
+        <section>
+          <h2>3. אין ביצירת קשר משום יצירת יחסי עורך דין–לקוח</h2>
+          <p>
+            פנייה למשרד באמצעות האתר — לרבות באמצעות טופס יצירת הקשר, דוא״ל או טלפון —
+            אינה יוצרת, כשלעצמה, יחסי עורך דין–לקוח. יחסים כאמור ייווצרו רק לאחר סיכום
+            מפורש ובכתב בין הפונה לבין המשרד. עד לאותו מועד, מומלץ שלא לכלול בפנייה
+            מידע חסוי או רגיש.
+          </p>
+        </section>
+
+        <section>
+          <h2>4. קניין רוחני</h2>
+          <p>
+            כל זכויות הקניין הרוחני באתר — לרבות עיצוב, לוגו, טקסטים, תמונות וקוד —
+            שייכות למשרד או לצדדים שלישיים שהתירו למשרד להשתמש בהם. אין להעתיק, לשכפל,
+            להפיץ, לפרסם או לעשות כל שימוש מסחרי בתכני האתר ללא הסכמה מראש ובכתב מאת
+            המשרד.
+          </p>
+        </section>
+
+        <section>
+          <h2>5. פרטיות ושמירת מידע</h2>
+          <p>
+            פרטים הנמסרים באמצעות טופס יצירת הקשר (שם, פרטי התקשרות ותוכן הפנייה)
+            נשמרים באופן מאובטח ומשמשים את המשרד לצורך מתן מענה לפנייה בלבד. המשרד
+            אינו מעביר את הפרטים לצדדים שלישיים, אלא אם נדרש לכך על פי דין. ניתן לפנות
+            למשרד בכל עת בבקשה לעיין בפרטים שנמסרו או להסירם.
+          </p>
+        </section>
+
+        <section>
+          <h2>6. אחריות</h2>
+          <p>
+            המשרד עושה מאמץ שהמידע באתר יהיה מדויק ועדכני, אך אינו מתחייב לכך. השימוש
+            באתר נעשה על אחריות המשתמש בלבד, והמשרד לא יישא באחריות לכל נזק, ישיר או
+            עקיף, שייגרם כתוצאה מהסתמכות על תכני האתר או מהשימוש בו, לרבות תקלות,
+            הפרעות או אי-זמינות של האתר.
+          </p>
+        </section>
+
+        <section>
+          <h2>7. קישורים לאתרים חיצוניים</h2>
+          <p>
+            האתר עשוי לכלול קישורים לאתרים חיצוניים (כגון LinkedIn). קישורים אלה
+            מובאים לנוחות בלבד; המשרד אינו אחראי לתוכנם, לזמינותם או למדיניות הפרטיות
+            הנוהגת בהם.
+          </p>
+        </section>
+
+        <section>
+          <h2>8. שינויים בתקנון ובאתר</h2>
+          <p>
+            המשרד רשאי לעדכן מעת לעת את תוכן האתר ואת הוראות תקנון זה, ללא הודעה
+            מוקדמת. הנוסח המחייב הוא הנוסח המפורסם באתר במועד השימוש.
+          </p>
+        </section>
+
+        <section>
+          <h2>9. דין וסמכות שיפוט</h2>
+          <p>
+            על השימוש באתר ועל תקנון זה יחולו דיני מדינת ישראל בלבד. סמכות השיפוט
+            הבלעדית בכל עניין הנוגע לאתר או לתקנון נתונה לבתי המשפט המוסמכים במחוז
+            תל אביב-יפו.
+          </p>
+        </section>
+
+        <section>
+          <h2>10. יצירת קשר</h2>
+          <p>
+            לשאלות בנוגע לתקנון זה ניתן לפנות למשרד:<br />
+            רועי קובובסקי, עורכי דין · מגדלי עזריאלי 1 (המגדל העגול), קומה 36,
+            תל אביב-יפו 6702101<br />
+            טלפון: <a href="tel:03-6072222" dir="ltr">03-6072222</a> ·
+            פקס: <span dir="ltr">03-6072220</span> ·
+            דוא״ל: <a href="mailto:roy.kubovsky@dle.co.il" dir="ltr">roy.kubovsky@dle.co.il</a>
+          </p>
+        </section>
+
+        <p class="updated">עודכן לאחרונה: יולי 2026</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>© <span id="year"></span> רועי קובובסקי, עורכי דין — כל הזכויות שמורות</span>
+      <a href="index.html">לעמוד הבית</a>
+    </div>
+  </footer>
+
+  <script>
+    var yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
