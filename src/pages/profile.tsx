@@ -283,7 +283,16 @@ function InsightsCard({ state, insights, coupons }: { state: string; insights: H
   if (state === 'loading') return <div style={insightsBox}>קוראים את ההיסטוריה שלכם ב-10bis…</div>;
   if (state === 'error') return <div style={insightsBox}>לא הצלחנו לקרוא היסטוריה כרגע — אפשר למלא ידנית למטה.</div>;
   if (!insights || insights.totalOrders === 0) {
-    return <div style={insightsBox}>עדיין אין היסטוריית הזמנות לקרוא ממנה — מלאו את הפרופיל ונתחיל.</div>;
+    return (
+      <div style={insightsBox}>
+        לא מצאנו היסטוריית הזמנות לקרוא ממנה. אם אתם בטוחים שיש לכם הזמנות ב-10bis,
+        נסו להתחבר מחדש — והפעם העתיקו את הבקשה דווקא מתוך{' '}
+        <a href="https://www.10bis.co.il/next/user-transactions" target="_blank" rel="noreferrer" style={{ color: '#fdba74', fontWeight: 600 }}>
+          דף "ההזמנות שלי" ←
+        </a>{' '}
+        (F12 ← Network ← רענון ← Copy as cURL). בינתיים אפשר למלא ידנית למטה.
+      </div>
+    );
   }
   const top = insights.favorites[0];
   return (
