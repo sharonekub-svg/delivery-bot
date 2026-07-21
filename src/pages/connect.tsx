@@ -16,7 +16,7 @@ const kbd: React.CSSProperties = {
 const STEPS: [string, React.ReactNode][] = [
   [
     'היכנסו לתן ביס במחשב',
-    <>במחשב (הכי קל ככה, לא בנייד) פתחו את האתר <a href="https://www.10bis.co.il" target="_blank" rel="noreferrer" style={ext}>10bis.co.il ←</a> והתחברו לחשבון שלכם כרגיל.</>,
+    <>במחשב (הכי קל ככה, לא בנייד) פתחו את דף <a href="https://www.10bis.co.il/next/user-transactions" target="_blank" rel="noreferrer" style={ext}>"ההזמנות שלי" בתן ביס ←</a> והתחברו לחשבון שלכם כרגיל. דווקא הדף הזה — כך נתפוס גם את היסטוריית ההזמנות שלכם.</>,
   ],
   [
     'לחצו F12 במקלדת',
