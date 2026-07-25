@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>המאמן שלי — קליסטניקס</title>
+<style>
+  :root {
+    --ground: #ECEEE9;
+    --surface: #F7F8F5;
+    --surface-2: #E2E6DE;
+    --ink: #171D19;
+    --muted: #5C665F;
+    --line: #CBD2C8;
+    --accent: #1F7A47;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DDEBE1;
+    --ochre: #B8742C;
+    --ochre-soft: #F2E4D2;
+    --done: #1F7A47;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #10140F;
+      --surface: #1A1F19;
+      --surface-2: #232A21;
+      --ink: #E9EDE6;
+      --muted: #93A096;
+      --line: #333C33;
+      --accent: #4CC07A;
+      --accent-ink: #0C130E;
+      --accent-soft: #1C2E22;
+      --ochre: #D99A50;
+      --ochre-soft: #2E2417;
+      --done: #4CC07A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #10140F;
+    --surface: #1A1F19;
+    --surface-2: #232A21;
+    --ink: #E9EDE6;
+    --muted: #93A096;
+    --line: #333C33;
+    --accent: #4CC07A;
+    --accent-ink: #0C130E;
+    --accent-soft: #1C2E22;
+    --ochre: #D99A50;
+    --ochre-soft: #2E2417;
+    --done: #4CC07A;
+  }
+  :root[data-theme="light"] {
+    --ground: #ECEEE9;
+    --surface: #F7F8F5;
+    --surface-2: #E2E6DE;
+    --ink: #171D19;
+    --muted: #5C665F;
+    --line: #CBD2C8;
+    --accent: #1F7A47;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #DDEBE1;
+    --ochre: #B8742C;
+    --ochre-soft: #F2E4D2;
+    --done: #1F7A47;
+  }
+
+  html, body { background: var(--ground); }
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: "Heebo", "Noto Sans Hebrew", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  * { box-sizing: border-box; }
+
+  .app {
+    direction: rtl;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 18px 56px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    font-weight: 700;
+    margin: 6px 0 2px;
+  }
+  h1.day-title {
+    font-size: clamp(34px, 9vw, 52px);
+    font-weight: 900;
+    line-height: 1.05;
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+  .day-tag { color: var(--muted); font-size: 15px; margin: 0 0 18px; }
+
+  .day-strip {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 22px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .day-chip {
+    flex: 1 0 auto;
+    min-width: 52px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .day-chip small { display: block; font-weight: 400; color: var(--muted); font-size: 10px; }
+  .day-chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .day-chip.active small { color: var(--accent-ink); opacity: 0.75; }
+  .day-chip.today:not(.active) { border-color: var(--accent); color: var(--accent); }
+  .day-chip:focus-visible, .ex:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .progress-wrap { margin: 0 0 20px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-label b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .progress-bar {
+    height: 10px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill { transition: none; }
+  }
+
+  .section-label {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: var(--muted);
+    margin: 26px 0 10px;
+  }
+
+  .ex-list { display: flex; flex-direction: column; gap: 10px; }
+  .ex {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    text-align: right;
+    width: 100%;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: inherit;
+  }
+  .ex .check {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    display: grid;
+    place-items: center;
+    color: transparent;
+    font-size: 15px;
+    font-weight: 900;
+  }
+  .ex.done .check {
+    background: var(--done);
+    border-color: var(--done);
+    color: var(--accent-ink);
+  }
+  .ex .ex-body { flex: 1; min-width: 0; }
+  .ex .ex-name { font-weight: 700; }
+  .ex.done .ex-name { text-decoration: line-through; color: var(--muted); }
+  .ex .ex-tip { font-size: 13px; color: var(--muted); margin-top: 1px; }
+  .ex .ex-sets {
+    flex: 0 0 auto;
+    font-weight: 900;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .ex.done .ex-sets { color: var(--muted); }
+
+  .all-done {
+    display: none;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-weight: 700;
+    margin-top: 12px;
+  }
+  .all-done.show { display: block; }
+
+  .timer-row { display: flex; gap: 10px; margin-top: 14px; }
+  .timer-btn {
+    flex: 1;
+    border: 1px dashed var(--line);
+    background: transparent;
+    color: var(--ink);
+    border-radius: var(--radius);
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-btn.running {
+    border-style: solid;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .food-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 520px) { .food-grid { grid-template-columns: 1fr 1fr; } .food-card.wide { grid-column: 1 / -1; } }
+  .food-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .food-card h3 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    color: var(--ochre);
+  }
+  .food-card.drink h3 { color: var(--accent); }
+  .food-card p { margin: 0; font-size: 15px; }
+  .food-card .when { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+  .foot {
+    margin-top: 34px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  .reset-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12.5px;
+    padding: 4px;
+  }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <p class="eyebrow">המאמן שלי · קליסטניקס</p>
+  <h1 class="day-title" id="dayTitle"></h1>
+  <p class="day-tag" id="dayTag"></p>
+
+  <div class="day-strip" id="dayStrip" role="tablist" aria-label="בחירת יום"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-label"><span>התקדמות היום</span><b id="progressText">0/0</b></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <p class="section-label">האימון</p>
+  <div class="ex-list" id="exList"></div>
+  <div class="all-done" id="allDone">כל הכבוד! סיימת את האימון של היום 🎉 עכשיו — ארוחת התאוששות ומים.</div>
+  <div class="timer-row">
+    <button class="timer-btn" id="timer60" type="button">טיימר מנוחה · 60 שנ׳</button>
+    <button class="timer-btn" id="timer90" type="button">טיימר מנוחה · 90 שנ׳</button>
+  </div>
+
+  <p class="section-label">תזונה ושתייה</p>
+  <div class="food-grid">
+    <div class="food-card">
+      <h3>לפני האימון</h3>
+      <p id="preFood"></p>
+      <p class="when">שעה–שעה וחצי לפני, קל לעיכול</p>
+    </div>
+    <div class="food-card">
+      <h3>אחרי האימון</h3>
+      <p id="postFood"></p>
+      <p class="when">עד שעה מהסיום — חלבון + פחמימה</p>
+    </div>
+    <div class="food-card drink wide">
+      <h3>שתייה</h3>
+      <p id="drinkTip"></p>
+      <p class="when">בסיס יומי: 8–10 כוסות מים. באימון בחום — להוסיף קורט מלח או משקה איזוטוני.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span id="dateNote"></span>
+    <button class="reset-btn" id="resetBtn" type="button">איפוס הסימונים של היום</button>
+  </div>
+</div>
+
+<script>
+  const PROGRAM = [
+    {
+      name: "ראשון", letter: "א׳", focus: "דחיפה",
+      tag: "חזה · כתפיים · יד אחורית",
+      exercises: [
+        { n: "שכיבות סמיכה", s: "4×12", t: "גוף ישר כקרש, מרפקים בזווית של ~45°" },
+        { n: "מקבילים (דיפס)", s: "3×8", t: "אין מקבילים? דיפס על כיסא יציב" },
+        { n: "פייק פוש־אפ", s: "3×10", t: "ירכיים גבוה, הראש יורד לכיוון הרצפה" },
+        { n: "שכיבות רחבות", s: "3×10", t: "ידיים רחבות מהכתפיים, טווח מלא" },
+        { n: "פלאנק", s: "3×45 שנ׳", t: "בטן אסופה, לא לשמוט אגן" }
+      ],
+      pre: "בננה + 2 תמרים, או פרוסת לחם מלא עם דבש",
+      post: "3 ביצים עם פרוסת לחם מלא, או שייק חלבון עם בננה",
+      drink: "כ־500 מ״ל מים בשעה שלפני, לגימות קטנות בין הסטים, ו־500–750 מ״ל אחרי"
+    },
+    {
+      name: "שני", letter: "ב׳", focus: "משיכה",
+      tag: "גב · יד קדמית · אחיזה",
+      exercises: [
+        { n: "מתח (עליות מתח)", s: "4×6", t: "מתחילים? קפיצה למעלה וירידה איטית של 4 שניות" },
+        { n: "חתירה אוסטרלית", s: "3×10", t: "מוט נמוך או שולחן יציב, גוף ישר" },
+        { n: "מתח אחיזה הפוכה", s: "3×5", t: "כפות ידיים אליך — עובד חזק על היד הקדמית" },
+        { n: "תלייה על מוט", s: "3×30 שנ׳", t: "כתפיים פעילות, לא 'לתלות על המפרקים'" },
+        { n: "סופרמן", s: "3×12", t: "שכיבה על הבטן, הרמת ידיים ורגליים יחד" }
+      ],
+      pre: "יוגורט עם גרנולה ופרי, או תפוח עם כף חמאת בוטנים",
+      post: "טונה עם אורז וירקות, או כריך ביצים וקוטג׳",
+      drink: "כ־500 מ״ל מים לפני, בקבוק מים צמוד באימון, ו־500–750 מ״ל אחרי"
+    },
+    {
+      name: "שלישי", letter: "ג׳", focus: "רגליים",
+      tag: "ארבע ראשי · ישבן · שוקיים",
+      exercises: [
+        { n: "סקוואט", s: "4×15", t: "ברכיים בכיוון האצבעות, ירידה עמוקה" },
+        { n: "לאנג׳ים הליכה", s: "3×10 לכל רגל", t: "צעד גדול, הברך האחורית כמעט נוגעת ברצפה" },
+        { n: "גשר עכוז", s: "3×15", t: "לסחוט את הישבן למעלה, שנייה עצירה" },
+        { n: "עליות עקבים", s: "3×20", t: "על מדרגה — טווח מלא למטה ולמעלה" },
+        { n: "כיסא קיר", s: "3×45 שנ׳", t: "גב צמוד לקיר, ירכיים במקביל לרצפה" }
+      ],
+      pre: "דייסת שיבולת שועל עם בננה, או פיתה עם חומוס",
+      post: "חזה עוף עם בטטה, או עדשים עם אורז",
+      drink: "יום רגליים מזיע — 500 מ״ל לפני, לפחות 750 מ״ל אחרי, ואם הזעת הרבה גם מלח/איזוטוני"
+    },
+    {
+      name: "רביעי", letter: "ד׳", focus: "ליבה",
+      tag: "בטן · גב תחתון · יציבות",
+      exercises: [
+        { n: "פלאנק", s: "3×60 שנ׳", t: "קשה מדי? לרדת לברכיים ולשמור גוף ישר" },
+        { n: "Hollow Hold", s: "3×30 שנ׳", t: "גב תחתון מודבק לרצפה, ידיים ורגליים באוויר" },
+        { n: "הרמות רגליים בתלייה", s: "3×10", t: "אין מוט? הרמות רגליים בשכיבה" },
+        { n: "טוויסט רוסי", s: "3×20", t: "רגליים באוויר לקושי גבוה יותר" },
+        { n: "פלאנק צד", s: "3×30 שנ׳ לכל צד", t: "אגן גבוה, קו ישר מהראש לרגליים" }
+      ],
+      pre: "פרי + חופן שקדים, או קרקר עם גבינה",
+      post: "שקשוקה עם לחם מלא, או קוטג׳ עם ירקות ופיתה",
+      drink: "כ־400–500 מ״ל לפני, לגימות באימון, ו־500 מ״ל אחרי"
+    },
+    {
+      name: "חמישי", letter: "ה׳", focus: "גוף מלא",
+      tag: "סבב אינטנסיבי · 3 סיבובים, מנוחה 90 שנ׳ בין סיבובים",
+      exercises: [
+        { n: "ברפי", s: "3×8", t: "קצב שאתה יכול להחזיק — טכניקה לפני מהירות" },
+        { n: "שכיבות סמיכה", s: "3×12", t: "טווח מלא, חזה כמעט נוגע ברצפה" },
+        { n: "סקוואט קפיצה", s: "3×10", t: "נחיתה רכה על כריות כף הרגל" },
+        { n: "מתח או חתירה", s: "3×6", t: "מה שזמין — העיקר משיכה" },
+        { n: "הרים (Mountain Climbers)", s: "3×30 שנ׳", t: "ליבה אסופה, אגן נמוך" }
+      ],
+      pre: "בננה + תמר וכוס מים גדולה — יום אינטנסיבי",
+      post: "ארוחה מלאה: חלבון (עוף/דג/טופו) + פחמימה + ירקות",
+      drink: "לפחות 500 מ״ל לפני, מים זמינים כל האימון, 750 מ״ל אחרי + קורט מלח אם הזעת חזק"
+    },
+    {
+      name: "שישי", letter: "ו׳", focus: "ניידות וגמישות",
+      tag: "התאוששות פעילה · תנועה איטית ונשימה",
+      exercises: [
+        { n: "חתול־פרה", s: "2×10", t: "תנועה איטית עם הנשימה" },
+        { n: "מתיחת ירך כורע", s: "2×30 שנ׳ לכל צד", t: "לדחוף אגן קדימה בעדינות" },
+        { n: "כלב מביט מטה", s: "2×45 שנ׳", t: "עקבים מחפשים את הרצפה, גב ארוך" },
+        { n: "תלייה פסיבית על מוט", s: "2×30 שנ׳", t: "פתיחת כתפיים ועמוד שדרה" },
+        { n: "סקוואט עמוק סטטי", s: "2×60 שנ׳", t: "לשבת בתחתית הסקוואט, מרפקים דוחפים ברכיים" }
+      ],
+      pre: "משהו קל — פרי או כמה שקדים, אפשר גם על בטן ריקה",
+      post: "ארוחת שישי רגילה — היום זה יום קל",
+      drink: "כוס מים גדולה לפני ואחרי; תה צמחים עובד מצוין בערב"
+    },
+    {
+      name: "שבת", letter: "ש׳", focus: "מנוחה",
+      tag: "השרירים נבנים במנוחה — זה חלק מהתוכנית",
+      exercises: [
+        { n: "הליכה קלה", s: "30–45 דק׳", t: "בחוץ, בקצב נעים" },
+        { n: "מתיחות קלות", s: "10 דק׳", t: "רק מה שמרגיש טוב, בלי להעמיס" }
+      ],
+      pre: "אכילה רגילה ומסודרת לאורך היום",
+      post: "ארוחות מאוזנות עם חלבון בכל ארוחה — זה בונה את השרירים של מחר",
+      drink: "8–10 כוסות מים מפוזרות על היום, גם ביום מנוחה"
+    }
+  ];
+
+  const todayIdx = new Date().getDay();
+  let selectedIdx = todayIdx;
+  const dateKey = new Date().toISOString().slice(0, 10);
+
+  function storeKey(dayIdx) { return "fit-" + dateKey + "-" + dayIdx; }
+  function getChecks(dayIdx) {
+    try { return JSON.parse(localStorage.getItem(storeKey(dayIdx))) || []; }
+    catch (e) { return []; }
+  }
+  function setChecks(dayIdx, arr) {
+    localStorage.setItem(storeKey(dayIdx), JSON.stringify(arr));
+  }
+
+  const el = (id) => document.getElementById(id);
+
+  function renderDayStrip() {
+    const strip = el("dayStrip");
+    strip.innerHTML = "";
+    PROGRAM.forEach((d, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "day-chip" + (i === selectedIdx ? " active" : "") + (i === todayIdx ? " today" : "");
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", i === selectedIdx ? "true" : "false");
+      b.innerHTML = d.letter + "<small>" + d.focus + "</small>";
+      b.addEventListener("click", () => { selectedIdx = i; render(); });
+      strip.appendChild(b);
+    });
+  }
+
+  function renderExercises() {
+    const day = PROGRAM[selectedIdx];
+    const checks = getChecks(selectedIdx);
+    const list = el("exList");
+    list.innerHTML = "";
+    day.exercises.forEach((ex, i) => {
+      const done = checks.includes(i);
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "ex" + (done ? " done" : "");
+      b.setAttribute("aria-pressed", done ? "true" : "false");
+      b.innerHTML =
+        '<span class="check" aria-hidden="true">✓</span>' +
+        '<span class="ex-body"><span class="ex-name">' + ex.n + '</span>' +
+        '<div class="ex-tip">' + ex.t + '</div></span>' +
+        '<span class="ex-sets">' + ex.s + "</span>";
+      b.addEventListener("click", () => {
+        const cur = getChecks(selectedIdx);
+        const pos = cur.indexOf(i);
+        if (pos >= 0) cur.splice(pos, 1); else cur.push(i);
+        setChecks(selectedIdx, cur);
+        render();
+      });
+      list.appendChild(b);
+    });
+    const doneCount = checks.length;
+    const total = day.exercises.length;
+    el("progressText").textContent = doneCount + "/" + total;
+    el("progressFill").style.width = (total ? (doneCount / total) * 100 : 0) + "%";
+    el("allDone").classList.toggle("show", doneCount === total && total > 0);
+  }
+
+  function render() {
+    const day = PROGRAM[selectedIdx];
+    el("dayTitle").textContent = "יום " + day.name + " · " + day.focus;
+    el("dayTag").textContent = day.tag;
+    el("preFood").textContent = day.pre;
+    el("postFood").textContent = day.post;
+    el("drinkTip").textContent = day.drink;
+    el("dateNote").textContent = selectedIdx === todayIdx
+      ? "האימון של היום · " + new Date().toLocaleDateString("he-IL")
+      : "תצוגה מקדימה — זה לא היום הנוכחי";
+    renderDayStrip();
+    renderExercises();
+  }
+
+  el("resetBtn").addEventListener("click", () => {
+    setChecks(selectedIdx, []);
+    render();
+  });
+
+  function setupTimer(btnId, seconds) {
+    const btn = el(btnId);
+    const label = btn.textContent;
+    let iv = null, left = 0;
+    btn.addEventListener("click", () => {
+      if (iv) {
+        clearInterval(iv); iv = null;
+        btn.textContent = label;
+        btn.classList.remove("running");
+        return;
+      }
+      left = seconds;
+      btn.classList.add("running");
+      btn.textContent = "מנוחה… " + left + " שנ׳";
+      iv = setInterval(() => {
+        left--;
+        if (left <= 0) {
+          clearInterval(iv); iv = null;
+          btn.textContent = label;
+          btn.classList.remove("running");
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        } else {
+          btn.textContent = "מנוחה… " + left + " שנ׳";
+        }
+      }, 1000);
+    });
+  }
+  setupTimer("timer60", 60);
+  setupTimer("timer90", 90);
+
+  render();
+</script>
+
+</body>
+</html>
