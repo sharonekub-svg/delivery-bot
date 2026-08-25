@@ -200,8 +200,9 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 700; line-height: 1.18; col
 }
 .hero-photo-mono {
   position: absolute; inset: 0; display: grid; place-items: center;
-  font-family: var(--serif); font-weight: 900; font-size: 5rem;
-  color: rgba(255,255,255,.9); letter-spacing: .05em; z-index: 0;
+  font-family: var(--serif); font-weight: 900; font-size: 1.9rem;
+  color: rgba(255,255,255,.9); letter-spacing: .04em; z-index: 0;
+  text-align: center; padding: 1rem;
 }
 .hero-figure::before {
   content: ""; position: absolute; inset-block: 26px -18px; inset-inline-start: -18px;
@@ -271,9 +272,10 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 700; line-height: 1.18; col
 .portrait-mono {
   position: absolute; inset: 0; display: grid; place-items: center;
   font-family: var(--serif); font-weight: 900;
-  font-size: clamp(4rem, 12vw, 7rem);
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
   color: rgba(255,255,255,.85);
-  letter-spacing: .05em; z-index: 0;
+  letter-spacing: .04em; z-index: 0;
+  text-align: center; padding: 1rem;
 }
 .portrait-caption { z-index: 2; }
 .portrait-caption {
@@ -317,12 +319,13 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 700; line-height: 1.18; col
 .card p { color: var(--text-soft); font-size: 1rem; }
 
 .cards-flagship { margin-bottom: 1.4rem; }
-.cards-secondary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.1rem; }
-.card-sm { padding: 1.5rem 1.4rem; }
-.card-sm h3 { font-size: 1.15rem; margin-bottom: .5rem; }
-.card-sm p { font-size: .95rem; }
-.card-sm::before { display: none; }
-.card-sm:hover { transform: translateY(-4px); }
+.cards-pair { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.4rem; }
+
+/* כרטיס תחום עיסוק כקישור לעמוד המלא */
+a.card { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+a.card p { flex: 1; }
+.card-more { margin-top: 1.1rem; font-weight: 700; font-size: .95rem; color: var(--blue-deep); }
+a.card:hover .card-more { text-decoration: underline; }
 
 /* ===== Approach ===== */
 .approach { background: var(--paper); }
@@ -371,6 +374,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 700; line-height: 1.18; col
 .contact-k { display: block; font-size: .82rem; color: var(--text-soft); letter-spacing: .05em; }
 .contact-v { display: block; font-size: 1.15rem; font-weight: 700; color: var(--ink); text-decoration: none; font-family: var(--serif); }
 a.contact-v:hover { color: var(--blue-deep); }
+.contact-address { font-size: 1.05rem; line-height: 1.5; }
 .contact-note { color: var(--text-soft); font-size: .96rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
 
 /* ===== Contact panel — פאנל כהה (ללא תמונה) + טופס ===== */
@@ -477,18 +481,18 @@ a.contact-v:hover { color: var(--blue-deep); }
   .hero-copy { max-width: none; }
   .hero-figure { max-width: 300px; margin-block: 2.5rem 1.5rem; }
   .hero-figure::before { display: none; }
-  .hero-photo-mono { font-size: 3.6rem; }
+  .hero-photo-mono { font-size: 1.6rem; }
 
   .about-grid, .approach-grid { grid-template-columns: 1fr; }
   .approach-intro { position: static; }
   .cards { grid-template-columns: repeat(2, 1fr); }
-  .cards-secondary { grid-template-columns: repeat(2, 1fr); }
+  .cards-pair { grid-template-columns: repeat(2, 1fr); }
   .about-portrait { max-width: 340px; }
 }
 
 @media (max-width: 560px) {
   .cards { grid-template-columns: 1fr; }
-  .cards-secondary { grid-template-columns: 1fr; }
+  .cards-pair { grid-template-columns: 1fr; }
   .field-row { grid-template-columns: 1fr; }
   .hero-stats { gap: 1.4rem 2rem; }
   .btn { width: 100%; }
@@ -544,18 +548,18 @@ html { scroll-padding-top: 90px; }
     "description": "משרד בוטיק למשפט מנהלי, דיני מכרזים וליטיגציה מנהלית.",
     "areaServed": "IL",
     "knowsLanguage": ["he", "en"],
-    "telephone": "03-6072222",
+    "telephone": ["03-6072222", "054-2113091"],
     "faxNumber": "03-6072220",
-    "email": "roy.kubovsky@dle.co.il",
+    "email": "Roy@kubovsky.co.il",
     "sameAs": ["https://www.linkedin.com/in/roy-kubovsky-34ba2a14/"],
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "מגדלי עזריאלי 1 (המגדל העגול), קומה 36",
-      "addressLocality": "תל אביב-יפו",
+      "streetAddress": "דרך מנחם בגין 132, מגדלי עזריאלי 1 (המגדל העגול), קומה 36",
+      "addressLocality": "תל אביב יפו",
       "postalCode": "6702101",
       "addressCountry": "IL"
     },
-    "knowsAbout": ["משפט מנהלי", "דיני מכרזים", "ליטיגציה מנהלית", "תובענות ייצוגיות", "ליטיגציה מסחרית"]
+    "knowsAbout": ["ליטיגציה מסחרית", "משפט מסחרי, הפצה, שיווק וקמעונאות", "תובענות ייצוגיות", "דיני צרכנות", "משפט מינהלי ודיני מכרזים"]
   }
   </script>
 </head>
@@ -644,7 +648,7 @@ html { scroll-padding-top: 90px; }
                loading="lazy"
                data-fallback="https://media.licdn.com/dms/image/v2/C4D03AQEOGrRD3HJB4A/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1516546319744?e=2147483647&amp;v=beta&amp;t=Tfmjurq1aBaALul8ncpc5-M7FAx7s1V3-oYRLQRxbyQ"
                onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute('data-fallback');}else{this.style.display='none';}" />
-          <div class="portrait-mono" aria-hidden="true">ר״ק</div>
+          <div class="portrait-mono" aria-hidden="true">רועי קובובסקי</div>
         </div>
         <div class="portrait-caption">
           <strong>עו״ד רועי קובובסקי</strong>
@@ -675,7 +679,7 @@ html { scroll-padding-top: 90px; }
         </p>
 
         <ul class="fact-list reveal">
-          <li><span class="fact-k">התמחות</span><span class="fact-v">משפט מנהלי · מכרזים · ליטיגציה מנהלית</span></li>
+          <li><span class="fact-k">התמחות</span><span class="fact-v">ליטיגציה מסחרית · משפט מינהלי ומכרזים · תובענות ייצוגיות · צרכנות</span></li>
           <li><span class="fact-k">רקע</span><span class="fact-v">17 שנים בשבלת ושות׳ (10 כשותף) · כ-5 שנים שותף ב-D.L.E</span></li>
           <li><span class="fact-k">הכרה</span><span class="fact-v">Legal 500 — עורך דין מומלץ (2020)</span></li>
           <li><span class="fact-k">מיקום · שפות</span><span class="fact-v">מגדלי עזריאלי, תל אביב · עברית ואנגלית</span></li>
@@ -691,48 +695,48 @@ html { scroll-padding-top: 90px; }
     <div class="wrap">
       <div class="section-head reveal">
         <p class="eyebrow">תחומי עיסוק</p>
-        <h2>שלושת תחומי הליבה שלי — ועומק מוכח סביבם</h2>
+        <h2>חמישה תחומים, עומק מוכח בכל אחד מהם</h2>
         <p class="section-sub">
-          אני ממוקד במקום שבו נפגשים האזרח והעסק עם הרשות: מכרזים, החלטות מנהליות
-          ורגולציה. וסביב הליבה — ניסיון עשיר שצברתי בליטיגציה אזרחית ומסחרית מורכבת.
+          מליטיגציה מסחרית וליווי שוטף של חברות ייבוא, הפצה וקמעונאות, ועד לתובענות
+          ייצוגיות, דיני צרכנות ומשפט מינהלי ומכרזים — ניסיון של למעלה מ-20 שנה
+          בתיקים שבהם המשפט והעסק נפגשים.
         </p>
       </div>
 
       <div class="cards cards-flagship">
-        <article class="card reveal">
+        <a class="card reveal" href="practice-areas.html#litigation">
           <div class="card-num">01</div>
-          <h3>משפט מנהלי</h3>
-          <p>ייצוג מול רשויות המדינה והשלטון המקומי: תקיפת החלטות מנהליות, רישוי, רגולציה, וחופש העיסוק — בליווי אסטרטגי מהשלב המוקדם ועד להכרעה.</p>
-        </article>
-        <article class="card reveal">
+          <h3>ליטיגציה מסחרית</h3>
+          <p>ייצוג חברות, בעלי מניות, מנהלים ואנשים פרטיים בסכסוכים מסחריים ואזרחיים — בכל הערכאות, בבוררות ובגישור, לרבות הליכים בעלי היבטים בינלאומיים.</p>
+          <span class="card-more">קראו עוד ←</span>
+        </a>
+        <a class="card reveal" href="practice-areas.html#commercial">
           <div class="card-num">02</div>
-          <h3>דיני מכרזים</h3>
-          <p>ליווי מציעים ועורכי מכרזים: בחינת תנאי סף, השגות ועררים, פסילת הצעות, ועתירות מכרזים — כדי שהזכייה (או הפסילה) לא תוכרע על טכניקה.</p>
-        </article>
-        <article class="card reveal">
+          <h3>משפט מסחרי — הפצה, שיווק וקמעונאות</h3>
+          <p>מעל 20 שנה בליווי חברות ייבוא, הפצה, שיווק וקמעונאות — קוסמטיקה, טואלטיקה, אלקטרוניקה וסלולר — מול יצרנים, ספקים ורשתות קמעונאיות.</p>
+          <span class="card-more">קראו עוד ←</span>
+        </a>
+        <a class="card reveal" href="practice-areas.html#class-actions">
           <div class="card-num">03</div>
-          <h3>ליטיגציה מנהלית</h3>
-          <p>עתירות מנהליות ועתירות לבג״ץ, וייצוג בהליכים מול ועדות וטריבונלים — ניהול חד ומהיר של הליכים שבהם לוח הזמנים הוא קריטי.</p>
-        </article>
+          <h3>תובענות ייצוגיות</h3>
+          <p>ייצוג תובעים ונתבעים בתחומי הצרכנות, הבנקאות, התקשורת, הביטוח, התעופה ואיכות הסביבה — משני צידי המתרס, מהשלב המוקדם ועד להכרעה.</p>
+          <span class="card-more">קראו עוד ←</span>
+        </a>
       </div>
 
-      <div class="cards cards-secondary">
-        <article class="card card-sm reveal">
-          <h3>תובענות ייצוגיות</h3>
-          <p>ניסיון מוכר (Legal 500) בייצוג בתובענות ייצוגיות — בצד המבקש ובצד הנתבע.</p>
-        </article>
-        <article class="card card-sm reveal">
-          <h3>סכסוכי בעלי מניות ושליטה</h3>
-          <p>מאבקי שליטה, קיפוח המיעוט וסכסוכים בין בעלי מניות בחברות.</p>
-        </article>
-        <article class="card card-sm reveal">
-          <h3>ליטיגציה מסחרית מורכבת</h3>
-          <p>מחלוקות אזרחיות-מסחריות מהמורכבות, לרבות משפט בינלאומי פרטי.</p>
-        </article>
-        <article class="card card-sm reveal">
-          <h3>הפצה, קמעונאות ומסחר</h3>
-          <p>ליווי וייצוג בסכסוכי הפצה ובסוגיות משפטיות בעולם הקמעונאי והמסחרי.</p>
-        </article>
+      <div class="cards cards-pair">
+        <a class="card reveal" href="practice-areas.html#consumer">
+          <div class="card-num">04</div>
+          <h3>דיני צרכנות</h3>
+          <p>ליווי שוטף של חברות מובילות בסוגיות הגנת הצרכן: שיווק ופרסום, מבצעים והגרלות, מסחר מקוון, אחריות למוצרים ומענה לגורמי אכיפה.</p>
+          <span class="card-more">קראו עוד ←</span>
+        </a>
+        <a class="card reveal" href="practice-areas.html#administrative">
+          <div class="card-num">05</div>
+          <h3>משפט מינהלי ודיני מכרזים</h3>
+          <p>ליווי מתמודדים במכרזים ושל ועדות מכרזים, ועשרות רבות של עתירות מינהליות בבתי המשפט לעניינים מינהליים, בבג״ץ ובבית המשפט העליון.</p>
+          <span class="card-more">קראו עוד ←</span>
+        </a>
       </div>
     </div>
   </section>
@@ -839,6 +843,13 @@ html { scroll-padding-top: 90px; }
             </div>
           </li>
           <li>
+            <span class="contact-ic" aria-hidden="true">✆</span>
+            <div>
+              <span class="contact-k">נייד</span>
+              <a href="tel:054-2113091" class="contact-v" dir="ltr">054-2113091</a>
+            </div>
+          </li>
+          <li>
             <span class="contact-ic" aria-hidden="true">🖷</span>
             <div>
               <span class="contact-k">פקס</span>
@@ -849,7 +860,7 @@ html { scroll-padding-top: 90px; }
             <span class="contact-ic" aria-hidden="true">✉</span>
             <div>
               <span class="contact-k">דוא״ל</span>
-              <a href="mailto:roy.kubovsky@dle.co.il" class="contact-v" id="emailLink" dir="ltr">roy.kubovsky@dle.co.il</a>
+              <a href="mailto:Roy@kubovsky.co.il" class="contact-v" id="emailLink" dir="ltr">Roy@kubovsky.co.il</a>
             </div>
           </li>
           <li>
@@ -863,14 +874,14 @@ html { scroll-padding-top: 90px; }
             <span class="contact-ic" aria-hidden="true">⌖</span>
             <div>
               <span class="contact-k">כתובת</span>
-              <span class="contact-v">מגדלי עזריאלי 1 (המגדל העגול), קומה 36, תל אביב-יפו 6702101</span>
+              <span class="contact-v contact-address">
+                דרך מנחם בגין 132<br />
+                מגדלי עזריאלי 1 (המגדל העגול)<br />
+                קומה 36, תל אביב יפו 6702101
+              </span>
             </div>
           </li>
         </ul>
-
-        <p class="contact-note">
-          שעות מענה: א׳–ה׳, 09:00–19:00. פנייה דחופה במכרז או בעתירה? התקשרו ישירות.
-        </p>
         </div>
       </div>
 
@@ -878,28 +889,27 @@ html { scroll-padding-top: 90px; }
         <form id="leadForm" class="lead-form" novalidate>
           <div class="field">
             <label for="f-name">שם מלא <span class="req">*</span></label>
-            <input type="text" id="f-name" name="full_name" autocomplete="name" required maxlength="120" placeholder="ישראל ישראלי" />
+            <input type="text" id="f-name" name="full_name" autocomplete="name" required maxlength="120" />
           </div>
 
           <div class="field-row">
             <div class="field">
               <label for="f-email">אימייל <span class="req">*</span></label>
-              <input type="email" id="f-email" name="email" autocomplete="email" required maxlength="200" placeholder="name@gmail.com" dir="ltr" />
+              <input type="email" id="f-email" name="email" autocomplete="email" required maxlength="200" dir="ltr" />
             </div>
             <div class="field">
               <label for="f-phone">טלפון</label>
-              <input type="tel" id="f-phone" name="phone" autocomplete="tel" maxlength="40" placeholder="050-0000000" dir="ltr" />
+              <input type="tel" id="f-phone" name="phone" autocomplete="tel" maxlength="40" dir="ltr" />
             </div>
           </div>
 
           <div class="field">
             <label for="f-message">במה אוכל לעזור?</label>
-            <textarea id="f-message" name="message" rows="5" maxlength="4000" placeholder="ספרו לי בקצרה על העניין (מכרז, החלטה מנהלית, מחלוקת...)"></textarea>
+            <textarea id="f-message" name="message" rows="5" maxlength="4000"></textarea>
           </div>
 
           <button type="submit" class="btn btn-primary btn-block" id="submitBtn">שליחת הפנייה</button>
           <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
-          <p class="form-fineprint">בשליחת הטופס אתם מאשרים שניצור עמכם קשר בנוגע לפנייה. הפרטים נשמרים בצורה מאובטחת ואינם מועברים לגורם שלישי. השימוש באתר כפוף ל<a href="takanon.html">תקנון האתר</a>.</p>
         </form>
       </div>
       </div>
@@ -927,7 +937,7 @@ html { scroll-padding-top: 90px; }
       </div>
       <nav class="footer-nav" aria-label="ניווט תחתון">
         <a href="#about">אודות</a>
-        <a href="#practice">תחומי עיסוק</a>
+        <a href="practice-areas.html">תחומי עיסוק</a>
         <a href="roy-kubovsky.html">פרופיל אישי</a>
         <a href="#faq">שאלות נפוצות</a>
         <a href="#contact">צרו קשר</a>
@@ -948,11 +958,15 @@ html { scroll-padding-top: 90px; }
 window.SITE_CONFIG = {
   supabaseUrl: "https://zceoswqrvcqmjjohpeyo.supabase.co",
   supabaseAnonKey: "sb_publishable_aWietdHty-i2IlGKGk421w_UH4X13q0",
-  // כתובת הדוא"ל המוצגת באתר (מקצועית).
-  contactEmail: "roy.kubovsky@dle.co.il",
+  // כתובת הדוא"ל המוצגת באתר, ואליה נשלחות הפניות מהטופס.
+  contactEmail: "Roy@kubovsky.co.il",
   // כתובת דוא"ל לגיבוי — אם שמירת הפנייה נכשלת, נפתח דוא"ל לכתובת הזו.
-  fallbackEmail: "sharonekub@gmail.com",
+  fallbackEmail: "Roy@kubovsky.co.il",
+  // כתובת ה-endpoint ששולח את הפנייה בדוא"ל. ראו site/backend/README.md.
+  // כל עוד השדה ריק, הפניות נשמרות במסד הנתונים בלבד.
+  formEndpoint: "",
   phone: "03-6072222",
+  mobile: "054-2113091",
   fax: "03-6072220",
   linkedin: "https://www.linkedin.com/in/roy-kubovsky-34ba2a14/",
 };
@@ -1045,6 +1059,20 @@ window.SITE_CONFIG = {
       "&body=" + encodeURIComponent(body);
   }
 
+  /* ---------- שליחת התראה בדוא"ל על פנייה חדשה ----------
+     נשלחת ל-formEndpoint (ראו site/backend/README.md), שמעביר את
+     הפנייה לתיבה שב-SITE_CONFIG.contactEmail. אם לא הוגדר endpoint,
+     הפנייה עדיין נשמרת במסד הנתונים. */
+  function notifyByEmail(payload) {
+    if (!cfg.formEndpoint) return Promise.resolve(false);
+    return fetch(cfg.formEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to: cfg.contactEmail, lead: payload }),
+    }).then(function (r) { return r.ok; })
+      .catch(function (err) { console.error(err); return false; });
+  }
+
   if (form) {
     form.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -1085,6 +1113,7 @@ window.SITE_CONFIG = {
           setTimeout(function () { mailtoFallback(payload); }, 900);
           return;
         }
+        notifyByEmail(payload);
         form.reset();
         setStatus("הפנייה נשלחה בהצלחה! נחזור אליכם בהקדם.", "ok");
       }).catch(function (err) {

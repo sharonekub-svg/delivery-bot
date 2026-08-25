@@ -112,8 +112,9 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent-l); outl
 .profile-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 18%; filter: grayscale(1) contrast(1.03); z-index: 1; }
 .profile-photo-mono {
   position: absolute; inset: 0; display: grid; place-items: center;
-  font-family: var(--serif); font-weight: 900; font-size: 3.4rem;
+  font-family: var(--serif); font-weight: 900; font-size: 1.8rem;
   color: rgba(255,255,255,.85); z-index: 0;
+  text-align: center; padding: 1rem;
 }
 .profile-contact { padding: 1.5rem 1.5rem 1.7rem; }
 .profile-contact h2 { font-size: 1.1rem; margin-bottom: .9rem; letter-spacing: .02em; }
@@ -204,13 +205,14 @@ a.pc-v:hover { text-decoration: underline; }
     "alternateName": "Roy Kubovsky",
     "jobTitle": "עורך דין, מייסד המשרד",
     "worksFor": { "@type": "Attorney", "name": "רועי קובובסקי, עורכי דין" },
-    "telephone": "03-6072222",
-    "email": "roy.kubovsky@dle.co.il",
+    "telephone": ["03-6072222", "054-2113091"],
+    "faxNumber": "03-6072220",
+    "email": "Roy@kubovsky.co.il",
     "sameAs": ["https://www.linkedin.com/in/roy-kubovsky-34ba2a14/"],
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "מגדלי עזריאלי 1 (המגדל העגול), קומה 36",
-      "addressLocality": "תל אביב-יפו",
+      "streetAddress": "דרך מנחם בגין 132, מגדלי עזריאלי 1 (המגדל העגול), קומה 36",
+      "addressLocality": "תל אביב יפו",
       "postalCode": "6702101",
       "addressCountry": "IL"
     },
@@ -236,7 +238,7 @@ a.pc-v:hover { text-decoration: underline; }
       </a>
       <nav class="nav-links" aria-label="ניווט ראשי">
         <a href="index.html">עמוד הבית</a>
-        <a href="index.html#practice">תחומי עיסוק</a>
+        <a href="practice-areas.html">תחומי עיסוק</a>
         <a href="index.html#faq">שאלות נפוצות</a>
         <a href="index.html#contact" class="nav-cta">קביעת פגישה</a>
       </nav>
@@ -269,14 +271,15 @@ a.pc-v:hover { text-decoration: underline; }
             <h2>פרטי התקשרות</h2>
             <ul class="pc-list">
               <li><span class="pc-k">טלפון</span><a class="pc-v" href="tel:03-6072222" dir="ltr">03-6072222</a></li>
+              <li><span class="pc-k">נייד</span><a class="pc-v" href="tel:054-2113091" dir="ltr">054-2113091</a></li>
               <li><span class="pc-k">פקס</span><span class="pc-v" dir="ltr">03-6072220</span></li>
-              <li><span class="pc-k">דוא״ל</span><a class="pc-v" href="mailto:roy.kubovsky@dle.co.il" dir="ltr">roy.kubovsky@dle.co.il</a></li>
+              <li><span class="pc-k">דוא״ל</span><a class="pc-v" href="mailto:Roy@kubovsky.co.il" dir="ltr">Roy@kubovsky.co.il</a></li>
               <li><span class="pc-k">LinkedIn</span><a class="pc-v" href="https://www.linkedin.com/in/roy-kubovsky-34ba2a14/" target="_blank" rel="noopener" dir="ltr">Roy Kubovsky</a></li>
-              <li><span class="pc-k">כתובת</span><span class="pc-v">מגדלי עזריאלי 1 (המגדל העגול), קומה 36, תל אביב-יפו 6702101</span></li>
+              <li><span class="pc-k">כתובת</span><span class="pc-v">דרך מנחם בגין 132<br />מגדלי עזריאלי 1 (המגדל העגול)<br />קומה 36, תל אביב יפו 6702101</span></li>
             </ul>
             <div class="pc-actions">
               <a href="index.html#contact" class="btn btn-dark">קביעת פגישת ייעוץ</a>
-              <a href="mailto:roy.kubovsky@dle.co.il" class="btn btn-line">שליחת דוא״ל</a>
+              <a href="mailto:Roy@kubovsky.co.il" class="btn btn-line">שליחת דוא״ל</a>
             </div>
           </div>
         </div>
@@ -285,18 +288,18 @@ a.pc-v:hover { text-decoration: underline; }
       <!-- גוף הפרופיל -->
       <article class="profile-body">
         <div class="tags" aria-label="תחומי עיסוק עיקריים">
-          <span class="tag">משפט מנהלי</span>
-          <span class="tag">דיני מכרזים</span>
-          <span class="tag">ליטיגציה מנהלית</span>
-          <span class="tag">תובענות ייצוגיות</span>
           <span class="tag">ליטיגציה מסחרית</span>
+          <span class="tag">הפצה, שיווק וקמעונאות</span>
+          <span class="tag">תובענות ייצוגיות</span>
+          <span class="tag">דיני צרכנות</span>
+          <span class="tag">משפט מינהלי ודיני מכרזים</span>
         </div>
 
         <p>
-          עו״ד רועי קובובסקי הוא מייסד המשרד, ומרכז בו ניסיון של למעלה משני עשורים
-          בליטיגציה מנהלית, אזרחית ומסחרית מהשורה הראשונה. רועי מתמחה במשפט מנהלי,
-          בדיני מכרזים ובליטיגציה מנהלית, ומייצג חברות, גופים ציבוריים ופרטיים, יזמים
-          ויחידים — בכל נקודת המפגש שבין המגזר העסקי לרשויות השלטון.
+          עו״ד רועי קובובסקי הוא מייסד המשרד, ומרכז בו ניסיון של למעלה מ-20 שנה
+          בליטיגציה מסחרית, אזרחית ומינהלית מהשורה הראשונה. רועי מייצג חברות, בעלי
+          מניות, מנהלים, גופים ציבוריים ואנשים פרטיים — בבתי המשפט בכל הערכאות,
+          בבוררות ובגישור — ומלווה חברות מובילות בפעילותן המסחרית השוטפת.
         </p>
         <p>
           במשך <strong>17 שנים היה רועי חלק ממשרד שבלת ושות׳</strong>, מהמשרדים הגדולים
@@ -336,16 +339,16 @@ a.pc-v:hover { text-decoration: underline; }
           <h2>תחומי עיסוק</h2>
           <div class="two-col">
             <ul class="plain-list">
-              <li><strong>משפט מנהלי</strong> — ייצוג מול רשויות המדינה והשלטון המקומי</li>
-              <li><strong>דיני מכרזים</strong> — ליווי מציעים ועורכי מכרזים, השגות ועתירות</li>
-              <li><strong>ליטיגציה מנהלית</strong> — עתירות מנהליות ועתירות לבג״ץ</li>
+              <li><strong>ליטיגציה מסחרית</strong> — סכסוכים חוזיים ומסחריים, מחלוקות בין בעלי מניות, סכסוכי שליטה וממשל תאגידי, לרבות הליכים בעלי היבטים בינלאומיים</li>
+              <li><strong>משפט מסחרי — הפצה, שיווק וקמעונאות</strong> — ליווי חברות ייבוא, הפצה וקמעונאות מול יצרנים, ספקים ורשתות</li>
+              <li><strong>תובענות ייצוגיות</strong> — ייצוג תובעים ונתבעים בצרכנות, בנקאות, תקשורת, ביטוח, תעופה ואיכות הסביבה</li>
             </ul>
             <ul class="plain-list">
-              <li><strong>תובענות ייצוגיות</strong> — בצד המבקש ובצד הנתבע</li>
-              <li><strong>סכסוכי בעלי מניות ומאבקי שליטה</strong></li>
-              <li><strong>ליטיגציה מסחרית מורכבת</strong> — לרבות משפט בינלאומי פרטי</li>
+              <li><strong>דיני צרכנות</strong> — שיווק ופרסום, מבצעים והגרלות, מסחר מקוון, אחריות למוצרים ורגולציה צרכנית</li>
+              <li><strong>משפט מינהלי ודיני מכרזים</strong> — ליווי מתמודדים וועדות מכרזים, עתירות מינהליות ובג״ץ</li>
             </ul>
           </div>
+          <p style="margin-top:1.2rem;"><a href="practice-areas.html" style="font-weight:700;color:var(--ink);">לפירוט המלא של תחומי העיסוק ←</a></p>
         </section>
 
         <section class="profile-sec" aria-label="הכרה ודירוגים">
@@ -382,7 +385,7 @@ a.pc-v:hover { text-decoration: underline; }
     <div class="wrap footer-inner">
       <nav class="footer-nav" aria-label="ניווט תחתון">
         <a href="index.html">עמוד הבית</a>
-        <a href="index.html#practice">תחומי עיסוק</a>
+        <a href="practice-areas.html">תחומי עיסוק</a>
         <a href="index.html#contact">צרו קשר</a>
         <a href="takanon.html">תקנון האתר</a>
       </nav>

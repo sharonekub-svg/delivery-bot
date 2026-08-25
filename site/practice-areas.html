@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>תחומי עיסוק | רועי קובובסקי, עורכי דין</title>
+  <meta name="description" content="תחומי העיסוק של עו״ד רועי קובובסקי: ליטיגציה מסחרית, משפט מסחרי — הפצה, שיווק וקמעונאות, תובענות ייצוגיות, דיני צרכנות, ומשפט מינהלי ודיני מכרזים." />
+  <meta name="theme-color" content="#0a2540" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="תחומי עיסוק · עו״ד רועי קובובסקי" />
+  <meta property="og:description" content="ליטיגציה מסחרית · הפצה, שיווק וקמעונאות · תובענות ייצוגיות · דיני צרכנות · משפט מינהלי ודיני מכרזים" />
+  <meta property="og:locale" content="he_IL" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="icon" href="assets/logo.png" />
+
+  <style>
+:root {
+  --ink:        #121212;
+  --ink-2:      #1d1d1d;
+  --accent-l:   #f0f0f0;
+  --sky:        #f5f5f4;
+  --paper:      #ffffff;
+  --text:       #141414;
+  --text-soft:  #565656;
+  --line:       #e2e2e0;
+  --radius:     14px;
+  --radius-lg:  22px;
+  --shadow:     0 18px 50px -20px rgba(0,0,0,.30);
+  --maxw:       1100px;
+  --serif:      "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
+  --sans:       "Assistant", system-ui, "Segoe UI", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--sky);
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.wrap { width: min(var(--maxw), 92%); margin-inline: auto; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 700; line-height: 1.2; color: var(--ink); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent-l); outline-offset: 2px; border-radius: 6px; }
+
+/* ===== Header ===== */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(0,0,0,.94);
+  backdrop-filter: blur(12px);
+  padding: .8rem 0;
+  box-shadow: 0 10px 30px -18px rgba(0,0,0,.6);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.brand { display: flex; align-items: center; gap: .75rem; text-decoration: none; }
+.brand-mark {
+  display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 12px;
+  background: #fff; overflow: hidden; flex-shrink: 0;
+}
+.brand-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.brand-mark.brand-mark--empty { display: none; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+.brand-text strong { color: #fff; font-size: 1.05rem; font-family: var(--serif); }
+.brand-text em { color: var(--accent-l); font-style: normal; font-size: .76rem; letter-spacing: .08em; }
+.nav-links { display: flex; align-items: center; gap: 1.8rem; }
+.nav-links a { color: rgba(255,255,255,.85); text-decoration: none; font-weight: 500; font-size: .98rem; }
+.nav-links a:hover { color: var(--accent-l); }
+.nav-links .nav-cta { border: 1.5px solid var(--accent-l); color: var(--accent-l); padding: .45rem 1.3rem; border-radius: 999px; }
+.nav-links .nav-cta:hover { background: var(--accent-l); color: var(--ink); }
+@media (max-width: 760px) { .nav-links a:not(.nav-cta) { display: none; } }
+
+/* ===== Page band ===== */
+.page-band {
+  background: linear-gradient(160deg, #000 0%, var(--ink) 55%, var(--ink-2) 100%);
+  color: #fff;
+  padding: 3.2rem 0 5.5rem;
+}
+.crumbs { font-size: .9rem; color: rgba(255,255,255,.6); margin-bottom: .6rem; }
+.crumbs a { color: rgba(255,255,255,.75); text-decoration: none; }
+.crumbs a:hover { color: #fff; }
+.page-band h1 { color: #fff; font-size: clamp(2.1rem, 5vw, 3.2rem); font-weight: 900; }
+.page-band .lead { color: rgba(255,255,255,.78); font-size: 1.12rem; margin-top: .7rem; max-width: 720px; }
+
+/* ===== Areas layout ===== */
+.areas { margin-top: -3.2rem; padding-bottom: clamp(4rem, 8vw, 6.5rem); }
+.areas-grid { display: grid; grid-template-columns: 260px 1fr; gap: clamp(1.6rem, 4vw, 3rem); align-items: start; }
+
+/* תפריט צד — ניווט בין התחומים */
+.areas-nav { position: sticky; top: 100px; }
+.areas-nav-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1.4rem 1.3rem;
+}
+.areas-nav-card h2 { font-size: 1.05rem; margin-bottom: .9rem; }
+.areas-nav ol { list-style: none; counter-reset: area; display: grid; gap: .1rem; }
+.areas-nav li { counter-increment: area; border-bottom: 1px solid var(--line); }
+.areas-nav li:last-child { border-bottom: 0; }
+.areas-nav a {
+  display: flex; gap: .7rem; align-items: baseline;
+  padding: .65rem 0; text-decoration: none;
+  color: var(--text-soft); font-weight: 600; font-size: .98rem;
+}
+.areas-nav a::before {
+  content: "0" counter(area);
+  font-family: var(--serif); font-size: .82rem; color: var(--ink); opacity: .55;
+}
+.areas-nav a:hover { color: var(--ink); }
+
+/* גוף התחומים */
+.area {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: clamp(1.8rem, 4vw, 2.8rem);
+  margin-bottom: 1.4rem;
+}
+.area:last-of-type { margin-bottom: 0; }
+.area-num {
+  font-family: var(--serif); font-weight: 700; font-size: .95rem;
+  letter-spacing: .12em; color: var(--text-soft); margin-bottom: .5rem;
+}
+.area h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 1.2rem; }
+.area h2::after {
+  content: ""; display: block; width: 44px; height: 3px;
+  background: var(--ink); border-radius: 2px; margin-top: .8rem;
+}
+.area p { color: var(--text-soft); font-size: 1.04rem; margin-bottom: 1.05rem; }
+.area p:last-child { margin-bottom: 0; }
+
+/* קריאה לפעולה בתחתית */
+.areas-cta {
+  margin-top: 1.6rem;
+  background: linear-gradient(160deg, #000 0%, var(--ink) 60%, var(--ink-2) 100%);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  padding: clamp(1.8rem, 4vw, 2.6rem);
+  display: flex; flex-wrap: wrap; gap: 1.4rem;
+  align-items: center; justify-content: space-between;
+}
+.areas-cta h2 { color: #fff; font-size: 1.5rem; margin-bottom: .35rem; }
+.areas-cta p { color: rgba(255,255,255,.78); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .85rem 1.9rem; border-radius: 999px;
+  font-family: var(--sans); font-weight: 600; font-size: 1rem;
+  text-decoration: none; cursor: pointer; border: 1.5px solid transparent;
+  transition: transform .2s ease, background .25s ease, color .25s ease;
+  white-space: nowrap;
+}
+.btn-light { background: #fff; color: #111; }
+.btn-light:hover { background: #e4e4e4; transform: translateY(-2px); }
+
+/* ===== Footer ===== */
+.site-footer { background: #0a0a0a; color: rgba(247,244,238,.7); padding: 2.6rem 0; }
+.footer-inner { display: flex; flex-wrap: wrap; gap: 1.4rem 2.5rem; align-items: center; justify-content: space-between; }
+.footer-nav { display: flex; gap: 1.6rem; flex-wrap: wrap; }
+.footer-nav a { color: rgba(247,244,238,.75); text-decoration: none; font-size: .95rem; }
+.footer-nav a:hover { color: var(--accent-l); }
+.footer-legal { font-size: .88rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.footer-legal a { color: var(--accent-l); text-decoration: none; font-weight: 600; }
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .areas-grid { grid-template-columns: 1fr; }
+  .areas-nav { position: static; }
+}
+  </style>
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="site-header">
+    <div class="wrap nav-inner">
+      <a href="index.html" class="brand" aria-label="רועי קובובסקי, עורכי דין — לעמוד הבית">
+        <span class="brand-mark">
+          <img src="assets/logo.png" alt="לוגו — רועי קובובסקי, עורכי דין"
+               onerror="this.parentElement.classList.add('brand-mark--empty');" />
+        </span>
+        <span class="brand-text">
+          <strong>רועי קובובסקי</strong>
+          <em>משפט מנהלי ומכרזים</em>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="ניווט ראשי">
+        <a href="index.html">עמוד הבית</a>
+        <a href="roy-kubovsky.html">פרופיל אישי</a>
+        <a href="index.html#faq">שאלות נפוצות</a>
+        <a href="index.html#contact" class="nav-cta">קביעת פגישה</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Page band ===== -->
+  <div class="page-band">
+    <div class="wrap">
+      <p class="crumbs"><a href="index.html">עמוד הבית</a> / תחומי עיסוק</p>
+      <h1>תחומי עיסוק</h1>
+      <p class="lead">
+        ניסיון של למעלה מ-20 שנה בליטיגציה מסחרית, בליווי שוטף של חברות ייבוא, הפצה
+        וקמעונאות, בתובענות ייצוגיות, בדיני צרכנות ובמשפט המינהלי ובדיני המכרזים.
+      </p>
+    </div>
+  </div>
+
+  <!-- ===== Practice areas ===== -->
+  <main class="areas">
+    <div class="wrap areas-grid">
+
+      <!-- ניווט צד -->
+      <aside class="areas-nav">
+        <div class="areas-nav-card">
+          <h2>התחומים</h2>
+          <ol>
+            <li><a href="#litigation">ליטיגציה מסחרית</a></li>
+            <li><a href="#commercial">הפצה, שיווק וקמעונאות</a></li>
+            <li><a href="#class-actions">תובענות ייצוגיות</a></li>
+            <li><a href="#consumer">דיני צרכנות</a></li>
+            <li><a href="#administrative">משפט מינהלי ומכרזים</a></li>
+          </ol>
+        </div>
+      </aside>
+
+      <div class="areas-body">
+
+        <!-- 01 — ליטיגציה מסחרית -->
+        <section class="area" id="litigation">
+          <p class="area-num">01</p>
+          <h2>ליטיגציה מסחרית</h2>
+          <p>
+            רועי מייצג חברות, בעלי מניות, מנהלים ואנשים פרטיים בסכסוכים מסחריים
+            ואזרחיים, בבתי המשפט בכל הערכאות ובמסגרות של בוררות וגישור. לאורך השנים
+            צבר ניסיון בניהול הליכים מורכבים, שבהם לצד הסוגיות המשפטיות נדרשת הבנה של
+            הפעילות העסקית ושל האינטרסים המסחריים של הצדדים.
+          </p>
+          <p>
+            הייצוג כולל, בין היתר, סכסוכים חוזיים ומסחריים, מחלוקות בין בעלי מניות,
+            סכסוכי שליטה וממשל תאגידי, סכסוכים הנוגעים להסכמי הפצה ושיווק, עוולות
+            מסחריות, וכן מחלוקות בתחומי המקרקעין, התשתיות והקניין הרוחני.
+          </p>
+          <p>
+            הטיפול בתיקים כולל גיבוש האסטרטגיה המשפטית, ניהול משא ומתן והליכים
+            מקדמיים, ובמידת הצורך ניהול ההליך בבית המשפט, בבוררות או בגישור. הניסיון
+            שנצבר לאורך השנים מאפשר לבחון את הסכסוך לא רק מנקודת המבט המשפטית, אלא גם
+            בהתחשב בהשלכותיו העסקיות ובמטרותיו של הלקוח.
+          </p>
+          <p>
+            בנוסף, לרועי ניסיון נרחב בניהול הליכים בעלי היבטים בינלאומיים, לרבות
+            סוגיות הנוגעות לסמכות שיפוט, תניות שיפוט, פורום נאות, המצאת כתבי בי-דין
+            מחוץ לישראל והכרה ואכיפה של פסקי חוץ.
+          </p>
+        </section>
+
+        <!-- 02 — הפצה, שיווק וקמעונאות -->
+        <section class="area" id="commercial">
+          <p class="area-num">02</p>
+          <h2>משפט מסחרי — הפצה, שיווק וקמעונאות</h2>
+          <p>
+            לרועי ניסיון של מעל 20 שנה בליווי חברות העוסקות בייבוא, הפצה, שיווק
+            וקמעונאות, ובפרט בתחומי הקוסמטיקה, הטואלטיקה, אלקטרוניקה ומוצרי צריכה
+            נוספים.
+          </p>
+          <p>
+            לאורך השנים ליווה רועי חברות ומפיצים במכלול ההיבטים המשפטיים והמסחריים של
+            פעילותם, ובכלל זה מערכות היחסים עם יצרנים וספקים בארץ ובחו״ל, התקשרויות עם
+            רשתות קמעונאיות, הסכמי הפצה ושיווק, פעילות באתרי סחר, שיווק ופרסום, מבצעים
+            והגרלות, וכן סוגיות הנוגעות לדיני הגנת הצרכן ולרגולציה החלה על הפעילות
+            המסחרית.
+          </p>
+          <p>
+            ליווי החברות לאורך השנים הקנה לרועי היכרות מעמיקה עם ההיבטים המשפטיים
+            והמסחריים של פעילותן ועם מערכות היחסים שבין יצרנים, ספקים, יבואנים, מפיצים
+            ורשתות קמעונאיות. הניסיון כולל טיפול בהתקשרויות ובמשאים ומתנים מול גורמים
+            בארץ ובחו״ל, וכן מתן מענה לסוגיות משפטיות ומסחריות המתעוררות במהלך
+            ההתקשרות ואגב הפעילות העסקית השוטפת.
+          </p>
+          <p>
+            כמו כן, רועי בעל ניסיון בייצוג חברות העוסקות בייצור, בייבוא ובהפצה של
+            מכשירי סלולר ומוצרי אלקטרוניקה, וכן בליווי התקשרויות בין יצרנים למפיצים
+            בשווקים אלו. השילוב בין ניסיון משפטי לבין היכרות מעשית עם אופן הפעילות של
+            יצרנים, יבואנים, מפיצים ורשתות קמעונאיות מאפשר מתן ייעוץ המותאם לצרכים
+            המסחריים ולמערכות היחסים העסקיות שבהן פועלים הלקוחות.
+          </p>
+        </section>
+
+        <!-- 03 — תובענות ייצוגיות -->
+        <section class="area" id="class-actions">
+          <p class="area-num">03</p>
+          <h2>תובענות ייצוגיות</h2>
+          <p>
+            לרועי ניסיון רב בייצוג תובעים ונתבעים בתובענות ייצוגיות, בין היתר בתחומי
+            הצרכנות, הבנקאות, התקשורת, הביטוח, התעופה ואיכות הסביבה.
+          </p>
+          <p>
+            בייצוג תובעים, נבחנות כבר בשלב הראשוני התשתית העובדתית והמשפטית, קיומה של
+            עילת תביעה, התאמת העניין להתנהל במסגרת ייצוגית, היקף הקבוצה והסעדים שניתן
+            לבקש. הבחינה המוקדמת נועדה לגבש את התשתית המתאימה להליך ולבחון את סיכוייו
+            ואת המשמעות המעשית שלו עבור חברי הקבוצה.
+          </p>
+          <p>
+            בצד הנתבע, רועי מלווה חברות ועסקים גם בטרם הוגשה תובענה ייצוגית. כך, כאשר
+            מתעוררת בחברה סוגיה העשויה להקים חשיפה להליך ייצוגי, או כאשר מתקבלת פנייה,
+            דרישה או התראה בעניין, נבחנות נסיבות המקרה, החשיפה המשפטית והאפשרויות
+            העומדות בפני החברה. הטיפול בשלב זה עשוי לכלול בחינה של ההתנהלות הקיימת,
+            מתן מענה לפנייה או לדרישה וגיבוש צעדים מתאימים לצמצום החשיפה ולהתמודדות עם
+            הסוגיה.
+          </p>
+          <p>
+            ככל שמוגשת בקשה לאישור תובענה ייצוגית, רועי מייצג את החברה לאורך ההליך,
+            החל מבחינת הבקשה וגיבוש קו ההגנה ועד לניהול ההליך ולהכרעה בו. בהתאם
+            לנסיבות, נבחנות גם אפשרויות להביא את ההליך לסיומו בשלב מוקדם, לרבות
+            באמצעות הסתלקות או הסדר.
+          </p>
+          <p>
+            הניסיון המצטבר בייצוג משני צדי ההליך מאפשר לרועי להעריך תובענות ייצוגיות הן
+            מנקודת המבט של התובע וחברי הקבוצה והן מנקודת מבטה של החברה הנתבעת, ולבחון
+            לצד ההיבטים המשפטיים גם את המשמעויות העסקיות הכרוכות בהליך.
+          </p>
+        </section>
+
+        <!-- 04 — דיני צרכנות -->
+        <section class="area" id="consumer">
+          <p class="area-num">04</p>
+          <h2>דיני צרכנות</h2>
+          <p>
+            רועי מלווה חברות ועוסקים במגוון רחב של סוגיות הנוגעות לדיני הגנת הצרכן,
+            כחלק מהליווי המשפטי השוטף של פעילותם המסחרית. הניסיון בתחום משלב היכרות
+            מעמיקה עם הוראות הדין והרגולציה הצרכנית לצד הבנה של האופן שבו הן משתלבות
+            בפעילות העסקית בפועל.
+          </p>
+          <p>
+            רועי מחזיק ניסיון רב שנים בליווי חברות מהמובילות בישראל בתחומי הקוסמטיקה,
+            הטואלטיקה, האלקטרוניקה והסלולר. במסגרת זו הוא מייעץ בסוגיות הנוגעות לשיווק
+            ופרסום, מבצעים והגרלות, התקשרויות עם צרכנים, פעילות באתרי סחר ובמסחר מקוון,
+            אחריות למוצרים, מדיניות מסחרית ונושאים נוספים המתעוררים בממשק שבין החברה
+            לצרכניה. הליווי משלב בין היכרות עם דיני הגנת הצרכן לבין הבנה של הפעילות
+            העסקית והאופן שבו הוראות הדין חלות על מהלכי שיווק, מכירה והפצה בפועל.
+          </p>
+          <p>
+            הליווי כולל גם טיפול בסוגיות המתעוררות במהלך הפעילות השוטפת, לרבות בחינת
+            מהלכים ופרקטיקות מסחריות טרם יישומם, בחינת חומרי שיווק ופרסום, מענה לפניות
+            ולמכתבים של צרכנים ושל גורמי אכיפה, וכן ייעוץ ביחס להשלכות המשפטיות
+            והצרכניות של החלטות עסקיות.
+          </p>
+          <p>
+            במקרים שבהם מתעוררת מחלוקת או חשיפה להליך משפטי, רועי מלווה את החברה גם
+            בהתמודדות עם ההליך, לרבות בהליכים אזרחיים ובתובענות ייצוגיות. ההיכרות עם
+            פעילותן המסחרית של חברות ועם האתגרים הצרכניים המתעוררים במסגרתה מאפשרת לתת
+            ייעוץ מעשי, המותאם הן לדרישות הדין והן לצרכים העסקיים של הלקוח.
+          </p>
+        </section>
+
+        <!-- 05 — משפט מינהלי ודיני מכרזים -->
+        <section class="area" id="administrative">
+          <p class="area-num">05</p>
+          <h2>משפט מינהלי ודיני מכרזים</h2>
+          <p>
+            לרועי ניסיון עשיר ביותר במשפט מינהלי ובדיני מכרזים, הן בליווי חברות וגופים
+            המתמודדים במכרזים והן בייעוץ וליווי של גופים ציבוריים וועדות מכרזים. לאורך
+            השנים צבר ניסיון משמעותי בכל שלבי ההליך המכרזי — החל מגיבוש האסטרטגיה
+            וההיערכות לקראת הגשת ההצעה, דרך ניסוח ובחינת מסמכי המכרז, ההתנהלות מול
+            ועדת המכרזים והליכי שאלות ההבהרה, ועד להתמודדות עם החלטות שהתקבלו במסגרת
+            המכרז.
+          </p>
+          <p>
+            בנוסף, לרועי ניסיון נרחב בייצוג בהליכים מנהליים הנוגעים למכרזים ולהחלטות
+            של רשויות וגופים ציבוריים. במהלך השנים ייצג בעשרות רבות של עתירות מנהליות
+            והליכים מינהליים בפני בתי המשפט לעניינים מינהליים, בג״ץ ובית המשפט העליון.
+            ההליכים שבהם טיפל עסקו במגוון רחב של תחומים, ובהם מכרזי תשתיות, תחנות כוח,
+            ציוד ביטחוני ורפואי, מערכות טכנולוגיות, מתן שירותים ופרויקטים מורכבים
+            נוספים.
+          </p>
+          <p>
+            הניסיון בתחום כולל גם ייצוג וליווי של ועדות מכרזים וגופים עורכי מכרזים
+            לאורך שלבי ההליך, לרבות גיבוש אמות מידה ותנאי סף, ניסוח מסמכי המכרז והסכם
+            ההתקשרות, טיפול בשאלות הבהרה, בחינת הצעות וקבלת החלטות במסגרת ההליך.
+          </p>
+          <p>
+            לצד העיסוק במכרזים, לרועי ניסיון רחב במשפט מינהלי, לרבות ייצוג בעתירות
+            ובהליכים הנוגעים להחלטות שלטוניות, רישוי, רגולציה והפעלת סמכויות של רשויות
+            ציבוריות.
+          </p>
+          <p>
+            לאורך השנים נטל חלק בהליכים עקרוניים שנדונו בבית המשפט העליון, שבמסגרתם
+            נדונו סוגיות מרכזיות במשפט המינהלי ובדיני המכרזים ונקבעו הלכות בתחום.
+          </p>
+        </section>
+
+        <div class="areas-cta">
+          <div>
+            <h2>יש לכם עניין באחד מהתחומים?</h2>
+            <p>שיחה ראשונית קצרה וללא התחייבות — נבין יחד את העניין ונחליט איך להתקדם.</p>
+          </div>
+          <a href="index.html#contact" class="btn btn-light">קביעת פגישת ייעוץ</a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <nav class="footer-nav" aria-label="ניווט תחתון">
+        <a href="index.html">עמוד הבית</a>
+        <a href="roy-kubovsky.html">פרופיל אישי</a>
+        <a href="index.html#contact">צרו קשר</a>
+        <a href="takanon.html">תקנון האתר</a>
+      </nav>
+      <div class="footer-legal">
+        <a href="tel:03-6072222" dir="ltr">03-6072222</a>
+        <span id="year"></span> © רועי קובובסקי, עורכי דין — כל הזכויות שמורות
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    var yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
